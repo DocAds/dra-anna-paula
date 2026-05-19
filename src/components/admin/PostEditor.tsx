@@ -1,0 +1,308 @@
+"use client";
+
+import { useEditor, EditorContent } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
+import Link from "@tiptap/extension-link";
+import Image from "@tiptap/extension-image";
+import Placeholder from "@tiptap/extension-placeholder";
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import slugify from "slugify";
+import { createClient } from "@/lib/supabase/client";
+import {
+  Bold,
+  Italic,
+  Heading1,
+  Heading2,
+  Heading3,
+  List,
+  ListOrdered,
+  Quote,
+  Link2,
+  Image as ImageIcon,
+  Trash2,
+  Save,
+  Eye,
+} from "lucide-react";
+import type { Post, PostStatus } from "@/lib/supabase/types";
+
+type Props = {
+  initial?: Partial<Post>;
+  onSubmit: (formData: FormData) => Promise<void> | void;
+  onDelete?: () => Promise<void> | void;
+  postId?: string;
+};
+
+const CATEGORIAS = [
+  "Skincare",
+  "Saúde",
+  "Lifestyle",
+  "Tecnologia",
+  "Medicina",
+  "Nutrição",
+] as const;
+
+export function PostEditor({ initial, onSubmit, onDelete, postId }: Props) {
+  const router = useRouter();
+  const [pending, startTransition] = useTransition();
+  const [title, setTitle] = useState(initial?.title ?? "");
+  const [slug, setSlug] = useState(initial?.slug ?? "");
+  const [excerpt, setExcerpt] = useState(initial?.excerpt ?? "");
+  const [category, setCategory] = useState(initial?.category ?? "");
+  const [status, setStatus] = useState<PostStatus>((initial?.status as PostStatus) ?? "draft");
+  const [coverImage, setCoverImage] = useState(initial?.cover_image ?? "");
+  const [uploading, setUploading] = useState(false);
+  const [slugTouched, setSlugTouched] = useState(!!initial?.slug);
+
+  const editor = useEditor({
+    extensions: [
+      StarterKit.configure({}),
+      Link.configure({ openOnClick: false, HTMLAttributes: { class: "text-cocoa underline" } }),
+      Image,
+      Placeholder.configure({ placeholder: "Escreva o conteúdo do post..." }),
+    ],
+    content: initial?.content || "",
+    immediatelyRender: false,
+  });
+
+  function onTitleChange(v: string) {
+    setTitle(v);
+    if (!slugTouched) setSlug(slugify(v, { lower: true, strict: true }));
+  }
+
+  async function uploadFile(file: File): Promise<string | null> {
+    setUploading(true);
+    try {
+      const supabase = createClient();
+      const ext = file.name.split(".").pop()?.toLowerCase() || "bin";
+      const path = `cover/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+      const { error } = await supabase.storage.from("blog").upload(path, file, {
+        cacheControl: "31536000",
+        upsert: false,
+      });
+      if (error) {
+        alert("Erro no upload: " + error.message);
+        return null;
+      }
+      const { data } = supabase.storage.from("blog").getPublicUrl(path);
+      return data.publicUrl;
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  async function onCoverUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const url = await uploadFile(file);
+    if (url) setCoverImage(url);
+  }
+
+  async function onInsertImage() {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
+    input.onchange = async () => {
+      const file = input.files?.[0];
+      if (!file) return;
+      const url = await uploadFile(file);
+      if (url) editor?.chain().focus().setImage({ src: url, alt: file.name }).run();
+    };
+    input.click();
+  }
+
+  function onAddLink() {
+    const previous = editor?.getAttributes("link").href;
+    const url = window.prompt("URL", previous || "https://");
+    if (url === null) return;
+    if (url === "") {
+      editor?.chain().focus().extendMarkRange("link").unsetLink().run();
+      return;
+    }
+    editor?.chain().focus().extendMarkRange("link").setLink({ href: url }).run();
+  }
+
+  function submit(targetStatus?: PostStatus) {
+    const fd = new FormData();
+    fd.set("title", title);
+    fd.set("slug", slug);
+    fd.set("excerpt", excerpt);
+    fd.set("category", category || "");
+    fd.set("cover_image", coverImage || "");
+    fd.set("content", editor?.getHTML() ?? "");
+    fd.set("status", targetStatus ?? status);
+    startTransition(async () => {
+      await onSubmit(fd);
+      if (postId) router.refresh();
+    });
+  }
+
+  return (
+    <div className="grid gap-8 lg:grid-cols-[1fr_320px]">
+      <div className="space-y-6">
+        <input
+          value={title}
+          onChange={(e) => onTitleChange(e.target.value)}
+          placeholder="Título do post"
+          className="w-full bg-transparent border-b border-cocoa/15 focus:border-cocoa outline-none py-3 font-display text-3xl md:text-4xl text-ink placeholder-ink/30"
+        />
+
+        <div className="flex items-center gap-3 text-[11px] uppercase tracking-widest2 text-ink/45">
+          <span>/blog/</span>
+          <input
+            value={slug}
+            onChange={(e) => { setSlug(e.target.value); setSlugTouched(true); }}
+            placeholder="slug-do-post"
+            className="flex-1 bg-transparent border-b border-cocoa/15 focus:border-cocoa outline-none py-2 text-ink/75"
+          />
+        </div>
+
+        <Toolbar
+          editor={editor}
+          onInsertImage={onInsertImage}
+          onAddLink={onAddLink}
+          uploading={uploading}
+        />
+
+        <div className="editorial-card rounded-3xl p-6 min-h-[400px]">
+          <EditorContent
+            editor={editor}
+            className="prose prose-cocoa max-w-none focus:outline-none [&_.ProseMirror]:min-h-[360px] [&_.ProseMirror]:outline-none [&_.ProseMirror_p.is-editor-empty:first-child]:before:content-[attr(data-placeholder)] [&_.ProseMirror_p.is-editor-empty:first-child]:before:text-ink/30 [&_.ProseMirror_p.is-editor-empty:first-child]:before:pointer-events-none [&_.ProseMirror_p.is-editor-empty:first-child]:before:float-left [&_.ProseMirror_p.is-editor-empty:first-child]:before:h-0"
+          />
+        </div>
+
+        <label className="block">
+          <span className="text-[10px] uppercase tracking-widest3 text-ink/55">Resumo (opcional)</span>
+          <textarea
+            value={excerpt}
+            onChange={(e) => setExcerpt(e.target.value)}
+            rows={3}
+            placeholder="Aparece na lista do blog e nas redes sociais. 1 a 2 frases."
+            className="w-full bg-transparent border-b border-cocoa/15 focus:border-cocoa outline-none py-3 text-ink/75 resize-none"
+          />
+        </label>
+      </div>
+
+      <aside className="space-y-4">
+        <div className="editorial-card rounded-3xl p-6 space-y-5">
+          <div>
+            <div className="text-[10px] uppercase tracking-widest3 text-toffee mb-3">Status</div>
+            <select
+              value={status}
+              onChange={(e) => setStatus(e.target.value as PostStatus)}
+              className="w-full bg-transparent border border-cocoa/20 rounded-full px-4 py-2 text-sm text-ink"
+            >
+              <option value="draft">Rascunho</option>
+              <option value="published">Publicado</option>
+              <option value="archived">Arquivado</option>
+            </select>
+          </div>
+
+          <div>
+            <div className="text-[10px] uppercase tracking-widest3 text-toffee mb-3">Categoria</div>
+            <select
+              value={category || ""}
+              onChange={(e) => setCategory(e.target.value)}
+              className="w-full bg-transparent border border-cocoa/20 rounded-full px-4 py-2 text-sm text-ink"
+            >
+              <option value="">Sem categoria</option>
+              {CATEGORIAS.map((c) => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <div className="text-[10px] uppercase tracking-widest3 text-toffee mb-3">Capa</div>
+            {coverImage ? (
+              <div className="space-y-3">
+                <img src={coverImage} alt="capa" className="w-full aspect-[5/4] object-cover rounded-2xl" />
+                <button
+                  type="button"
+                  onClick={() => setCoverImage("")}
+                  className="text-[11px] uppercase tracking-widest2 text-ink/55 hover:text-cocoa"
+                >
+                  Remover capa
+                </button>
+              </div>
+            ) : (
+              <label className="block cursor-pointer border border-dashed border-cocoa/30 rounded-2xl p-6 text-center text-sm text-ink/55 hover:border-cocoa hover:text-cocoa transition-colors">
+                {uploading ? "Enviando..." : "Clique para enviar imagem"}
+                <input type="file" accept="image/*" className="hidden" onChange={onCoverUpload} />
+              </label>
+            )}
+          </div>
+
+          <div className="pt-2 space-y-2">
+            <button
+              type="button"
+              onClick={() => submit()}
+              disabled={pending}
+              className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-cocoa text-bone py-3 text-[12px] uppercase tracking-widest2 hover:bg-ink transition-colors disabled:opacity-50"
+            >
+              <Save className="h-4 w-4" /> {pending ? "Salvando..." : "Salvar"}
+            </button>
+            {status !== "published" && (
+              <button
+                type="button"
+                onClick={() => submit("published")}
+                disabled={pending}
+                className="w-full inline-flex items-center justify-center gap-2 rounded-full border border-cocoa text-cocoa py-3 text-[12px] uppercase tracking-widest2 hover:bg-cocoa hover:text-bone transition-colors"
+              >
+                <Eye className="h-4 w-4" /> Publicar agora
+              </button>
+            )}
+          </div>
+        </div>
+
+        {onDelete && (
+          <form action={onDelete}>
+            <button
+              type="submit"
+              onClick={(e) => {
+                if (!confirm("Excluir este post? Não dá pra desfazer.")) e.preventDefault();
+              }}
+              className="w-full inline-flex items-center justify-center gap-2 text-[11px] uppercase tracking-widest2 text-ink/55 hover:text-red-700 transition-colors py-3"
+            >
+              <Trash2 className="h-4 w-4" /> Excluir post
+            </button>
+          </form>
+        )}
+      </aside>
+    </div>
+  );
+}
+
+function Toolbar({
+  editor,
+  onInsertImage,
+  onAddLink,
+  uploading,
+}: {
+  editor: ReturnType<typeof useEditor>;
+  onInsertImage: () => void;
+  onAddLink: () => void;
+  uploading: boolean;
+}) {
+  if (!editor) return null;
+  const btn = "p-2 rounded-lg text-ink/65 hover:bg-cocoa/10 hover:text-cocoa transition-colors";
+  const active = "bg-cocoa text-bone hover:bg-cocoa hover:text-bone";
+  return (
+    <div className="flex flex-wrap items-center gap-1 editorial-card rounded-full px-3 py-2 sticky top-2 z-10">
+      <button type="button" onClick={() => editor.chain().focus().toggleBold().run()} className={`${btn} ${editor.isActive("bold") ? active : ""}`}><Bold className="h-4 w-4" /></button>
+      <button type="button" onClick={() => editor.chain().focus().toggleItalic().run()} className={`${btn} ${editor.isActive("italic") ? active : ""}`}><Italic className="h-4 w-4" /></button>
+      <span className="w-px h-5 bg-cocoa/20 mx-1" />
+      <button type="button" onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()} className={`${btn} ${editor.isActive("heading", { level: 1 }) ? active : ""}`}><Heading1 className="h-4 w-4" /></button>
+      <button type="button" onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} className={`${btn} ${editor.isActive("heading", { level: 2 }) ? active : ""}`}><Heading2 className="h-4 w-4" /></button>
+      <button type="button" onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()} className={`${btn} ${editor.isActive("heading", { level: 3 }) ? active : ""}`}><Heading3 className="h-4 w-4" /></button>
+      <span className="w-px h-5 bg-cocoa/20 mx-1" />
+      <button type="button" onClick={() => editor.chain().focus().toggleBulletList().run()} className={`${btn} ${editor.isActive("bulletList") ? active : ""}`}><List className="h-4 w-4" /></button>
+      <button type="button" onClick={() => editor.chain().focus().toggleOrderedList().run()} className={`${btn} ${editor.isActive("orderedList") ? active : ""}`}><ListOrdered className="h-4 w-4" /></button>
+      <button type="button" onClick={() => editor.chain().focus().toggleBlockquote().run()} className={`${btn} ${editor.isActive("blockquote") ? active : ""}`}><Quote className="h-4 w-4" /></button>
+      <span className="w-px h-5 bg-cocoa/20 mx-1" />
+      <button type="button" onClick={onAddLink} className={`${btn} ${editor.isActive("link") ? active : ""}`}><Link2 className="h-4 w-4" /></button>
+      <button type="button" onClick={onInsertImage} className={btn}><ImageIcon className="h-4 w-4" /></button>
+      {uploading && <span className="text-[10px] uppercase tracking-widest2 text-ink/45 ml-2">enviando…</span>}
+    </div>
+  );
+}
