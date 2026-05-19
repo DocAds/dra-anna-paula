@@ -5,6 +5,7 @@ import StarterKit from "@tiptap/starter-kit";
 import Link from "@tiptap/extension-link";
 import Image from "@tiptap/extension-image";
 import Placeholder from "@tiptap/extension-placeholder";
+import Youtube from "@tiptap/extension-youtube";
 import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import slugify from "slugify";
@@ -20,6 +21,7 @@ import {
   Quote,
   Link2,
   Image as ImageIcon,
+  Video,
   Trash2,
   Save,
   Eye,
@@ -62,11 +64,77 @@ export function PostEditor({ initial, onSubmit, onDelete, postId }: Props) {
       StarterKit.configure({}),
       Link.configure({ openOnClick: false, HTMLAttributes: { class: "text-cocoa underline" } }),
       Image,
+      Youtube.configure({
+        controls: true,
+        nocookie: true,
+        modestBranding: true,
+        HTMLAttributes: { class: "w-full aspect-video rounded-2xl my-6" },
+      }),
       Placeholder.configure({ placeholder: "Escreva o conteúdo do post..." }),
     ],
     content: initial?.content || "",
     immediatelyRender: false,
   });
+
+  function onInsertVideo() {
+    const url = window.prompt(
+      "Cole a URL do vídeo (YouTube, Vimeo, ou um link direto .mp4):",
+      "https://"
+    );
+    if (!url) return;
+    const youtube = /youtu\.?be/.test(url);
+    const vimeo = /vimeo\.com/.test(url);
+    if (youtube) {
+      editor?.chain().focus().setYoutubeVideo({ src: url }).run();
+      return;
+    }
+    if (vimeo) {
+      const match = url.match(/vimeo\.com\/(?:video\/)?(\d+)/);
+      const id = match?.[1];
+      if (id) {
+        const html = `<div class="aspect-video w-full rounded-2xl overflow-hidden my-6"><iframe src="https://player.vimeo.com/video/${id}" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen style="width:100%;height:100%"></iframe></div>`;
+        editor?.chain().focus().insertContent(html).run();
+        return;
+      }
+    }
+    if (/\.(mp4|webm|ogg)$/i.test(url)) {
+      const html = `<video controls preload="metadata" class="w-full rounded-2xl my-6"><source src="${url}"></video>`;
+      editor?.chain().focus().insertContent(html).run();
+      return;
+    }
+    alert("URL não reconhecida. Use YouTube, Vimeo ou um link direto .mp4 / .webm.");
+  }
+
+  async function onUploadVideo() {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "video/mp4,video/webm,video/ogg";
+    input.onchange = async () => {
+      const file = input.files?.[0];
+      if (!file) return;
+      if (file.size > 100 * 1024 * 1024) {
+        if (!confirm("Vídeo maior que 100MB. Recomendo subir no YouTube e colar o link. Continuar mesmo assim?")) return;
+      }
+      setUploading(true);
+      try {
+        const supabase = createClient();
+        const ext = file.name.split(".").pop()?.toLowerCase() || "mp4";
+        const path = `video/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+        const { error } = await supabase.storage.from("blog").upload(path, file, {
+          cacheControl: "31536000",
+          upsert: false,
+          contentType: file.type,
+        });
+        if (error) { alert("Erro no upload: " + error.message); return; }
+        const { data } = supabase.storage.from("blog").getPublicUrl(path);
+        const html = `<video controls preload="metadata" class="w-full rounded-2xl my-6"><source src="${data.publicUrl}" type="${file.type}"></video>`;
+        editor?.chain().focus().insertContent(html).run();
+      } finally {
+        setUploading(false);
+      }
+    };
+    input.click();
+  }
 
   function onTitleChange(v: string) {
     setTitle(v);
@@ -163,6 +231,8 @@ export function PostEditor({ initial, onSubmit, onDelete, postId }: Props) {
         <Toolbar
           editor={editor}
           onInsertImage={onInsertImage}
+          onInsertVideo={onInsertVideo}
+          onUploadVideo={onUploadVideo}
           onAddLink={onAddLink}
           uploading={uploading}
         />
@@ -283,11 +353,15 @@ export function PostEditor({ initial, onSubmit, onDelete, postId }: Props) {
 function Toolbar({
   editor,
   onInsertImage,
+  onInsertVideo,
+  onUploadVideo,
   onAddLink,
   uploading,
 }: {
   editor: ReturnType<typeof useEditor>;
   onInsertImage: () => void;
+  onInsertVideo: () => void;
+  onUploadVideo: () => void;
   onAddLink: () => void;
   uploading: boolean;
 }) {
@@ -307,8 +381,10 @@ function Toolbar({
       <button type="button" onClick={() => editor.chain().focus().toggleOrderedList().run()} className={`${btn} ${editor.isActive("orderedList") ? active : ""}`}><ListOrdered className="h-4 w-4" /></button>
       <button type="button" onClick={() => editor.chain().focus().toggleBlockquote().run()} className={`${btn} ${editor.isActive("blockquote") ? active : ""}`}><Quote className="h-4 w-4" /></button>
       <span className="w-px h-5 bg-cocoa/20 mx-1" />
-      <button type="button" onClick={onAddLink} className={`${btn} ${editor.isActive("link") ? active : ""}`}><Link2 className="h-4 w-4" /></button>
-      <button type="button" onClick={onInsertImage} className={btn}><ImageIcon className="h-4 w-4" /></button>
+      <button type="button" onClick={onAddLink} className={`${btn} ${editor.isActive("link") ? active : ""}`} title="Link"><Link2 className="h-4 w-4" /></button>
+      <button type="button" onClick={onInsertImage} className={btn} title="Imagem"><ImageIcon className="h-4 w-4" /></button>
+      <button type="button" onClick={onInsertVideo} className={btn} title="Vídeo do YouTube/Vimeo (colar URL)"><Video className="h-4 w-4" /></button>
+      <button type="button" onClick={onUploadVideo} className={btn} title="Enviar vídeo (mp4/webm)"><span className="text-[10px] uppercase tracking-widest2 px-1.5">MP4</span></button>
       {uploading && <span className="text-[10px] uppercase tracking-widest2 text-ink/45 ml-2">enviando…</span>}
     </div>
   );
