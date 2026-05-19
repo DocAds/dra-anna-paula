@@ -39,7 +39,6 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const nav = [
     { href: "/admin", label: "Painel", icon: LayoutDashboard },
     { href: "/admin/crm", label: "Dashboard", icon: BarChart3 },
-    { href: "/admin/crm/kanban", label: "Kanban", icon: Trello },
     { href: "/admin/crm/leads", label: "Leads", icon: Users },
     { href: "/admin/posts", label: "Posts", icon: FileText },
     ...(profile.role === "admin" ? [{ href: "/admin/users", label: "Usuários", icon: Users }] : []),
