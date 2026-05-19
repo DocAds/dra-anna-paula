@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createClient as createSbClient } from "@supabase/supabase-js";
 import type { Post } from "@/lib/supabase/types";
 
 const fallbackPosts: Pick<Post, "title" | "slug" | "excerpt" | "category">[] = [
@@ -15,35 +15,43 @@ const fallbackPosts: Pick<Post, "title" | "slug" | "excerpt" | "category">[] = [
   { title: "Diga adeus às manchas com Fotona StarWalker", slug: "fotona-manchas", excerpt: null, category: "Tecnologia" },
 ];
 
+// Cliente público (anon) sem cookies — seguro pra usar em generateStaticParams
+function pub() {
+  return createSbClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    { auth: { persistSession: false, autoRefreshToken: false } }
+  );
+}
+
 export async function listPublishedPosts(): Promise<Pick<Post, "title" | "slug" | "excerpt" | "category" | "cover_image" | "published_at">[]> {
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
     return fallbackPosts.map((p) => ({ ...p, cover_image: null, published_at: null }));
   }
-  const supabase = await createClient();
-  const { data } = await supabase
+  const { data } = await pub()
     .from("posts")
     .select("title, slug, excerpt, category, cover_image, published_at")
     .eq("status", "published")
     .order("published_at", { ascending: false });
-  return data && data.length > 0 ? data : fallbackPosts.map((p) => ({ ...p, cover_image: null, published_at: null }));
+  return data && data.length > 0
+    ? data
+    : fallbackPosts.map((p) => ({ ...p, cover_image: null, published_at: null }));
 }
 
 export async function getPostBySlug(slug: string): Promise<Post | null> {
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL) return null;
-  const supabase = await createClient();
-  const { data } = await supabase
+  const { data } = await pub()
     .from("posts")
     .select("*")
     .eq("slug", slug)
     .eq("status", "published")
-    .single<Post>();
+    .maybeSingle<Post>();
   return data;
 }
 
 export async function listPublishedSlugs(): Promise<string[]> {
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL) return [];
-  const supabase = await createClient();
-  const { data } = await supabase
+  const { data } = await pub()
     .from("posts")
     .select("slug")
     .eq("status", "published");
