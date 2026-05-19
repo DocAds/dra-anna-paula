@@ -5,7 +5,7 @@ import StarterKit from "@tiptap/starter-kit";
 import Link from "@tiptap/extension-link";
 import Image from "@tiptap/extension-image";
 import Placeholder from "@tiptap/extension-placeholder";
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import slugify from "slugify";
 import { createClient } from "@/lib/supabase/client";
@@ -53,6 +53,9 @@ export function PostEditor({ initial, onSubmit, onDelete, postId }: Props) {
   const [coverImage, setCoverImage] = useState(initial?.cover_image ?? "");
   const [uploading, setUploading] = useState(false);
   const [slugTouched, setSlugTouched] = useState(!!initial?.slug);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => setMounted(true), []);
 
   const editor = useEditor({
     extensions: [
@@ -165,10 +168,14 @@ export function PostEditor({ initial, onSubmit, onDelete, postId }: Props) {
         />
 
         <div className="editorial-card rounded-3xl p-6 min-h-[400px]">
-          <EditorContent
-            editor={editor}
-            className="prose prose-cocoa max-w-none focus:outline-none [&_.ProseMirror]:min-h-[360px] [&_.ProseMirror]:outline-none [&_.ProseMirror_p.is-editor-empty:first-child]:before:content-[attr(data-placeholder)] [&_.ProseMirror_p.is-editor-empty:first-child]:before:text-ink/30 [&_.ProseMirror_p.is-editor-empty:first-child]:before:pointer-events-none [&_.ProseMirror_p.is-editor-empty:first-child]:before:float-left [&_.ProseMirror_p.is-editor-empty:first-child]:before:h-0"
-          />
+          {mounted && editor ? (
+            <EditorContent
+              editor={editor}
+              className="prose max-w-none focus:outline-none [&_.ProseMirror]:min-h-[360px] [&_.ProseMirror]:outline-none [&_.ProseMirror_h1]:font-display [&_.ProseMirror_h2]:font-display [&_.ProseMirror_h3]:font-display [&_.ProseMirror_a]:text-cocoa [&_.ProseMirror_a]:underline [&_.ProseMirror_p.is-editor-empty:first-child]:before:content-[attr(data-placeholder)] [&_.ProseMirror_p.is-editor-empty:first-child]:before:text-ink/30 [&_.ProseMirror_p.is-editor-empty:first-child]:before:pointer-events-none [&_.ProseMirror_p.is-editor-empty:first-child]:before:float-left [&_.ProseMirror_p.is-editor-empty:first-child]:before:h-0"
+            />
+          ) : (
+            <div className="min-h-[360px] text-ink/30">Carregando editor…</div>
+          )}
         </div>
 
         <label className="block">
