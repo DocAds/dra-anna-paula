@@ -57,7 +57,7 @@ export default function SobrePage() {
                   <div className="col-span-4 row-span-4 relative rounded-[28px] overflow-hidden editorial-card p-2">
                     <div className="relative h-full w-full rounded-[20px] overflow-hidden bg-cream">
                       <Image
-                        src="/img/dra/dra-principal-1440.webp"
+                        src="/img/dra/sobre-main-1440.webp"
                         alt="Dra. Anna Paula Bomtempo"
                         fill
                         priority
@@ -67,7 +67,7 @@ export default function SobrePage() {
                     </div>
                   </div>
                   <div className="col-span-2 col-start-5 row-span-2 row-start-1 relative rounded-[20px] overflow-hidden">
-                    <Image src="/img/dra/dra-3-960.webp" alt="" fill sizes="200px" className="object-cover" />
+                    <Image src="/img/dra/sobre-detail-960.webp" alt="" fill sizes="200px" className="object-cover" />
                   </div>
                   <div className="col-span-2 col-start-5 row-span-2 row-start-3 relative rounded-[20px] overflow-hidden glass-dark p-2">
                     <div className="grid h-full w-full place-items-center text-cream text-center">
@@ -80,10 +80,10 @@ export default function SobrePage() {
                     </div>
                   </div>
                   <div className="col-span-3 col-start-1 row-span-2 row-start-5 relative rounded-[20px] overflow-hidden">
-                    <Image src="/img/dra/dra-4-960.webp" alt="" fill sizes="200px" className="object-cover" />
+                    <Image src="/img/dra/sobre-moment-1-960.webp" alt="" fill sizes="240px" className="object-cover" />
                   </div>
                   <div className="col-span-3 col-start-4 row-span-2 row-start-5 relative rounded-[20px] overflow-hidden">
-                    <Image src="/img/dra/dra-5-960.webp" alt="" fill sizes="200px" className="object-cover" />
+                    <Image src="/img/dra/sobre-moment-2-960.webp" alt="" fill sizes="240px" className="object-cover" />
                   </div>
                 </div>
               </Reveal>

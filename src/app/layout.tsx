@@ -19,7 +19,6 @@ export const metadata: Metadata = {
       "Rejuvenescimento facial, lasers e tratamentos premium personalizados. CRM 177.888.",
     siteName: "Dra. Anna Bomtempo",
   },
-  icons: { icon: "/favicon.ico" },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
