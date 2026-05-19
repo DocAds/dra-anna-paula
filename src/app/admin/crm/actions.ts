@@ -26,6 +26,15 @@ export async function updateLead(id: string, formData: FormData) {
   revalidatePath(`/admin/crm/leads/${id}`);
 }
 
+export async function moveLeadFase(id: string, fase: LeadFase) {
+  const sb = await createClient();
+  const { error } = await sb.from("leads").update({ fase }).eq("id", id);
+  if (error) throw new Error(error.message);
+  revalidatePath("/admin/crm/kanban");
+  revalidatePath("/admin/crm/leads");
+  revalidatePath(`/admin/crm/leads/${id}`);
+}
+
 export async function deleteLead(id: string) {
   const sb = await createClient();
   const { error } = await sb.from("leads").delete().eq("id", id);
