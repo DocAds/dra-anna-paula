@@ -2,11 +2,13 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Eye, EyeOff } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
 export function LoginForm({ next, initialError }: { next?: string; initialError?: string }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(initialError ?? null);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -42,13 +44,23 @@ export function LoginForm({ next, initialError }: { next?: string; initialError?
       </label>
       <label className="block">
         <span className="text-[10px] uppercase tracking-widest3 text-ink/55">Senha</span>
-        <input
-          name="password"
-          type="password"
-          required
-          autoComplete="current-password"
-          className="w-full bg-transparent border-b border-cocoa/25 focus:border-cocoa outline-none py-3 text-ink mt-1"
-        />
+        <div className="relative">
+          <input
+            name="password"
+            type={showPassword ? "text" : "password"}
+            required
+            autoComplete="current-password"
+            className="w-full bg-transparent border-b border-cocoa/25 focus:border-cocoa outline-none py-3 pr-10 text-ink mt-1"
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword((v) => !v)}
+            aria-label={showPassword ? "Ocultar senha" : "Exibir senha"}
+            className="absolute right-0 top-1/2 -translate-y-1/2 mt-1 p-2 text-ink/45 hover:text-cocoa transition-colors"
+          >
+            {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+          </button>
+        </div>
       </label>
       <button
         type="submit"

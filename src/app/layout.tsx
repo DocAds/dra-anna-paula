@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { Nav } from "@/components/Nav";
-import { Footer } from "@/components/Footer";
-import { WhatsAppFloat } from "@/components/WhatsAppFloat";
+import { PublicChrome } from "@/components/PublicChrome";
 import { Tracker } from "@/components/Tracker";
 
 export const metadata: Metadata = {
@@ -37,10 +35,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className="font-sans antialiased">
         <Tracker />
-        <Nav />
-        <main className="overflow-hidden">{children}</main>
-        <Footer />
-        <WhatsAppFloat />
+        <PublicChrome>{children}</PublicChrome>
       </body>
     </html>
   );
