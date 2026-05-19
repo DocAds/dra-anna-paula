@@ -55,8 +55,17 @@ export function Footer() {
       <div className="border-t border-cream/15">
         <div className="mx-auto max-w-6xl px-6 py-6 flex flex-col md:flex-row items-center justify-between gap-3 text-[11px] uppercase tracking-widest2 text-cream/55">
           <span>© {new Date().getFullYear()} Anna Bomtempo Dermatologia</span>
-          <span>
-            Site por <a href="https://docads.com.br" className="underline-editorial">DocAds</a>
+          <span className="flex items-center gap-5">
+            <Link
+              href="/admin"
+              aria-label="Área restrita"
+              className="text-cream/35 hover:text-cream/75 transition-colors text-[10px] tracking-widest3"
+            >
+              Equipe
+            </Link>
+            <span>
+              Site por <a href="https://docads.com.br" className="underline-editorial">DocAds</a>
+            </span>
           </span>
         </div>
       </div>
