@@ -2,7 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { LogoAB } from "@/components/LogoAB";
-import { LayoutDashboard, FileText, Users, Settings, LogOut, ExternalLink } from "lucide-react";
+import { LayoutDashboard, FileText, Users, Settings, LogOut, ExternalLink, BarChart3 } from "lucide-react";
 import { signOut } from "./actions";
 import type { Profile } from "@/lib/supabase/types";
 
@@ -38,6 +38,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   const nav = [
     { href: "/admin", label: "Painel", icon: LayoutDashboard },
+    { href: "/admin/crm", label: "CRM", icon: BarChart3 },
+    { href: "/admin/crm/leads", label: "Leads", icon: Users },
     { href: "/admin/posts", label: "Posts", icon: FileText },
     ...(profile.role === "admin" ? [{ href: "/admin/users", label: "Usuários", icon: Users }] : []),
     { href: "/admin/configuracoes", label: "Conta", icon: Settings },

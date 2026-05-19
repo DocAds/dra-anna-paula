@@ -1,8 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { whatsappLink } from "@/lib/site";
-import { trackWhatsapp } from "@/lib/tracking";
+import { leadModal } from "@/lib/leadModal";
 import { ArrowUpRight } from "lucide-react";
 import type { ReactNode } from "react";
 
@@ -39,14 +38,12 @@ export function CTA({ children, source = "default", variant = "primary", href, c
   }
 
   return (
-    <a
-      href={whatsappLink()}
-      target="_blank"
-      rel="noopener"
-      onClick={() => trackWhatsapp(source)}
+    <button
+      type="button"
+      onClick={() => leadModal.open(source)}
       className={`${base} ${styles[variant]} ${className ?? ""}`}
     >
       {inner}
-    </a>
+    </button>
   );
 }

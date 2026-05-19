@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { LogoAB } from "./LogoAB";
 import { NAV, whatsappLink } from "@/lib/site";
+import { leadModal } from "@/lib/leadModal";
 
 export function Nav() {
   const [scrolled, setScrolled] = useState(false);
@@ -48,14 +49,13 @@ export function Nav() {
           </nav>
 
           <div className="flex items-center shrink-0">
-            <a
-              href={whatsappLink()}
-              target="_blank"
-              rel="noopener"
+            <button
+              type="button"
+              onClick={() => leadModal.open("nav")}
               className="hidden md:inline-flex items-center gap-2 rounded-full bg-cocoa px-5 py-3 text-[12px] uppercase tracking-widest2 text-bone hover:bg-ink transition-colors"
             >
               Agendar
-            </a>
+            </button>
             <button
               onClick={() => setOpen(true)}
               className="md:hidden rounded-full p-2.5 text-cocoa"
