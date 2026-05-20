@@ -55,7 +55,7 @@ function Hero() {
       <SceneBackdrop scene="drapery" intensity={0.85} />
 
       <div className="relative mx-auto grid max-w-7xl gap-12 px-6 lg:grid-cols-12 lg:gap-8 lg:px-12 items-center">
-        <div className="lg:col-span-7 lg:pt-10 z-10">
+        <div className="lg:col-span-6 lg:pt-10 z-10">
           <Reveal>
             <div className="mb-6 flex items-center gap-3 text-[11px] uppercase tracking-widest3 text-toffee">
               <span className="h-px w-12 bg-toffee/60" />
@@ -101,19 +101,19 @@ function Hero() {
           </Reveal>
         </div>
 
-        <div className="lg:col-span-5 relative">
+        <div className="lg:col-span-6 relative">
           <Reveal delay={0.35}>
             <Parallax offset={30}>
-              <div className="relative aspect-[4/5] w-full max-w-md mx-auto">
+              <div className="relative aspect-[3/4] w-full max-w-lg mx-auto">
                 <div className="absolute -inset-6 rounded-[36px] bg-gradient-to-br from-latte/50 via-biscotti/30 to-transparent blur-2xl" />
                 <div className="absolute inset-0 rounded-[28px] overflow-hidden editorial-card p-2">
                   <div className="relative h-full w-full rounded-[22px] overflow-hidden bg-cream">
                     <Image
-                      src="/img/dra/dra-principal-1440.webp"
+                      src="/img/dra/dra-hero-1440.webp"
                       alt="Dra. Anna Paula Bomtempo"
                       fill
                       priority
-                      sizes="(min-width: 1024px) 36vw, 80vw"
+                      sizes="(min-width: 1024px) 45vw, 85vw"
                       className="object-cover"
                     />
                   </div>
