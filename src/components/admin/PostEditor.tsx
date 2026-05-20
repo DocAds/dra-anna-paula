@@ -437,11 +437,9 @@ function Toolbar({
     <>
     <div ref={sentinel} aria-hidden className="h-px w-full" />
     <div
-      style={stuck ? { backgroundColor: "#2B1F17" } : undefined}
-      className={`flex flex-wrap items-center gap-1 rounded-full px-3 py-2 sticky top-2 z-10 transition-all duration-300 ${
-        stuck
-          ? "border border-cream/15 shadow-2xl"
-          : "editorial-card"
+      style={{ backgroundColor: stuck ? "#2B1F17" : "#FBF7F1" }}
+      className={`flex flex-wrap items-center gap-1 rounded-full px-3 py-2 sticky top-2 z-10 transition-all duration-300 border ${
+        stuck ? "border-cream/15 shadow-2xl" : "border-cocoa/15"
       }`}
     >
       <button type="button" onClick={() => editor.chain().focus().toggleBold().run()} className={`${btn} ${editor.isActive("bold") ? active : ""}`}><Bold className="h-4 w-4" /></button>
