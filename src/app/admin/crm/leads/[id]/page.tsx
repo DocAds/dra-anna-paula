@@ -5,7 +5,9 @@ import { format } from "date-fns/format";
 import { ptBR } from "date-fns/locale";
 import { ExternalLink, MessageCircle, Mail, MapPin, Sparkles, Clock, Globe, Smartphone, Megaphone } from "lucide-react";
 import { updateLead, deleteLead } from "../../actions";
+import { createNote, updateNote, deleteNote } from "../../notes-actions";
 import { LeadActions } from "./LeadActions";
+import { LeadNotes } from "./LeadNotes";
 import type { Lead } from "@/lib/supabase/types";
 
 export const dynamic = "force-dynamic";
@@ -61,6 +63,13 @@ export default async function LeadDetail({
   const sb = await createClient();
   const { data: lead } = await sb.from("leads").select("*").eq("id", id).maybeSingle<Lead>();
   if (!lead) return notFound();
+
+  const { data: { user } } = await sb.auth.getUser();
+  const { data: notes = [] } = await sb
+    .from("lead_notes")
+    .select("id, content, created_at, updated_at, author:profiles(name,email)")
+    .eq("lead_id", id)
+    .order("created_at", { ascending: false });
 
   const update = async (fd: FormData) => {
     "use server";
@@ -156,6 +165,18 @@ export default async function LeadDetail({
               )}
             </div>
           </section>
+
+          <LeadNotes
+            leadId={id}
+            initial={(notes || []).map((n) => ({
+              ...n,
+              author: Array.isArray(n.author) ? n.author[0] : n.author,
+            })) as Parameters<typeof LeadNotes>[0]["initial"]}
+            onCreate={createNote}
+            onUpdate={updateNote}
+            onDelete={deleteNote}
+            currentUserEmail={user?.email}
+          />
 
           <section className="editorial-card rounded-3xl p-7">
             <h2 className="text-[10px] uppercase tracking-widest3 text-toffee mb-5">Como o sistema classifica</h2>
