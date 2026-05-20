@@ -430,8 +430,8 @@ function Toolbar({
     ? "p-2 rounded-lg text-cream/75 hover:bg-cream/15 hover:text-cream transition-colors"
     : "p-2 rounded-lg text-ink/65 hover:bg-cocoa/10 hover:text-cocoa transition-colors";
   const active = stuck
-    ? "bg-cream text-cocoa hover:bg-cream hover:text-cocoa"
-    : "bg-cocoa text-bone hover:bg-cocoa hover:text-bone";
+    ? "bg-cream text-ink shadow-sm hover:bg-cream hover:text-ink"
+    : "bg-ink text-bone shadow-sm hover:bg-ink hover:text-bone";
   const sep = stuck ? "bg-cream/25" : "bg-cocoa/20";
   return (
     <>
