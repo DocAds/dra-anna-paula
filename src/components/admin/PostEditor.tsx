@@ -6,7 +6,7 @@ import Link from "@tiptap/extension-link";
 import Image from "@tiptap/extension-image";
 import Placeholder from "@tiptap/extension-placeholder";
 import Youtube from "@tiptap/extension-youtube";
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import slugify from "slugify";
 import { createClient } from "@/lib/supabase/client";
@@ -413,11 +413,16 @@ function Toolbar({
   uploading: boolean;
 }) {
   const [stuck, setStuck] = useState(false);
+  const sentinel = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    const on = () => setStuck(window.scrollY > 120);
-    on();
-    window.addEventListener("scroll", on, { passive: true });
-    return () => window.removeEventListener("scroll", on);
+    const el = sentinel.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      ([entry]) => setStuck(!entry.isIntersecting),
+      { threshold: 0, rootMargin: "-10px 0px 0px 0px" }
+    );
+    io.observe(el);
+    return () => io.disconnect();
   }, []);
 
   if (!editor) return null;
@@ -429,10 +434,13 @@ function Toolbar({
     : "bg-cocoa text-bone hover:bg-cocoa hover:text-bone";
   const sep = stuck ? "bg-cream/25" : "bg-cocoa/20";
   return (
+    <>
+    <div ref={sentinel} aria-hidden className="h-px w-full" />
     <div
-      className={`flex flex-wrap items-center gap-1 rounded-full px-3 py-2 sticky top-2 z-10 transition-all duration-500 ${
+      style={stuck ? { backgroundColor: "#2B1F17" } : undefined}
+      className={`flex flex-wrap items-center gap-1 rounded-full px-3 py-2 sticky top-2 z-10 transition-all duration-300 ${
         stuck
-          ? "bg-ink/92 backdrop-blur-md border border-cream/15 shadow-2xl"
+          ? "border border-cream/15 shadow-2xl"
           : "editorial-card"
       }`}
     >
@@ -453,5 +461,6 @@ function Toolbar({
       <button type="button" onClick={onUploadVideo} className={btn} title="Enviar vídeo (mp4/webm)"><span className="text-[10px] uppercase tracking-widest2 px-1.5">MP4</span></button>
       {uploading && <span className={`text-[10px] uppercase tracking-widest2 ml-2 ${stuck ? "text-cream/55" : "text-ink/45"}`}>enviando…</span>}
     </div>
+    </>
   );
 }
