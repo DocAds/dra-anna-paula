@@ -13,7 +13,11 @@ export default async function EditPostPage({
 }) {
   const { id } = await params;
   const supabase = await createClient();
-  const { data: post } = await supabase.from("posts").select("*").eq("id", id).single();
+  const [{ data: post }, { data: categories }, { data: aiConfig }] = await Promise.all([
+    supabase.from("posts").select("*").eq("id", id).single(),
+    supabase.from("post_categories").select("name").order("name"),
+    supabase.from("ai_settings").select("provider, api_token, instructions, model").eq("id", 1).maybeSingle(),
+  ]);
   if (!post) return notFound();
 
   const update = async (fd: FormData) => {
@@ -44,7 +48,7 @@ export default async function EditPostPage({
           </Link>
         )}
       </div>
-      <PostEditor initial={post} postId={post.id} onSubmit={update} onDelete={remove} />
+      <PostEditor initial={post} postId={post.id} onSubmit={update} onDelete={remove} categories={categories || []} aiConfig={aiConfig} />
     </main>
   );
 }

@@ -25,7 +25,11 @@ import {
   Trash2,
   Save,
   Eye,
+  Settings2,
+  Sparkles,
 } from "lucide-react";
+import { AIConfigDialog, AIGenerateDialog } from "./AIDialogs";
+import { saveAiConfig, generateArticle } from "@/app/admin/posts/ai-actions";
 import type { Post, PostStatus } from "@/lib/supabase/types";
 
 type Props = {
@@ -33,9 +37,11 @@ type Props = {
   onSubmit: (formData: FormData) => Promise<void> | void;
   onDelete?: () => Promise<void> | void;
   postId?: string;
+  categories?: { name: string }[];
+  aiConfig?: { provider?: string; api_token?: string; instructions?: string; model?: string } | null;
 };
 
-const CATEGORIAS = [
+const _LEGACY = [
   "Skincare",
   "Saúde",
   "Lifestyle",
@@ -44,9 +50,12 @@ const CATEGORIAS = [
   "Nutrição",
 ] as const;
 
-export function PostEditor({ initial, onSubmit, onDelete, postId }: Props) {
+export function PostEditor({ initial, onSubmit, onDelete, postId, categories, aiConfig }: Props) {
   const router = useRouter();
+  const CATEGORIAS = categories?.map((c) => c.name) ?? _LEGACY;
   const [pending, startTransition] = useTransition();
+  const [aiConfigOpen, setAiConfigOpen] = useState(false);
+  const [aiGenOpen, setAiGenOpen] = useState(false);
   const [title, setTitle] = useState(initial?.title ?? "");
   const [slug, setSlug] = useState(initial?.slug ?? "");
   const [excerpt, setExcerpt] = useState(initial?.excerpt ?? "");
@@ -228,6 +237,23 @@ export function PostEditor({ initial, onSubmit, onDelete, postId }: Props) {
           />
         </div>
 
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setAiGenOpen(true)}
+            className="inline-flex items-center gap-2 rounded-full bg-cocoa text-bone px-4 py-2 text-[11px] uppercase tracking-widest2 hover:bg-ink transition-colors"
+          >
+            <Sparkles className="h-3.5 w-3.5" /> Criar artigo com IA
+          </button>
+          <button
+            type="button"
+            onClick={() => setAiConfigOpen(true)}
+            className="inline-flex items-center gap-2 rounded-full border border-cocoa/30 text-cocoa px-4 py-2 text-[11px] uppercase tracking-widest2 hover:bg-cocoa hover:text-bone transition-colors"
+          >
+            <Settings2 className="h-3.5 w-3.5" /> Configurar IA
+          </button>
+        </div>
+
         <Toolbar
           editor={editor}
           onInsertImage={onInsertImage}
@@ -235,6 +261,27 @@ export function PostEditor({ initial, onSubmit, onDelete, postId }: Props) {
           onUploadVideo={onUploadVideo}
           onAddLink={onAddLink}
           uploading={uploading}
+        />
+
+        <AIConfigDialog
+          open={aiConfigOpen}
+          onClose={() => setAiConfigOpen(false)}
+          initial={aiConfig ? {
+            provider: (aiConfig.provider as "gemini" | "openai" | "anthropic") || "gemini",
+            api_token: aiConfig.api_token || "",
+            instructions: aiConfig.instructions || "",
+            model: aiConfig.model || "",
+          } : null}
+          onSave={saveAiConfig}
+        />
+        <AIGenerateDialog
+          open={aiGenOpen}
+          onClose={() => setAiGenOpen(false)}
+          onGenerate={generateArticle}
+          onResult={(html, t) => {
+            if (!title) setTitle(t);
+            editor?.commands.setContent(html);
+          }}
         />
 
         <div className="editorial-card rounded-3xl p-6 min-h-[400px]">

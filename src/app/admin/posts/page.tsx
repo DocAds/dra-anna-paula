@@ -36,12 +36,20 @@ export default async function PostsList({
           <div className="text-[11px] uppercase tracking-widest3 text-toffee mb-3">Conteúdo</div>
           <h1 className="font-display text-4xl text-ink leading-tight">Posts</h1>
         </div>
-        <Link
-          href="/admin/posts/new"
-          className="inline-flex items-center gap-2 rounded-full bg-cocoa text-bone px-5 py-3 text-[12px] uppercase tracking-widest2 hover:bg-ink transition-colors"
-        >
-          <Plus className="h-4 w-4" /> Novo post
-        </Link>
+        <div className="flex items-center gap-3">
+          <Link
+            href="/admin/posts/categorias"
+            className="inline-flex items-center gap-2 rounded-full border border-cocoa/30 text-cocoa px-5 py-3 text-[12px] uppercase tracking-widest2 hover:bg-cocoa hover:text-bone transition-colors"
+          >
+            Categorias
+          </Link>
+          <Link
+            href="/admin/posts/new"
+            className="inline-flex items-center gap-2 rounded-full bg-cocoa text-bone px-5 py-3 text-[12px] uppercase tracking-widest2 hover:bg-ink transition-colors"
+          >
+            <Plus className="h-4 w-4" /> Novo post
+          </Link>
+        </div>
       </div>
 
       <div className="flex flex-wrap gap-2 mb-6">
