@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
 import { PhoneInput } from "react-international-phone";
@@ -41,6 +41,8 @@ export function LeadQualifyModal() {
   const [urgencia, setUrgencia] = useState<string>(URGENCIAS[1].t);
   const [pending, start] = useTransition();
   const [sent, setSent] = useState(false);
+  const [step, setStep] = useState<1 | 2>(1);
+  const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
     const unsub = leadModal.subscribe(setVis);
@@ -57,11 +59,29 @@ export function LeadQualifyModal() {
     if (!vis.open) {
       setSent(false);
       setPhone("");
+      setStep(1);
     }
   }, [vis.open]);
 
+  function goToStep2() {
+    const nome = String(new FormData(formRef.current!).get("nome") || "").trim();
+    if (!nome) {
+      alert("Por favor preencha seu nome.");
+      return;
+    }
+    if (!phone || phone.length < 6) {
+      alert("Por favor preencha o WhatsApp.");
+      return;
+    }
+    setStep(2);
+  }
+
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (step !== 2) {
+      goToStep2();
+      return;
+    }
     if (!phone || phone.length < 6) {
       alert("Por favor preencha o WhatsApp.");
       return;
@@ -147,10 +167,10 @@ export function LeadQualifyModal() {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
-          className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+          className="fixed inset-0 z-[100] flex items-start sm:items-center justify-center overflow-y-auto p-4"
         >
           <div
-            className="absolute inset-0 bg-ink/55 backdrop-blur-sm"
+            className="fixed inset-0 bg-ink/55 backdrop-blur-sm"
             onClick={() => leadModal.close()}
           />
           <motion.div
@@ -158,18 +178,23 @@ export function LeadQualifyModal() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 24, scale: 0.97 }}
             transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-            className="relative z-10 w-full max-w-lg bg-porcelain rounded-3xl p-7 md:p-9 shadow-2xl"
+            className="relative z-10 my-auto max-h-[90dvh] w-full max-w-lg overflow-y-auto overscroll-contain bg-porcelain rounded-3xl p-6 md:p-9 shadow-2xl"
           >
             <button
               onClick={() => leadModal.close()}
               aria-label="Fechar"
-              className="absolute top-4 right-4 p-2 text-ink/45 hover:text-cocoa transition-colors"
+              className="absolute top-4 right-4 p-2 text-ink/45 hover:text-cocoa transition-colors z-10"
             >
               <X className="h-5 w-5" />
             </button>
 
-            <div className="text-[11px] uppercase tracking-widest3 text-toffee mb-4">
-              Agendar avaliação
+            <div className="flex items-center justify-between gap-3 mb-4">
+              <div className="text-[11px] uppercase tracking-widest3 text-toffee">
+                Agendar avaliação
+              </div>
+              <div className="text-[10px] uppercase tracking-widest3 text-ink/40">
+                Etapa {step} de 2
+              </div>
             </div>
             <h2 className="font-display text-3xl md:text-4xl text-ink leading-tight mb-2 text-balance">
               Conte um pouco sobre você.
@@ -178,81 +203,103 @@ export function LeadQualifyModal() {
               Vamos retornar pelo WhatsApp com a primeira disponibilidade.
             </p>
 
-            <form onSubmit={onSubmit} className="grid gap-5">
-              <Field label="Nome completo" name="nome" required autoComplete="name" />
+            <form ref={formRef} onSubmit={onSubmit} className="grid gap-5">
+              <div className={step === 1 ? "grid gap-5" : "hidden"}>
+                <Field label="Nome completo" name="nome" autoComplete="name" />
 
-              <label className="block">
-                <span className="text-[10px] uppercase tracking-widest3 text-ink/55">WhatsApp</span>
-                <PhoneInput
-                  defaultCountry={country}
-                  value={phone}
-                  onChange={(v, meta) => {
-                    setPhone(v);
-                    if (meta?.country?.iso2) setCountry(meta.country.iso2);
-                  }}
-                  className="anna-phone mt-1"
-                  inputClassName="w-full bg-transparent border-b border-cocoa/25 focus:border-cocoa outline-none py-3 text-ink"
-                  countrySelectorStyleProps={{
-                    buttonClassName: "border-0 bg-transparent border-b border-cocoa/25 py-3",
-                    dropdownStyleProps: {
-                      className: "bg-porcelain border border-cocoa/15 rounded-2xl shadow-2xl",
-                    },
-                  }}
-                />
-              </label>
+                <label className="block">
+                  <span className="text-[10px] uppercase tracking-widest3 text-ink/55">WhatsApp</span>
+                  <PhoneInput
+                    defaultCountry={country}
+                    value={phone}
+                    onChange={(v, meta) => {
+                      setPhone(v);
+                      if (meta?.country?.iso2) setCountry(meta.country.iso2);
+                    }}
+                    className="anna-phone mt-1"
+                    inputClassName="w-full bg-transparent border-b border-cocoa/25 focus:border-cocoa outline-none py-3 text-ink"
+                    countrySelectorStyleProps={{
+                      buttonClassName: "border-0 bg-transparent border-b border-cocoa/25 py-3",
+                      dropdownStyleProps: {
+                        className: "bg-porcelain border border-cocoa/15 rounded-2xl shadow-2xl",
+                      },
+                    }}
+                  />
+                </label>
 
-              <Field label="E-mail (opcional)" name="email" type="email" autoComplete="email" />
+                <Field label="E-mail (opcional)" name="email" type="email" autoComplete="email" />
 
-              <label className="block">
-                <span className="text-[10px] uppercase tracking-widest3 text-ink/55">
-                  Tenho interesse em
-                </span>
-                <select
-                  value={interesse}
-                  onChange={(e) => setInteresse(e.target.value)}
-                  className="w-full bg-transparent border-b border-cocoa/25 focus:border-cocoa outline-none py-3 text-ink mt-1"
+                <button
+                  type="button"
+                  onClick={goToStep2}
+                  className="mt-2 rounded-full bg-cocoa text-bone py-4 text-[12px] uppercase tracking-widest2 hover:bg-ink transition-colors"
                 >
-                  {INTERESSES.map((i) => (
-                    <option key={i} value={i}>{i}</option>
-                  ))}
-                </select>
-              </label>
+                  Próximo →
+                </button>
+              </div>
 
-              <div>
-                <div className="text-[10px] uppercase tracking-widest3 text-ink/55 mb-2">
-                  Qual a urgência?
+              <div className={step === 2 ? "grid gap-5" : "hidden"}>
+                <label className="block">
+                  <span className="text-[10px] uppercase tracking-widest3 text-ink/55">
+                    Tenho interesse em
+                  </span>
+                  <select
+                    value={interesse}
+                    onChange={(e) => setInteresse(e.target.value)}
+                    className="w-full bg-transparent border-b border-cocoa/25 focus:border-cocoa outline-none py-3 text-ink mt-1"
+                  >
+                    {INTERESSES.map((i) => (
+                      <option key={i} value={i}>{i}</option>
+                    ))}
+                  </select>
+                </label>
+
+                <div>
+                  <div className="text-[10px] uppercase tracking-widest3 text-ink/55 mb-2">
+                    Qual a urgência?
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {URGENCIAS.map((u) => (
+                      <button
+                        key={u.t}
+                        type="button"
+                        onClick={() => setUrgencia(u.t)}
+                        className={`rounded-full px-4 py-2 text-[11px] uppercase tracking-widest2 transition-colors border ${
+                          urgencia === u.t
+                            ? "bg-cocoa text-bone border-cocoa"
+                            : "border-cocoa/25 text-ink/65 hover:border-cocoa hover:text-cocoa"
+                        }`}
+                      >
+                        {u.v}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-                <div className="flex flex-wrap gap-2">
-                  {URGENCIAS.map((u) => (
-                    <button
-                      key={u.t}
-                      type="button"
-                      onClick={() => setUrgencia(u.t)}
-                      className={`rounded-full px-4 py-2 text-[11px] uppercase tracking-widest2 transition-colors border ${
-                        urgencia === u.t
-                          ? "bg-cocoa text-bone border-cocoa"
-                          : "border-cocoa/25 text-ink/65 hover:border-cocoa hover:text-cocoa"
-                      }`}
-                    >
-                      {u.v}
-                    </button>
-                  ))}
+
+                <Field label="Mensagem (opcional)" name="mensagem" multiline />
+
+                <div className="mt-2 flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setStep(1)}
+                    className="rounded-full border border-cocoa/25 text-ink/65 px-5 py-4 text-[12px] uppercase tracking-widest2 hover:border-cocoa hover:text-cocoa transition-colors"
+                  >
+                    ← Voltar
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={pending}
+                    className="flex-1 rounded-full bg-cocoa text-bone py-4 text-[12px] uppercase tracking-widest2 hover:bg-ink transition-colors disabled:opacity-50"
+                  >
+                    {pending
+                      ? "Enviando..."
+                      : sent
+                      ? "Abrindo WhatsApp →"
+                      : "Continuar no WhatsApp"}
+                  </button>
                 </div>
               </div>
 
-              <Field label="Mensagem (opcional)" name="mensagem" multiline />
-
-              <button
-                type="submit"
-                disabled={pending}
-                className="mt-2 rounded-full bg-cocoa text-bone py-4 text-[12px] uppercase tracking-widest2 hover:bg-ink transition-colors disabled:opacity-50"
-              >
-                {pending
-                  ? "Enviando..."
-                  : sent
-                  ? "Abrindo WhatsApp →"
-                  : "Continuar no WhatsApp"}
-              </button>
               <p className="text-[11px] text-ink/45">
                 Seus dados são tratados com sigilo médico.
               </p>
