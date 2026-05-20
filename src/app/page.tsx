@@ -152,7 +152,7 @@ function RibbonTecnologias() {
             Plataformas e parceiros
           </div>
         </Reveal>
-        <Marquee items={tecnologiasParceiras as unknown as string[]} duration={45} />
+        <Marquee items={tecnologiasParceiras as unknown as string[]} duration={20} />
       </div>
     </section>
   );
