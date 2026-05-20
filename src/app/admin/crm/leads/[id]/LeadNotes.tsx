@@ -79,14 +79,14 @@ export function LeadNotes({
   return (
     <section className="editorial-card rounded-3xl p-7">
       <div className="flex items-center justify-between mb-5">
-        <h2 className="text-[10px] uppercase tracking-widest3 text-toffee">Anotações da equipe</h2>
+        <h2 className="text-[10px] uppercase tracking-widest3 text-toffee">Comentários da equipe</h2>
         {!adding && (
           <button
             type="button"
             onClick={() => setAdding(true)}
             className="inline-flex items-center gap-2 text-[11px] uppercase tracking-widest2 text-cocoa hover:text-ink transition-colors"
           >
-            <Plus className="h-3.5 w-3.5" /> Adicionar anotação
+            <Plus className="h-3.5 w-3.5" /> Adicionar comentário
           </button>
         )}
       </div>
@@ -122,7 +122,7 @@ export function LeadNotes({
       )}
 
       {notes.length === 0 && !adding ? (
-        <p className="text-sm text-ink/45 italic">Nenhuma anotação ainda. Use o botão acima pra registrar contatos e observações.</p>
+        <p className="text-sm text-ink/45 italic">Nenhum comentário ainda. Use o botão acima pra registrar contatos e observações.</p>
       ) : (
         <ul className="space-y-3">
           {notes.map((n) => {

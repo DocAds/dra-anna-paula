@@ -95,7 +95,7 @@ export function LeadActions({
             name="notas"
             rows={6}
             defaultValue={lead.notas || ""}
-            placeholder="Anotações da equipe: ligações feitas, observações, próximos passos..."
+            placeholder="Comentários da equipe: ligações feitas, observações, próximos passos..."
             className="w-full bg-transparent border border-cocoa/15 rounded-2xl p-3 text-ink text-sm resize-none focus:border-cocoa outline-none"
           />
         </div>
