@@ -2,7 +2,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { LogoAB } from "@/components/LogoAB";
-import { LayoutDashboard, FileText, Users, Settings, LogOut, ExternalLink, BarChart3, Trello } from "lucide-react";
+import { LogOut, ExternalLink } from "lucide-react";
+import { AdminNav } from "@/components/admin/AdminNav";
 import { signOut } from "./actions";
 import type { Profile } from "@/lib/supabase/types";
 
@@ -36,33 +37,13 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   if (!profile) redirect("/login?error=Sem%20perfil");
 
-  const nav = [
-    { href: "/admin", label: "Painel", icon: LayoutDashboard },
-    { href: "/admin/crm", label: "Dashboard", icon: BarChart3 },
-    { href: "/admin/crm/leads", label: "Leads", icon: Users },
-    { href: "/admin/posts", label: "Posts", icon: FileText },
-    ...(profile.role === "admin" ? [{ href: "/admin/users", label: "Usuários", icon: Users }] : []),
-    { href: "/admin/configuracoes", label: "Conta", icon: Settings },
-  ];
-
   return (
     <div className="min-h-screen bg-bone grid grid-cols-1 md:grid-cols-[260px_1fr]">
       <aside className="border-r border-cocoa/10 bg-porcelain p-6 md:sticky md:top-0 md:h-screen flex flex-col">
         <Link href="/admin" className="flex items-center mb-10">
           <LogoAB variant="full" className="h-6 w-auto" />
         </Link>
-        <nav className="flex-1 flex flex-col gap-1">
-          {nav.map((n) => (
-            <Link
-              key={n.href}
-              href={n.href}
-              className="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm text-ink/70 hover:bg-cocoa/8 hover:text-cocoa transition-colors"
-            >
-              <n.icon className="h-4 w-4" />
-              {n.label}
-            </Link>
-          ))}
-        </nav>
+        <AdminNav isAdmin={profile.role === "admin"} />
         <div className="mt-6 border-t border-cocoa/10 pt-5 space-y-3">
           <div className="text-[10px] uppercase tracking-widest3 text-ink/45">Logado como</div>
           <div className="text-sm font-display text-ink truncate">{profile.name || profile.email}</div>
