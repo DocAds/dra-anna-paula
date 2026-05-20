@@ -412,27 +412,46 @@ function Toolbar({
   onAddLink: () => void;
   uploading: boolean;
 }) {
+  const [stuck, setStuck] = useState(false);
+  useEffect(() => {
+    const on = () => setStuck(window.scrollY > 120);
+    on();
+    window.addEventListener("scroll", on, { passive: true });
+    return () => window.removeEventListener("scroll", on);
+  }, []);
+
   if (!editor) return null;
-  const btn = "p-2 rounded-lg text-ink/65 hover:bg-cocoa/10 hover:text-cocoa transition-colors";
-  const active = "bg-cocoa text-bone hover:bg-cocoa hover:text-bone";
+  const btn = stuck
+    ? "p-2 rounded-lg text-cream/75 hover:bg-cream/15 hover:text-cream transition-colors"
+    : "p-2 rounded-lg text-ink/65 hover:bg-cocoa/10 hover:text-cocoa transition-colors";
+  const active = stuck
+    ? "bg-cream text-cocoa hover:bg-cream hover:text-cocoa"
+    : "bg-cocoa text-bone hover:bg-cocoa hover:text-bone";
+  const sep = stuck ? "bg-cream/25" : "bg-cocoa/20";
   return (
-    <div className="flex flex-wrap items-center gap-1 editorial-card rounded-full px-3 py-2 sticky top-2 z-10">
+    <div
+      className={`flex flex-wrap items-center gap-1 rounded-full px-3 py-2 sticky top-2 z-10 transition-all duration-500 ${
+        stuck
+          ? "bg-ink/92 backdrop-blur-md border border-cream/15 shadow-2xl"
+          : "editorial-card"
+      }`}
+    >
       <button type="button" onClick={() => editor.chain().focus().toggleBold().run()} className={`${btn} ${editor.isActive("bold") ? active : ""}`}><Bold className="h-4 w-4" /></button>
       <button type="button" onClick={() => editor.chain().focus().toggleItalic().run()} className={`${btn} ${editor.isActive("italic") ? active : ""}`}><Italic className="h-4 w-4" /></button>
-      <span className="w-px h-5 bg-cocoa/20 mx-1" />
+      <span className={`w-px h-5 mx-1 ${sep}`} />
       <button type="button" onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()} className={`${btn} ${editor.isActive("heading", { level: 1 }) ? active : ""}`}><Heading1 className="h-4 w-4" /></button>
       <button type="button" onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} className={`${btn} ${editor.isActive("heading", { level: 2 }) ? active : ""}`}><Heading2 className="h-4 w-4" /></button>
       <button type="button" onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()} className={`${btn} ${editor.isActive("heading", { level: 3 }) ? active : ""}`}><Heading3 className="h-4 w-4" /></button>
-      <span className="w-px h-5 bg-cocoa/20 mx-1" />
+      <span className={`w-px h-5 mx-1 ${sep}`} />
       <button type="button" onClick={() => editor.chain().focus().toggleBulletList().run()} className={`${btn} ${editor.isActive("bulletList") ? active : ""}`}><List className="h-4 w-4" /></button>
       <button type="button" onClick={() => editor.chain().focus().toggleOrderedList().run()} className={`${btn} ${editor.isActive("orderedList") ? active : ""}`}><ListOrdered className="h-4 w-4" /></button>
       <button type="button" onClick={() => editor.chain().focus().toggleBlockquote().run()} className={`${btn} ${editor.isActive("blockquote") ? active : ""}`}><Quote className="h-4 w-4" /></button>
-      <span className="w-px h-5 bg-cocoa/20 mx-1" />
+      <span className={`w-px h-5 mx-1 ${sep}`} />
       <button type="button" onClick={onAddLink} className={`${btn} ${editor.isActive("link") ? active : ""}`} title="Link"><Link2 className="h-4 w-4" /></button>
       <button type="button" onClick={onInsertImage} className={btn} title="Imagem"><ImageIcon className="h-4 w-4" /></button>
       <button type="button" onClick={onInsertVideo} className={btn} title="Vídeo do YouTube/Vimeo (colar URL)"><Video className="h-4 w-4" /></button>
       <button type="button" onClick={onUploadVideo} className={btn} title="Enviar vídeo (mp4/webm)"><span className="text-[10px] uppercase tracking-widest2 px-1.5">MP4</span></button>
-      {uploading && <span className="text-[10px] uppercase tracking-widest2 text-ink/45 ml-2">enviando…</span>}
+      {uploading && <span className={`text-[10px] uppercase tracking-widest2 ml-2 ${stuck ? "text-cream/55" : "text-ink/45"}`}>enviando…</span>}
     </div>
   );
 }
