@@ -59,23 +59,23 @@ function Hero() {
 
 function HeroMobile() {
   return (
-    <section className="lg:hidden relative flex min-h-[100svh] flex-col overflow-hidden bg-bone">
-      <div className="absolute inset-x-0 top-0 h-[70%]">
+    <section className="lg:hidden relative overflow-hidden bg-bone">
+      <div className="relative h-[52svh] min-h-[360px] w-full">
         <Image
           src="/img/dra/dra-hero-1440.webp"
           alt="Dra. Anna Paula Bomtempo"
           fill
           priority
           sizes="100vw"
-          className="object-cover object-[center_18%]"
+          className="object-cover object-[center_10%]"
         />
         {/* Scrim no topo para leitura do menu flutuante */}
         <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-ink/35 via-ink/5 to-transparent" />
-        {/* Degradê de conexão: funde a foto no fundo bone para contraste do texto */}
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent from-40% via-bone/75 via-78% to-bone" />
+        {/* Degradê de conexão: funde a foto no fundo bone, onde o texto começa */}
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent from-45% via-bone/80 via-85% to-bone" />
       </div>
 
-      <div className="relative z-10 mt-auto px-6 pb-14 pt-10">
+      <div className="relative z-10 -mt-12 px-6 pb-14">
         <Reveal>
           <div className="mb-5 flex items-center gap-3 text-[11px] uppercase tracking-widest3 text-toffee [text-shadow:0_1px_10px_rgba(245,239,230,0.95)]">
             <span className="h-px w-10 bg-toffee/60" />
