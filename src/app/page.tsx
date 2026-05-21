@@ -49,9 +49,67 @@ export default function HomePage() {
 }
 
 function Hero() {
+  return (
+    <>
+      <HeroMobile />
+      <HeroDesktop />
+    </>
+  );
+}
+
+function HeroMobile() {
+  return (
+    <section className="lg:hidden relative flex min-h-[100svh] flex-col overflow-hidden bg-bone">
+      <div className="absolute inset-x-0 top-0 h-[70%]">
+        <Image
+          src="/img/dra/dra-hero-1440.webp"
+          alt="Dra. Anna Paula Bomtempo"
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover object-[center_18%]"
+        />
+        {/* Scrim no topo para leitura do menu flutuante */}
+        <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-ink/35 via-ink/5 to-transparent" />
+        {/* Degradê de conexão: funde a foto no fundo bone para contraste do texto */}
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent from-40% via-bone/75 via-78% to-bone" />
+      </div>
+
+      <div className="relative z-10 mt-auto px-6 pb-14 pt-10">
+        <Reveal>
+          <div className="mb-5 flex items-center gap-3 text-[11px] uppercase tracking-widest3 text-toffee [text-shadow:0_1px_10px_rgba(245,239,230,0.95)]">
+            <span className="h-px w-10 bg-toffee/60" />
+            <span>Dermatologia · São Paulo</span>
+          </div>
+        </Reveal>
+
+        <h1 className="font-display text-[clamp(2.4rem,11vw,3.6rem)] leading-[1.0] tracking-tight text-ink text-balance">
+          A medicina da pele,
+          <span className="block italic font-serif text-cocoa">conduzida com tempo.</span>
+        </h1>
+
+        <Reveal delay={0.2}>
+          <p className="mt-5 max-w-md text-base leading-relaxed text-ink/75">
+            Rejuvenescimento facial, lasers e protocolos personalizados — uma
+            experiência discreta, sofisticada e focada em resultados naturais.
+          </p>
+        </Reveal>
+
+        <Reveal delay={0.35} className="mt-8 flex flex-col gap-3">
+          <CTA source="hero">Agendar avaliação</CTA>
+          <CTA source="hero" href="/tratamentos" variant="outline">
+            Conhecer tratamentos
+          </CTA>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
+function HeroDesktop() {
   const micro = ["Ultraformer MPT", "Volnewmer", "Laser CO₂", "Fotona", "Injetáveis premium", "Skinbooster"];
   return (
-    <section className="relative min-h-screen overflow-hidden pt-28 pb-20">
+    <section className="hidden lg:block relative min-h-screen overflow-hidden pt-28 pb-20">
       <SceneBackdrop scene="drapery" intensity={0.85} />
 
       <div className="relative mx-auto grid max-w-7xl gap-12 px-6 lg:grid-cols-12 lg:gap-8 lg:px-12 items-center">
