@@ -59,8 +59,8 @@ function Hero() {
 
 function HeroMobile() {
   return (
-    <section className="lg:hidden relative overflow-hidden bg-bone">
-      <div className="relative h-[40svh] min-h-[280px] w-full">
+    <section className="lg:hidden relative flex min-h-[100svh] flex-col overflow-hidden bg-bone">
+      <div className="relative flex-1 min-h-[34svh] w-full">
         <Image
           src="/img/dra/dra-hero-1440.webp"
           alt="Dra. Anna Paula Bomtempo"
@@ -262,7 +262,7 @@ function Categorias() {
                 com a sua pele.
               </>
             }
-            description="Da saúde dérmica essencial à tecnologia mais avançada — cada paciente segue um caminho clínico individualizado."
+            description="Da saúde dérmica essencial à tecnologia mais avançada, cada paciente segue um caminho clínico individualizado."
           />
         </Reveal>
         <div className="mt-16 grid gap-6 md:grid-cols-3">
@@ -574,7 +574,7 @@ function Confianca() {
           <SectionHeading
             eyebrow="Confiança"
             title="Medicina séria, conduzida por médica registrada."
-            description="Sem promessas e sem antes-e-depois — esse é o nosso compromisso ético."
+            description="Sem promessas e sem antes-e-depois: esse é o nosso compromisso ético."
           />
         </Reveal>
         <div className="mt-14 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
