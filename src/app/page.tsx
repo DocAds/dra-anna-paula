@@ -60,14 +60,14 @@ function Hero() {
 function HeroMobile() {
   return (
     <section className="lg:hidden relative overflow-hidden bg-bone">
-      <div className="relative h-[52svh] min-h-[360px] w-full">
+      <div className="relative h-[40svh] min-h-[280px] w-full">
         <Image
           src="/img/dra/dra-hero-1440.webp"
           alt="Dra. Anna Paula Bomtempo"
           fill
           priority
           sizes="100vw"
-          className="object-cover object-[center_10%]"
+          className="object-cover object-[center_8%]"
         />
         {/* Scrim no topo para leitura do menu flutuante */}
         <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-ink/35 via-ink/5 to-transparent" />
@@ -75,27 +75,27 @@ function HeroMobile() {
         <div className="absolute inset-0 bg-gradient-to-b from-transparent from-45% via-bone/80 via-85% to-bone" />
       </div>
 
-      <div className="relative z-10 -mt-12 px-6 pb-14">
+      <div className="relative z-10 -mt-10 px-6 pb-8">
         <Reveal>
-          <div className="mb-5 flex items-center gap-3 text-[11px] uppercase tracking-widest3 text-toffee [text-shadow:0_1px_10px_rgba(245,239,230,0.95)]">
+          <div className="mb-3 flex items-center gap-3 text-[11px] uppercase tracking-widest3 text-toffee [text-shadow:0_1px_10px_rgba(245,239,230,0.95)]">
             <span className="h-px w-10 bg-toffee/60" />
             <span>Dermatologia · São Paulo</span>
           </div>
         </Reveal>
 
-        <h1 className="font-display text-[clamp(2.4rem,11vw,3.6rem)] leading-[1.0] tracking-tight text-ink text-balance">
+        <h1 className="font-display text-[clamp(1.9rem,8.2vw,3.2rem)] leading-[1.06] tracking-tight text-ink text-balance">
           A medicina da pele,
           <span className="block italic font-serif text-cocoa">conduzida com tempo.</span>
         </h1>
 
         <Reveal delay={0.2}>
-          <p className="mt-5 max-w-md text-base leading-relaxed text-ink/75">
-            Rejuvenescimento facial, lasers e protocolos personalizados — uma
-            experiência discreta, sofisticada e focada em resultados naturais.
+          <p className="mt-4 max-w-md text-[14.5px] leading-relaxed text-ink/75">
+            Rejuvenescimento facial, lasers e protocolos personalizados, com
+            resultados naturais.
           </p>
         </Reveal>
 
-        <Reveal delay={0.35} className="mt-8 flex flex-col gap-3">
+        <Reveal delay={0.35} className="mt-6 flex flex-col gap-3">
           <CTA source="hero">Agendar avaliação</CTA>
           <CTA source="hero" href="/tratamentos" variant="outline">
             Conhecer tratamentos
