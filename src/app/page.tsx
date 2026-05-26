@@ -19,7 +19,6 @@ import {
   Stethoscope,
   GraduationCap,
   Award,
-  Instagram,
 } from "lucide-react";
 
 const txImg = (slug: string) => `/img/bg/tx-${slug}-1200.webp`;
@@ -41,7 +40,6 @@ export default function HomePage() {
       <Stats />
       <Confianca />
       <Insights />
-      <InstagramFeed />
       <Localizacao />
       <CTAFinal />
     </>
@@ -210,7 +208,7 @@ function RibbonTecnologias() {
             Plataformas e parceiros
           </div>
         </Reveal>
-        <Marquee items={tecnologiasParceiras as unknown as string[]} duration={20} />
+        <Marquee items={tecnologiasParceiras as unknown as string[]} duration={15} />
       </div>
     </section>
   );
@@ -648,61 +646,6 @@ function Insights() {
                   {p.t}
                 </h3>
               </Link>
-            </Reveal>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function InstagramFeed() {
-  const feed = [
-    "/img/dra/dra-1-960.webp",
-    "/img/bg/tx-cat-pele-1200.webp",
-    "/img/dra/dra-4-960.webp",
-    "/img/bg/tx-volnewmer-1200.webp",
-    "/img/dra/dra-5-960.webp",
-    "/img/bg/section-botanical-1600.webp",
-  ];
-  return (
-    <section className="relative py-24 md:py-28">
-      <div className="mx-auto max-w-7xl px-6">
-        <Reveal>
-          <div className="flex flex-col items-center text-center mb-12">
-            <div className="text-[11px] uppercase tracking-widest3 text-toffee mb-4 flex items-center gap-3">
-              <Instagram className="h-3.5 w-3.5" /> Instagram
-            </div>
-            <h2 className="font-display text-4xl md:text-5xl text-ink text-balance leading-tight">
-              <a
-                href={SITE.instagram}
-                target="_blank"
-                rel="noopener"
-                className="underline-editorial"
-              >
-                @annabomtempo.dermato
-              </a>
-            </h2>
-          </div>
-        </Reveal>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2 md:gap-3">
-          {feed.map((src, i) => (
-            <Reveal key={src + i} delay={(i % 6) * 0.05}>
-              <a
-                href={SITE.instagram}
-                target="_blank"
-                rel="noopener"
-                className="group relative block aspect-square overflow-hidden rounded-2xl bg-cream"
-              >
-                <Image
-                  src={src}
-                  alt=""
-                  fill
-                  sizes="(min-width: 1024px) 16vw, 33vw"
-                  className="object-cover transition-transform duration-[1500ms] ease-editorial group-hover:scale-110"
-                />
-                <div className="absolute inset-0 bg-ink/0 group-hover:bg-ink/20 transition-colors duration-700" />
-              </a>
             </Reveal>
           ))}
         </div>
