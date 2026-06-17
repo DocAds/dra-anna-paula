@@ -11,6 +11,23 @@ function uniqueSlug(base: string) {
   return slug || `post-${Date.now()}`;
 }
 
+// Campos de SEO avançado extraídos do formulário do editor.
+function seoFields(formData: FormData) {
+  const kw = String(formData.get("seo_keywords") || "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  return {
+    seo_title: String(formData.get("seo_title") || "") || null,
+    seo_description: String(formData.get("seo_description") || "") || null,
+    focus_keyword: String(formData.get("focus_keyword") || "") || null,
+    seo_keywords: kw.length ? kw : null,
+    canonical_url: String(formData.get("canonical_url") || "") || null,
+    og_image_url: String(formData.get("og_image_url") || "") || null,
+    no_index: formData.get("no_index") === "on" || formData.get("no_index") === "true",
+  };
+}
+
 export async function createPost(formData: FormData) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -36,6 +53,7 @@ export async function createPost(formData: FormData) {
       status: (formData.get("status") as PostStatus) || "draft",
       author_id: user.id,
       published_at: formData.get("status") === "published" ? new Date().toISOString() : null,
+      ...seoFields(formData),
     })
     .select("id")
     .single();
@@ -78,6 +96,7 @@ export async function updatePost(id: string, formData: FormData) {
       cover_image: String(formData.get("cover_image") || "") || null,
       status,
       published_at,
+      ...seoFields(formData),
     })
     .eq("id", id);
 
@@ -94,4 +113,30 @@ export async function deletePost(id: string) {
   revalidatePath("/admin/posts");
   revalidatePath("/blog");
   redirect("/admin/posts");
+}
+
+// --- Ações em massa (seleção múltipla na listagem) ---
+
+export async function bulkSetStatus(ids: string[], status: PostStatus) {
+  if (!ids.length) return;
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Não autenticado");
+  const patch: Record<string, unknown> = { status };
+  if (status === "published") patch.published_at = new Date().toISOString();
+  const { error } = await supabase.from("posts").update(patch).in("id", ids);
+  if (error) throw new Error(error.message);
+  revalidatePath("/admin/posts");
+  revalidatePath("/blog");
+}
+
+export async function bulkDeletePosts(ids: string[]) {
+  if (!ids.length) return;
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Não autenticado");
+  const { error } = await supabase.from("posts").delete().in("id", ids);
+  if (error) throw new Error(error.message);
+  revalidatePath("/admin/posts");
+  revalidatePath("/blog");
 }

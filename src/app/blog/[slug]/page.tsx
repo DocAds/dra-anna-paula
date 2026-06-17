@@ -8,6 +8,7 @@ import { getPostBySlug, listPublishedSlugs, listPublishedPosts } from "@/lib/pos
 import { format } from "date-fns/format";
 import { ptBR } from "date-fns/locale";
 import { ArrowRight } from "lucide-react";
+import DOMPurify from "isomorphic-dompurify";
 
 type Params = { params: Promise<{ slug: string }> };
 
@@ -95,7 +96,7 @@ export default async function PostPage({ params }: Params) {
         <div className="mx-auto max-w-3xl px-6 mt-16">
           <div
             className="prose prose-cocoa max-w-none prose-headings:font-display prose-headings:text-ink prose-p:text-ink/80 prose-p:leading-relaxed prose-a:text-cocoa prose-img:rounded-2xl"
-            dangerouslySetInnerHTML={{ __html: post.content }}
+            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content) }}
           />
         </div>
       </article>

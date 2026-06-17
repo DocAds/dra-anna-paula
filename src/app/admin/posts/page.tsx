@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { Plus, ArrowRight } from "lucide-react";
-import { format } from "date-fns/format";
-import { ptBR } from "date-fns/locale";
+import { Plus } from "lucide-react";
+import { getAiConfig } from "./ai-actions";
+import { AiConfigButton } from "@/components/admin/AiConfigButton";
+import { BlogTable } from "@/components/admin/BlogTable";
+import { requireSection } from "@/lib/admin-guard";
 
 export const dynamic = "force-dynamic";
 
@@ -11,6 +13,7 @@ export default async function PostsList({
 }: {
   searchParams: Promise<{ status?: string }>;
 }) {
+  await requireSection("posts");
   const { status } = await searchParams;
   const supabase = await createClient();
   let q = supabase
@@ -21,6 +24,7 @@ export default async function PostsList({
     q = q.eq("status", status);
   }
   const { data: posts } = await q;
+  const aiCfg = await getAiConfig();
 
   const tabs = [
     { v: "", l: "Todos" },
@@ -37,6 +41,18 @@ export default async function PostsList({
           <h1 className="font-display text-4xl text-ink leading-tight">Posts</h1>
         </div>
         <div className="flex items-center gap-3">
+          <AiConfigButton
+            initial={
+              aiCfg
+                ? {
+                    provider: aiCfg.provider ?? undefined,
+                    model: aiCfg.model ?? undefined,
+                    instructions: aiCfg.instructions ?? undefined,
+                    hasToken: aiCfg.has_token,
+                  }
+                : null
+            }
+          />
           <Link
             href="/admin/posts/categorias"
             className="inline-flex items-center gap-2 rounded-full border border-cocoa/30 text-cocoa px-5 py-3 text-[12px] uppercase tracking-widest2 hover:bg-cocoa hover:text-bone transition-colors"
@@ -81,33 +97,7 @@ export default async function PostsList({
           </Link>
         </div>
       ) : (
-        <ul className="grid gap-3">
-          {posts.map((p) => (
-            <li key={p.id}>
-              <Link
-                href={`/admin/posts/${p.id}`}
-                className="grid grid-cols-[1fr_auto_auto] items-center gap-4 editorial-card rounded-3xl px-6 py-5 hover:-translate-y-0.5 transition-all duration-500"
-              >
-                <div className="min-w-0">
-                  <div className="font-display text-xl text-ink truncate">{p.title}</div>
-                  <div className="text-[11px] uppercase tracking-widest2 text-ink/45 mt-1 flex flex-wrap gap-3">
-                    <span>/{p.slug}</span>
-                    {p.category && <span>· {p.category}</span>}
-                  </div>
-                </div>
-                <span className={`text-[10px] uppercase tracking-widest2 px-3 py-1 rounded-full ${
-                  p.status === "published" ? "bg-cocoa text-bone" : "bg-cocoa/10 text-cocoa"
-                }`}>
-                  {p.status === "published" ? "publicado" : p.status === "draft" ? "rascunho" : "arquivado"}
-                </span>
-                <div className="hidden sm:flex items-center gap-3 text-[11px] text-ink/55">
-                  <span>{format(new Date(p.updated_at), "dd MMM yy", { locale: ptBR })}</span>
-                  <ArrowRight className="h-4 w-4 text-cocoa" />
-                </div>
-              </Link>
-            </li>
-          ))}
-        </ul>
+        <BlogTable posts={posts} />
       )}
     </main>
   );

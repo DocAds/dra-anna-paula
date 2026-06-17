@@ -3,7 +3,14 @@
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import type { UserRole } from "@/lib/supabase/types";
+import { ADMIN_SECTIONS, type UserRole } from "@/lib/supabase/types";
+
+const ALL_SECTIONS = ADMIN_SECTIONS.map((s) => s.key);
+function sectionsFrom(formData: FormData, role: UserRole): string[] {
+  if (role === "admin") return ALL_SECTIONS;
+  const picked = formData.getAll("sections").map(String);
+  return ALL_SECTIONS.filter((k) => picked.includes(k));
+}
 
 async function assertAdmin() {
   const supabase = await createClient();
@@ -24,6 +31,7 @@ export async function createUser(formData: FormData) {
   const password = String(formData.get("password") || "");
   const name = String(formData.get("name") || "");
   const role = (formData.get("role") as UserRole) || "editor";
+  const sections = sectionsFrom(formData, role);
 
   const { data, error } = await admin.auth.admin.createUser({
     email,
@@ -33,7 +41,7 @@ export async function createUser(formData: FormData) {
   });
   if (error) throw new Error(error.message);
   // garante role correta no profile (trigger pode usar default)
-  await admin.from("profiles").update({ role, name }).eq("id", data.user!.id);
+  await admin.from("profiles").update({ role, name, sections }).eq("id", data.user!.id);
 
   revalidatePath("/admin/users");
   redirect("/admin/users?ok=created");
@@ -45,8 +53,9 @@ export async function updateUser(id: string, formData: FormData) {
   const name = String(formData.get("name") || "");
   const role = (formData.get("role") as UserRole) || "editor";
   const password = String(formData.get("password") || "");
+  const sections = sectionsFrom(formData, role);
 
-  const { error } = await admin.from("profiles").update({ name, role }).eq("id", id);
+  const { error } = await admin.from("profiles").update({ name, role, sections }).eq("id", id);
   if (error) throw new Error(error.message);
 
   if (password) {

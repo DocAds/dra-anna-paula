@@ -79,7 +79,7 @@ export function LeadNotes({
   return (
     <section className="editorial-card rounded-3xl p-7">
       <div className="flex items-center justify-between mb-5">
-        <h2 className="text-[10px] uppercase tracking-widest3 text-toffee">Comentários da equipe</h2>
+        <h2 className="text-[10px] uppercase tracking-widest3 text-cocoa">Comentários da equipe</h2>
         {!adding && (
           <button
             type="button"
@@ -105,7 +105,7 @@ export function LeadNotes({
             <button
               type="button"
               onClick={() => { setAdding(false); setNewContent(""); }}
-              className="text-[11px] uppercase tracking-widest2 text-ink/55 hover:text-cocoa transition-colors px-3 py-1.5"
+              className="text-[11px] uppercase tracking-widest2 text-ink/70 hover:text-cocoa transition-colors px-3 py-1.5"
             >
               Cancelar
             </button>
@@ -122,7 +122,7 @@ export function LeadNotes({
       )}
 
       {notes.length === 0 && !adding ? (
-        <p className="text-sm text-ink/45 italic">Nenhum comentário ainda. Use o botão acima pra registrar contatos e observações.</p>
+        <p className="text-sm text-ink/70 italic">Nenhum comentário ainda. Use o botão acima pra registrar contatos e observações.</p>
       ) : (
         <ul className="space-y-3">
           {notes.map((n) => {
@@ -143,7 +143,7 @@ export function LeadNotes({
                       <button
                         type="button"
                         onClick={() => setEditingId(null)}
-                        className="text-[11px] uppercase tracking-widest2 text-ink/55 hover:text-cocoa px-3 py-1"
+                        className="text-[11px] uppercase tracking-widest2 text-ink/70 hover:text-cocoa px-3 py-1"
                       >
                         Cancelar
                       </button>
@@ -159,7 +159,7 @@ export function LeadNotes({
                   </>
                 ) : (
                   <>
-                    <div className="text-[10px] uppercase tracking-widest2 text-ink/45 flex items-center gap-2 mb-1.5">
+                    <div className="text-[10px] uppercase tracking-widest2 text-ink/70 flex items-center gap-2 mb-1.5">
                       <span>
                         {format(new Date(n.created_at), "dd 'de' MMM 'às' HH:mm", { locale: ptBR })}
                       </span>
@@ -171,7 +171,7 @@ export function LeadNotes({
                         <button
                           type="button"
                           onClick={() => { setEditingId(n.id); setEditingContent(n.content); }}
-                          className="p-1 text-ink/55 hover:text-cocoa"
+                          className="p-1 text-ink/70 hover:text-cocoa"
                           aria-label="Editar"
                         >
                           <Pencil className="h-3.5 w-3.5" />
@@ -179,7 +179,7 @@ export function LeadNotes({
                         <button
                           type="button"
                           onClick={() => remove(n.id)}
-                          className="p-1 text-ink/55 hover:text-red-700"
+                          className="p-1 text-ink/70 hover:text-red-700"
                           aria-label="Excluir"
                         >
                           <Trash2 className="h-3.5 w-3.5" />

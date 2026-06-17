@@ -1,4 +1,13 @@
 export type UserRole = "admin" | "editor";
+export type AdminSection = "painel" | "dashboard" | "leads" | "posts" | "marketing" | "usuarios";
+export const ADMIN_SECTIONS: { key: AdminSection; label: string; href: string }[] = [
+  { key: "painel", label: "Painel", href: "/admin" },
+  { key: "dashboard", label: "Dashboard", href: "/admin/crm" },
+  { key: "leads", label: "Leads", href: "/admin/crm/leads" },
+  { key: "posts", label: "Posts", href: "/admin/posts" },
+  { key: "marketing", label: "Marketing", href: "/admin/marketing" },
+  { key: "usuarios", label: "Usuários", href: "/admin/users" },
+];
 export type PostStatus = "draft" | "published" | "archived";
 export type LeadTemperatura = "frio" | "morno" | "quente";
 export type LeadFase =
@@ -14,6 +23,7 @@ export type Profile = {
   email: string;
   name: string | null;
   role: UserRole;
+  sections: AdminSection[];
   avatar_url: string | null;
   created_at: string;
   updated_at: string;
@@ -32,6 +42,14 @@ export type Post = {
   published_at: string | null;
   created_at: string;
   updated_at: string;
+  // SEO avançado
+  seo_title: string | null;
+  seo_description: string | null;
+  focus_keyword: string | null;
+  seo_keywords: string[] | null;
+  canonical_url: string | null;
+  og_image_url: string | null;
+  no_index: boolean;
 };
 
 export type PostWithAuthor = Post & {

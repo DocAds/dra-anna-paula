@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { PublicChrome } from "@/components/PublicChrome";
-import { Tracker } from "@/components/Tracker";
+import { TrackingScripts } from "@/components/TrackingScripts";
 
 export const metadata: Metadata = {
   title: {
@@ -33,7 +33,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body className="font-sans antialiased">
-        <Tracker />
+        <TrackingScripts />
         <PublicChrome>{children}</PublicChrome>
       </body>
     </html>

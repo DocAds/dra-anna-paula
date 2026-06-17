@@ -308,3 +308,9 @@ export const tratamentos: Tratamento[] = [
 
 export const tratamentoBySlug = (slug: string) =>
   tratamentos.find((t) => t.slug === slug);
+
+// Opções de interesse para os formulários de lead (deriva do catálogo).
+export const interessesLead: string[] = [
+  ...tratamentos.map((t) => t.nome),
+  "Outro / não sei ainda",
+];

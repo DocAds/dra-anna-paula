@@ -7,7 +7,9 @@ import { PhoneInput } from "react-international-phone";
 import "react-international-phone/style.css";
 import { leadModal } from "@/lib/leadModal";
 import { SITE } from "@/lib/site";
+import { interessesLead } from "@/lib/tratamentos";
 import { readClickId } from "@/lib/tracking";
+import { fireAdsConversion } from "@/lib/fire-conversion";
 
 declare global {
   interface Window {
@@ -17,14 +19,7 @@ declare global {
   }
 }
 
-const INTERESSES = [
-  "Avaliação geral",
-  "Rejuvenescimento facial",
-  "Lasers e manchas",
-  "Injetáveis",
-  "Skinbooster e qualidade de pele",
-  "Outro",
-] as const;
+const INTERESSES = interessesLead;
 
 const URGENCIAS = [
   { v: "Hoje", t: "hoje" },
@@ -133,6 +128,7 @@ export function LeadQualifyModal() {
         source: payload.source,
       });
     }
+    fireAdsConversion("lead", { transaction_id: eventId });
 
     start(async () => {
       try {
