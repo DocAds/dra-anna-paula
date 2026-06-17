@@ -97,13 +97,13 @@ export default function ContatoPage() {
         <div className="mx-auto max-w-7xl px-6">
           <Reveal>
             <div className="text-[11px] uppercase tracking-widest3 text-toffee mb-6 flex items-center gap-3">
-              <span className="h-px w-12 bg-toffee/60" /> Unidades
+              <span className="h-px w-12 bg-toffee/60" /> Onde atendo
             </div>
             <h2 className="font-display text-4xl md:text-5xl leading-tight text-ink text-balance max-w-2xl">
-              Dois endereços, mesmo cuidado.
+              Onde eu te recebo.
             </h2>
           </Reveal>
-          <div className="mt-12 grid gap-6 md:grid-cols-2">
+          <div className="mt-12 grid gap-6 max-w-xl">
             {SITE.enderecos.map((e, i) => (
               <Reveal key={e.label} delay={i * 0.15}>
                 <a

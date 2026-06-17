@@ -661,11 +661,11 @@ function Localizacao() {
         <Reveal>
           <SectionHeading
             eyebrow="Onde encontrar"
-            title="Dois endereços em São Paulo."
-            description="Atendimento pelos bairros mais elegantes da cidade, com estrutura premium e equipe dedicada."
+            title="Onde eu te recebo, em São Paulo."
+            description="Na Vila Olímpia, com estrutura premium e equipe dedicada."
           />
         </Reveal>
-        <div className="mt-14 grid gap-6 md:grid-cols-2">
+        <div className="mt-14 grid gap-6 max-w-xl">
           {SITE.enderecos.map((e, i) => (
             <Reveal key={e.label} delay={i * 0.15}>
               <a

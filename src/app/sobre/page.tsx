@@ -143,7 +143,7 @@ export default function SobrePage() {
               {
                 ano: "Atual",
                 titulo: "Consultório próprio em São Paulo",
-                desc: "Atendimento em duas unidades, Vila Olímpia e Jardim Paulista, com foco em dermatologia clínica e rejuvenescimento facial.",
+                desc: "Atendimento na Vila Olímpia, com foco em dermatologia clínica e rejuvenescimento facial.",
               },
               {
                 ano: "Especialização",

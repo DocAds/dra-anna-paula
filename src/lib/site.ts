@@ -14,21 +14,12 @@ export const SITE = {
   enderecos: [
     {
       label: "Vila Olímpia",
-      rua: "R. Fidêncio Ramos, 160",
-      complemento: "8º andar",
+      rua: "R. Helena, 218",
+      complemento: "Conj. 203",
       bairro: "Vila Olímpia",
       cidade: "São Paulo — SP",
-      cep: "04551-010",
-      mapsQuery: "R. Fidêncio Ramos, 160, Vila Olímpia, São Paulo",
-    },
-    {
-      label: "Jardim Paulista",
-      rua: "Av. Brasil, 126",
-      complemento: "",
-      bairro: "Jardim Paulista",
-      cidade: "São Paulo — SP",
-      cep: "01430-000",
-      mapsQuery: "Av. Brasil, 126, Jardim Paulista, São Paulo",
+      cep: "04552-050",
+      mapsQuery: "R. Helena, 218, Vila Olímpia, São Paulo",
     },
   ],
 } as const;

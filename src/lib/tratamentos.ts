@@ -53,7 +53,7 @@ export const tecnologiasParceiras = [
 export const stats = [
   { v: "+8", l: "Anos de prática clínica" },
   { v: "+5.000", l: "Procedimentos realizados" },
-  { v: "2", l: "Unidades em São Paulo" },
+  { v: "1", l: "Unidade na Vila Olímpia" },
   { v: "1", l: "Médica responsável por cada caso" },
 ];
 
