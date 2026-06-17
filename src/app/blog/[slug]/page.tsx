@@ -44,7 +44,7 @@ export default async function PostPage({ params }: Params) {
   return (
     <>
       <article className="relative pt-32 pb-16 bg-porcelain">
-        <div className="mx-auto max-w-3xl px-6">
+        <div className="mx-auto max-w-[1400px] px-6">
           <Reveal>
             <Link href="/blog" className="text-[11px] uppercase tracking-widest3 text-toffee underline-editorial">
               ← Diário
@@ -79,7 +79,7 @@ export default async function PostPage({ params }: Params) {
         </div>
 
         {post.cover_image && (
-          <Reveal delay={0.3} className="mx-auto max-w-5xl px-6 mt-14">
+          <Reveal delay={0.3} className="mx-auto max-w-[1400px] px-6 mt-14">
             <div className="relative aspect-[16/9] overflow-hidden rounded-3xl bg-cream">
               <Image
                 src={post.cover_image}
@@ -93,7 +93,7 @@ export default async function PostPage({ params }: Params) {
           </Reveal>
         )}
 
-        <div className="mx-auto max-w-3xl px-6 mt-16">
+        <div className="mx-auto max-w-[1400px] px-6 mt-16">
           <div
             className="prose prose-cocoa max-w-none prose-headings:font-display prose-headings:text-ink prose-p:text-ink/80 prose-p:leading-relaxed prose-a:text-cocoa prose-img:rounded-2xl"
             dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content) }}
@@ -103,7 +103,7 @@ export default async function PostPage({ params }: Params) {
 
       {otherPosts.length > 0 && (
         <section className="relative py-24 bg-bone">
-          <div className="mx-auto max-w-5xl px-6">
+          <div className="mx-auto max-w-[1400px] px-6">
             <div className="flex items-end justify-between gap-6 mb-10">
               <h2 className="font-display text-3xl md:text-4xl text-ink">Outros estudos</h2>
               <Link href="/blog" className="text-[11px] uppercase tracking-widest2 text-cocoa underline-editorial inline-flex items-center gap-2">

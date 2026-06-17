@@ -1,6 +1,7 @@
 "use client";
 
 import { motion, useReducedMotion } from "framer-motion";
+import { Fragment } from "react";
 import type { ReactNode } from "react";
 
 type Props = {
@@ -45,22 +46,23 @@ export function RevealText({
   return (
     <span className={className} aria-label={text}>
       {words.map((w, i) => (
-        <motion.span
-          key={i}
-          aria-hidden
-          initial={reduce ? { opacity: 0 } : { opacity: 0, y: 18, filter: "blur(8px)" }}
-          whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-          viewport={{ once: true }}
-          transition={{
-            duration: 0.9,
-            delay: delay + i * 0.04,
-            ease: [0.22, 1, 0.36, 1],
-          }}
-          className="inline-block"
-          style={{ marginRight: "0.28em" }}
-        >
-          {w}
-        </motion.span>
+        <Fragment key={i}>
+          <motion.span
+            aria-hidden
+            initial={reduce ? { opacity: 0 } : { opacity: 0, y: 18, filter: "blur(8px)" }}
+            whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            viewport={{ once: true }}
+            transition={{
+              duration: 0.9,
+              delay: delay + i * 0.04,
+              ease: [0.22, 1, 0.36, 1],
+            }}
+            className="inline-block"
+          >
+            {w}
+          </motion.span>
+          {i < words.length - 1 ? " " : ""}
+        </Fragment>
       ))}
     </span>
   );
