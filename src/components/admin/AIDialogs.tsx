@@ -6,7 +6,7 @@ import { X, Sparkles, Settings2 } from "lucide-react";
 type Provider = "gemini" | "openai" | "anthropic";
 
 const PROVIDERS: { v: Provider; l: string; defaultModel: string; models: string[] }[] = [
-  { v: "gemini", l: "Google Gemini", defaultModel: "gemini-2.5-flash", models: ["gemini-2.5-flash", "gemini-2.5-pro", "gemini-3-pro-preview"] },
+  { v: "gemini", l: "Google Gemini", defaultModel: "gemini-2.5-flash", models: ["gemini-2.5-flash", "gemini-2.5-pro", "gemini-2.5-flash-lite"] },
   { v: "openai", l: "OpenAI ChatGPT", defaultModel: "gpt-4o-mini", models: ["gpt-4o-mini", "gpt-4o", "gpt-4.1"] },
   { v: "anthropic", l: "Anthropic Claude", defaultModel: "claude-sonnet-4-6", models: ["claude-sonnet-4-6", "claude-haiku-4-5", "claude-opus-4-8"] },
 ];
@@ -36,7 +36,7 @@ const IMAGEM_USD = 0.04; // 1 imagem de capa, gerada à parte
 const PRICING: Record<string, { in: number; out: number }> = {
   "gemini-2.5-flash": { in: 0.3, out: 2.5 },
   "gemini-2.5-pro": { in: 1.25, out: 10 },
-  "gemini-3-pro-preview": { in: 2, out: 12 },
+  "gemini-2.5-flash-lite": { in: 0.1, out: 0.4 },
   "gpt-4o-mini": { in: 0.15, out: 0.6 },
   "gpt-4o": { in: 2.5, out: 10 },
   "gpt-4.1": { in: 2, out: 8 },
@@ -249,7 +249,7 @@ export function AIGenerateDialog({
 }: {
   open: boolean;
   onClose: () => void;
-  onGenerate: (input: { topic: string; description: string }) => Promise<GeneratedArticle>;
+  onGenerate: (input: { topic: string; description: string }) => Promise<{ ok: true; article: GeneratedArticle } | { ok: false; error: string }>;
   onResult: (article: GeneratedArticle, topic: string) => void;
 }) {
   const [topic, setTopic] = useState("");
@@ -264,8 +264,9 @@ export function AIGenerateDialog({
     setError(null);
     start(async () => {
       try {
-        const article = await onGenerate({ topic, description });
-        onResult(article, topic);
+        const r = await onGenerate({ topic, description });
+        if (!r.ok) { setError(r.error); return; }
+        onResult(r.article, topic);
         onClose();
       } catch (e) {
         setError(e instanceof Error ? e.message : String(e));

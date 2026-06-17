@@ -164,90 +164,118 @@ function parseArticle(raw: string): GeneratedArticle {
   }
 }
 
-export async function generateArticle(input: { topic: string; description: string }): Promise<GeneratedArticle> {
-  const sb = await createClient();
-  const { data: cfg } = await sb.from("ai_settings").select("*").eq("id", 1).maybeSingle();
-  if (!cfg?.api_token) throw new Error("Configure o token da IA primeiro.");
+export type GenerateResult = { ok: true; article: GeneratedArticle } | { ok: false; error: string };
 
-  const baseInstructions =
-    cfg.instructions ||
-    "Você escreve em português do Brasil, tom editorial e elegante, sem promessas terapêuticas, sem antes-e-depois, em conformidade com o Código de Ética Médica e CFM 1.974/2011.";
-
-  const userPrompt =
-    `Você vai escrever um artigo para o blog da Dra. Anna Bomtempo (dermatologista premium em São Paulo).\n\n` +
-    `Tema sugerido pelo editor: "${input.topic}"\n` +
-    (input.description ? `Direcionamento: ${input.description}\n` : "") +
-    `\nResponda APENAS com um JSON válido (sem texto fora do JSON e sem cercas de código), neste formato:\n` +
-    `{\n` +
-    `  "title": "título jornalístico melhorado e atraente, REESCRITO a partir do tema (NÃO copie o tema literalmente)",\n` +
-    `  "excerpt": "resumo de 1 a 2 frases para a lista do blog",\n` +
-    `  "seo_title": "título otimizado para SEO, até 60 caracteres",\n` +
-    `  "seo_description": "meta descrição persuasiva, até 155 caracteres",\n` +
-    `  "focus_keyword": "a palavra-chave principal do artigo",\n` +
-    `  "keywords": ["3 a 6 palavras-chave relevantes"],\n` +
-    `  "body_html": "o artigo em HTML (h2, h3, p, ul, li, strong, em), entre 1200 e 2000 palavras, sem <html>/<head>/<body>, sem imagens, sem estilos inline e sem blocos de código"\n` +
-    `}`;
-
-  if (cfg.provider === "gemini") {
-    const model = cfg.model || "gemini-2.5-flash";
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
-    const res = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "x-goog-api-key": cfg.api_token },
-      body: JSON.stringify({
-        systemInstruction: { parts: [{ text: baseInstructions }] },
-        contents: [{ role: "user", parts: [{ text: userPrompt }] }],
-        generationConfig: { responseMimeType: "application/json" },
-      }),
-    });
-    const j = await res.json();
-    if (!res.ok) throw new Error(`Falha ao gerar: ${j?.error?.message || "Erro Gemini"}`);
-    return parseArticle(j.candidates?.[0]?.content?.parts?.[0]?.text || "");
+// Lê o corpo da resposta com segurança (evita SyntaxError quando o corpo vem vazio).
+async function readJson(res: Response): Promise<Record<string, unknown>> {
+  const text = await res.text().catch(() => "");
+  if (!text) return {};
+  try {
+    return JSON.parse(text);
+  } catch {
+    return { _raw: text };
   }
+}
 
-  if (cfg.provider === "openai") {
-    const model = cfg.model || "gpt-4o-mini";
-    const res = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${cfg.api_token}` },
-      body: JSON.stringify({
-        model,
-        messages: [
-          { role: "system", content: baseInstructions },
-          { role: "user", content: userPrompt },
-        ],
-        temperature: 0.7,
-        response_format: { type: "json_object" },
-      }),
-    });
-    const j = await res.json();
-    if (!res.ok) throw new Error(`Falha ao gerar: ${j?.error?.message || "Erro OpenAI"}`);
-    return parseArticle(j.choices?.[0]?.message?.content || "");
+// Retorna sempre um resultado estruturado. NÃO lança: em produção o Next oculta
+// a mensagem de erros lançados em server actions, então devolvemos o motivo real
+// para o editor exibir.
+export async function generateArticle(input: { topic: string; description: string }): Promise<GenerateResult> {
+  try {
+    const sb = await createClient();
+    const { data: cfg } = await sb.from("ai_settings").select("*").eq("id", 1).maybeSingle();
+    if (!cfg?.api_token) {
+      return { ok: false, error: "Configure o token da IA primeiro (botão 'Configurar IA' na lista de posts)." };
+    }
+
+    const baseInstructions =
+      cfg.instructions ||
+      "Você escreve em português do Brasil, tom editorial e elegante, sem promessas terapêuticas, sem antes-e-depois, em conformidade com o Código de Ética Médica e CFM 1.974/2011.";
+
+    const userPrompt =
+      `Você vai escrever um artigo para o blog da Dra. Anna Bomtempo (dermatologista premium em São Paulo).\n\n` +
+      `Tema sugerido pelo editor: "${input.topic}"\n` +
+      (input.description ? `Direcionamento: ${input.description}\n` : "") +
+      `\nResponda APENAS com um JSON válido (sem texto fora do JSON e sem cercas de código), neste formato:\n` +
+      `{\n` +
+      `  "title": "título jornalístico melhorado e atraente, REESCRITO a partir do tema (NÃO copie o tema literalmente)",\n` +
+      `  "excerpt": "resumo de 1 a 2 frases para a lista do blog",\n` +
+      `  "seo_title": "título otimizado para SEO, até 60 caracteres",\n` +
+      `  "seo_description": "meta descrição persuasiva, até 155 caracteres",\n` +
+      `  "focus_keyword": "a palavra-chave principal do artigo",\n` +
+      `  "keywords": ["3 a 6 palavras-chave relevantes"],\n` +
+      `  "body_html": "o artigo em HTML (h2, h3, p, ul, li, strong, em), entre 1200 e 2000 palavras, sem <html>/<head>/<body>, sem imagens, sem estilos inline e sem blocos de código"\n` +
+      `}`;
+
+    let raw = "";
+
+    if (cfg.provider === "gemini") {
+      const model = cfg.model || "gemini-2.5-flash";
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-goog-api-key": cfg.api_token },
+        body: JSON.stringify({
+          systemInstruction: { parts: [{ text: baseInstructions }] },
+          contents: [{ role: "user", parts: [{ text: userPrompt }] }],
+          generationConfig: { responseMimeType: "application/json" },
+        }),
+      });
+      const j = await readJson(res);
+      if (!res.ok) {
+        const msg = (j.error as { message?: string })?.message || `o modelo "${model}" pode não estar disponível para esta chave`;
+        return { ok: false, error: `Gemini ${res.status}: ${msg}` };
+      }
+      raw = (j as { candidates?: { content?: { parts?: { text?: string }[] } }[] }).candidates?.[0]?.content?.parts?.[0]?.text || "";
+    } else if (cfg.provider === "openai") {
+      const model = cfg.model || "gpt-4o-mini";
+      const res = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${cfg.api_token}` },
+        body: JSON.stringify({
+          model,
+          messages: [
+            { role: "system", content: baseInstructions },
+            { role: "user", content: userPrompt },
+          ],
+          temperature: 0.7,
+          response_format: { type: "json_object" },
+        }),
+      });
+      const j = await readJson(res);
+      if (!res.ok) return { ok: false, error: `OpenAI ${res.status}: ${(j.error as { message?: string })?.message || "falha ao gerar"}` };
+      raw = (j as { choices?: { message?: { content?: string } }[] }).choices?.[0]?.message?.content || "";
+    } else if (cfg.provider === "anthropic") {
+      const model = cfg.model || "claude-sonnet-4-6";
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": cfg.api_token,
+          "anthropic-version": "2023-06-01",
+        },
+        body: JSON.stringify({
+          model,
+          max_tokens: 8192,
+          system: baseInstructions + " Responda apenas com JSON válido, sem texto fora do JSON.",
+          messages: [
+            { role: "user", content: userPrompt },
+            { role: "assistant", content: "{" },
+          ],
+        }),
+      });
+      const j = await readJson(res);
+      if (!res.ok) return { ok: false, error: `Anthropic ${res.status}: ${(j.error as { message?: string })?.message || "falha ao gerar"}` };
+      raw = "{" + ((j as { content?: { text?: string }[] }).content?.[0]?.text || "");
+    } else {
+      return { ok: false, error: "Provider de IA desconhecido. Reconfigure em 'Configurar IA'." };
+    }
+
+    const article = parseArticle(raw);
+    if (!article.body_html.trim()) {
+      return { ok: false, error: "A IA respondeu, mas sem conteúdo utilizável. Tente novamente ou troque o modelo." };
+    }
+    return { ok: true, article };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : String(e) };
   }
-
-  if (cfg.provider === "anthropic") {
-    const model = cfg.model || "claude-sonnet-4-6";
-    const res = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": cfg.api_token,
-        "anthropic-version": "2023-06-01",
-      },
-      body: JSON.stringify({
-        model,
-        max_tokens: 8192,
-        system: baseInstructions + " Responda apenas com JSON válido, sem texto fora do JSON.",
-        messages: [
-          { role: "user", content: userPrompt },
-          { role: "assistant", content: "{" },
-        ],
-      }),
-    });
-    const j = await res.json();
-    if (!res.ok) throw new Error(`Falha ao gerar: ${j?.error?.message || "Erro Anthropic"}`);
-    return parseArticle("{" + (j.content?.[0]?.text || ""));
-  }
-
-  throw new Error("Provider desconhecido");
 }
