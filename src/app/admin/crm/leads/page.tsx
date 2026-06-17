@@ -20,7 +20,7 @@ export default async function LeadsPage({
 }) {
   await requireSection("leads");
   const sp = await searchParams;
-  const view = sp.view === "kanban" ? "kanban" : "lista";
+  const view = sp.view === "lista" ? "lista" : "kanban";
   const sb = await createClient();
 
   let q = sb.from("leads").select("*").order("created_at", { ascending: false });
@@ -44,7 +44,7 @@ export default async function LeadsPage({
         </div>
         <div className="inline-flex rounded-full border border-cocoa/15 p-1 bg-porcelain/60">
           <Link
-            href={{ pathname: "/admin/crm/leads", query: { ...(sp.q ? { q: sp.q } : {}) } }}
+            href={{ pathname: "/admin/crm/leads", query: { view: "lista", ...(sp.q ? { q: sp.q } : {}) } }}
             className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-[11px] uppercase tracking-widest2 transition-colors ${
               view === "lista" ? "bg-cocoa text-bone" : "text-ink/65 hover:text-cocoa"
             }`}
