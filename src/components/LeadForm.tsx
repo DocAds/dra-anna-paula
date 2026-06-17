@@ -22,6 +22,7 @@ export function LeadForm({ source = "contato" }: { source?: string }) {
   const [country, setCountry] = useState("br");
   const [phone, setPhone] = useState("");
   const [interesse, setInteresse] = useState(interessesLead[0]);
+  const [consent, setConsent] = useState(false);
   const [pending, start] = useTransition();
 
   useEffect(() => {
@@ -46,6 +47,10 @@ export function LeadForm({ source = "contato" }: { source?: string }) {
     }
     if (!phone || phone.replace(/\D/g, "").length < 10) {
       alert("Por favor preencha um WhatsApp válido.");
+      return;
+    }
+    if (!consent) {
+      alert("Para enviar, confirme que você leu e concorda com a Política de Privacidade.");
       return;
     }
 
@@ -73,6 +78,8 @@ export function LeadForm({ source = "contato" }: { source?: string }) {
       gclid: params.get("gclid") || readClickId("gclid") || undefined,
       fbclid: params.get("fbclid") || readClickId("fbclid") || undefined,
       event_id: eventId,
+      consent: true,
+      consent_ts: new Date().toISOString(),
       ts: Date.now(),
     };
 
@@ -158,10 +165,27 @@ export function LeadForm({ source = "contato" }: { source?: string }) {
 
       <Field label="Mensagem (opcional)" name="mensagem" multiline />
 
+      <label className="flex items-start gap-3 cursor-pointer">
+        <input
+          type="checkbox"
+          checked={consent}
+          onChange={(e) => setConsent(e.target.checked)}
+          className="mt-1 h-4 w-4 shrink-0 accent-cocoa"
+          required
+        />
+        <span className="text-[12px] leading-relaxed text-ink/60">
+          Li e concordo com a{" "}
+          <a href="/privacidade" target="_blank" rel="noopener" className="underline text-cocoa">
+            Política de Privacidade
+          </a>{" "}
+          e autorizo o contato pela equipe.
+        </span>
+      </label>
+
       <motion.button
         whileTap={{ scale: 0.985 }}
         type="submit"
-        disabled={status === "sending" || pending}
+        disabled={status === "sending" || pending || !consent}
         className="mt-2 rounded-full bg-cocoa text-bone py-4 text-[12px] uppercase tracking-widest2 hover:bg-ink transition-colors disabled:opacity-50"
       >
         {status === "sending" || pending
@@ -182,7 +206,11 @@ export function LeadForm({ source = "contato" }: { source?: string }) {
       )}
 
       <p className="text-[11px] text-ink/45 mt-1">
-        Seus dados são tratados com sigilo médico. Não compartilhamos com terceiros.
+        Seus dados são usados para entrar em contato e podem ser processados por nossos
+        parceiros de tecnologia e marketing, conforme a{" "}
+        <a href="/privacidade" target="_blank" rel="noopener" className="underline">
+          Política de Privacidade
+        </a>.
       </p>
     </form>
   );

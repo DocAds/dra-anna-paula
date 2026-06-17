@@ -56,6 +56,9 @@ export function Footer() {
         <div className="mx-auto max-w-6xl px-6 py-6 flex flex-col md:flex-row items-center justify-between gap-3 text-[11px] uppercase tracking-widest2 text-cream/55">
           <span>© {new Date().getFullYear()} Anna Bomtempo Dermatologia</span>
           <span className="flex items-center gap-5">
+            <Link href="/privacidade" className="underline-editorial">
+              Política de privacidade
+            </Link>
             <Link
               href="/admin"
               aria-label="Área restrita"
