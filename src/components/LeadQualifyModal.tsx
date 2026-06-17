@@ -7,7 +7,9 @@ import { PhoneInput } from "react-international-phone";
 import "react-international-phone/style.css";
 import { leadModal } from "@/lib/leadModal";
 import { SITE } from "@/lib/site";
+import { interessesLead } from "@/lib/tratamentos";
 import { readClickId } from "@/lib/tracking";
+import { fireAdsConversion } from "@/lib/fire-conversion";
 
 declare global {
   interface Window {
@@ -17,14 +19,7 @@ declare global {
   }
 }
 
-const INTERESSES = [
-  "Avaliação geral",
-  "Rejuvenescimento facial",
-  "Lasers e manchas",
-  "Injetáveis",
-  "Skinbooster e qualidade de pele",
-  "Outro",
-] as const;
+const INTERESSES = interessesLead;
 
 const URGENCIAS = [
   { v: "Hoje", t: "hoje" },
@@ -41,6 +36,7 @@ export function LeadQualifyModal() {
   const [urgencia, setUrgencia] = useState<string>(URGENCIAS[1].t);
   const [pending, start] = useTransition();
   const [sent, setSent] = useState(false);
+  const [consent, setConsent] = useState(false);
   const [step, setStep] = useState<1 | 2>(1);
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -60,6 +56,7 @@ export function LeadQualifyModal() {
       setSent(false);
       setPhone("");
       setStep(1);
+      setConsent(false);
     }
   }, [vis.open]);
 
@@ -84,6 +81,10 @@ export function LeadQualifyModal() {
     }
     if (!phone || phone.length < 6) {
       alert("Por favor preencha o WhatsApp.");
+      return;
+    }
+    if (!consent) {
+      alert("Para enviar, confirme que você leu e concorda com a Política de Privacidade.");
       return;
     }
     const fd = new FormData(e.currentTarget);
@@ -113,6 +114,8 @@ export function LeadQualifyModal() {
       gclid: params.get("gclid") || readClickId("gclid") || undefined,
       fbclid: params.get("fbclid") || readClickId("fbclid") || undefined,
       event_id: eventId,
+      consent: true,
+      consent_ts: new Date().toISOString(),
       ts: Date.now(),
     };
 
@@ -133,6 +136,7 @@ export function LeadQualifyModal() {
         source: payload.source,
       });
     }
+    fireAdsConversion("lead", { transaction_id: eventId });
 
     start(async () => {
       try {
@@ -278,6 +282,23 @@ export function LeadQualifyModal() {
 
                 <Field label="Mensagem (opcional)" name="mensagem" multiline />
 
+                <label className="flex items-start gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={consent}
+                    onChange={(e) => setConsent(e.target.checked)}
+                    className="mt-1 h-4 w-4 shrink-0 accent-cocoa"
+                    required
+                  />
+                  <span className="text-[12px] leading-relaxed text-ink/60">
+                    Li e concordo com a{" "}
+                    <a href="/privacidade" target="_blank" rel="noopener" className="underline text-cocoa">
+                      Política de Privacidade
+                    </a>{" "}
+                    e autorizo o contato pela equipe.
+                  </span>
+                </label>
+
                 <div className="mt-2 flex items-center gap-3">
                   <button
                     type="button"
@@ -288,7 +309,7 @@ export function LeadQualifyModal() {
                   </button>
                   <button
                     type="submit"
-                    disabled={pending}
+                    disabled={pending || !consent}
                     className="flex-1 rounded-full bg-cocoa text-bone py-4 text-[12px] uppercase tracking-widest2 hover:bg-ink transition-colors disabled:opacity-50"
                   >
                     {pending
@@ -301,7 +322,11 @@ export function LeadQualifyModal() {
               </div>
 
               <p className="text-[11px] text-ink/45">
-                Seus dados são tratados com sigilo médico.
+                Seus dados são usados para entrar em contato e podem ser processados por
+                nossos parceiros de tecnologia e marketing, conforme a{" "}
+                <a href="/privacidade" target="_blank" rel="noopener" className="underline">
+                  Política de Privacidade
+                </a>.
               </p>
             </form>
           </motion.div>

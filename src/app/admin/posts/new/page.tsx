@@ -7,10 +7,7 @@ export const dynamic = "force-dynamic";
 
 export default async function NewPostPage() {
   const sb = await createClient();
-  const [{ data: categories }, { data: aiConfig }] = await Promise.all([
-    sb.from("post_categories").select("name").order("name"),
-    sb.from("ai_settings").select("provider, api_token, instructions, model").eq("id", 1).maybeSingle(),
-  ]);
+  const { data: categories } = await sb.from("post_categories").select("name").order("name");
   return (
     <main className="p-8 md:p-12">
       <div className="mb-8">
@@ -19,7 +16,7 @@ export default async function NewPostPage() {
         </Link>
         <h1 className="font-display text-4xl text-ink mt-3">Novo post</h1>
       </div>
-      <PostEditor onSubmit={createPost} categories={categories || []} aiConfig={aiConfig} />
+      <PostEditor onSubmit={createPost} categories={categories || []} />
     </main>
   );
 }

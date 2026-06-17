@@ -25,11 +25,12 @@ import {
   Trash2,
   Save,
   Eye,
-  Settings2,
   Sparkles,
+  Search,
 } from "lucide-react";
-import { AIConfigDialog, AIGenerateDialog } from "./AIDialogs";
-import { saveAiConfig, generateArticle } from "@/app/admin/posts/ai-actions";
+import { AIGenerateDialog } from "./AIDialogs";
+import { CoverImageField } from "./CoverImageField";
+import { generateArticle } from "@/app/admin/posts/ai-actions";
 import type { Post, PostStatus } from "@/lib/supabase/types";
 
 type Props = {
@@ -38,7 +39,6 @@ type Props = {
   onDelete?: () => Promise<void> | void;
   postId?: string;
   categories?: { name: string }[];
-  aiConfig?: { provider?: string; api_token?: string; instructions?: string; model?: string } | null;
 };
 
 const _LEGACY = [
@@ -50,11 +50,10 @@ const _LEGACY = [
   "Nutrição",
 ] as const;
 
-export function PostEditor({ initial, onSubmit, onDelete, postId, categories, aiConfig }: Props) {
+export function PostEditor({ initial, onSubmit, onDelete, postId, categories }: Props) {
   const router = useRouter();
   const CATEGORIAS = categories?.map((c) => c.name) ?? _LEGACY;
   const [pending, startTransition] = useTransition();
-  const [aiConfigOpen, setAiConfigOpen] = useState(false);
   const [aiGenOpen, setAiGenOpen] = useState(false);
   const [title, setTitle] = useState(initial?.title ?? "");
   const [slug, setSlug] = useState(initial?.slug ?? "");
@@ -65,6 +64,13 @@ export function PostEditor({ initial, onSubmit, onDelete, postId, categories, ai
   const [uploading, setUploading] = useState(false);
   const [slugTouched, setSlugTouched] = useState(!!initial?.slug);
   const [mounted, setMounted] = useState(false);
+  // SEO avançado
+  const [seoTitle, setSeoTitle] = useState(initial?.seo_title ?? "");
+  const [seoDescription, setSeoDescription] = useState(initial?.seo_description ?? "");
+  const [focusKeyword, setFocusKeyword] = useState(initial?.focus_keyword ?? "");
+  const [seoKeywords, setSeoKeywords] = useState((initial?.seo_keywords ?? []).join(", "));
+  const [canonicalUrl, setCanonicalUrl] = useState(initial?.canonical_url ?? "");
+  const [noIndex, setNoIndex] = useState(Boolean(initial?.no_index));
 
   useEffect(() => setMounted(true), []);
 
@@ -171,13 +177,6 @@ export function PostEditor({ initial, onSubmit, onDelete, postId, categories, ai
     }
   }
 
-  async function onCoverUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const url = await uploadFile(file);
-    if (url) setCoverImage(url);
-  }
-
   async function onInsertImage() {
     const input = document.createElement("input");
     input.type = "file";
@@ -211,6 +210,13 @@ export function PostEditor({ initial, onSubmit, onDelete, postId, categories, ai
     fd.set("cover_image", coverImage || "");
     fd.set("content", editor?.getHTML() ?? "");
     fd.set("status", targetStatus ?? status);
+    fd.set("seo_title", seoTitle);
+    fd.set("seo_description", seoDescription);
+    fd.set("focus_keyword", focusKeyword);
+    fd.set("seo_keywords", seoKeywords);
+    fd.set("canonical_url", canonicalUrl);
+    fd.set("og_image_url", coverImage || "");
+    fd.set("no_index", noIndex ? "true" : "");
     startTransition(async () => {
       await onSubmit(fd);
       if (postId) router.refresh();
@@ -245,13 +251,6 @@ export function PostEditor({ initial, onSubmit, onDelete, postId, categories, ai
           >
             <Sparkles className="h-3.5 w-3.5" /> Criar artigo com IA
           </button>
-          <button
-            type="button"
-            onClick={() => setAiConfigOpen(true)}
-            className="inline-flex items-center gap-2 rounded-full border border-cocoa/30 text-cocoa px-4 py-2 text-[11px] uppercase tracking-widest2 hover:bg-cocoa hover:text-bone transition-colors"
-          >
-            <Settings2 className="h-3.5 w-3.5" /> Configurar IA
-          </button>
         </div>
 
         <Toolbar
@@ -263,24 +262,20 @@ export function PostEditor({ initial, onSubmit, onDelete, postId, categories, ai
           uploading={uploading}
         />
 
-        <AIConfigDialog
-          open={aiConfigOpen}
-          onClose={() => setAiConfigOpen(false)}
-          initial={aiConfig ? {
-            provider: (aiConfig.provider as "gemini" | "openai" | "anthropic") || "gemini",
-            api_token: aiConfig.api_token || "",
-            instructions: aiConfig.instructions || "",
-            model: aiConfig.model || "",
-          } : null}
-          onSave={saveAiConfig}
-        />
         <AIGenerateDialog
           open={aiGenOpen}
           onClose={() => setAiGenOpen(false)}
           onGenerate={generateArticle}
-          onResult={(html, t) => {
-            if (!title) setTitle(t);
-            editor?.commands.setContent(html);
+          onResult={(article, t) => {
+            const newTitle = article.title || t;
+            setTitle(newTitle);
+            if (!slugTouched && newTitle) setSlug(slugify(newTitle, { lower: true, strict: true }));
+            if (article.excerpt) setExcerpt(article.excerpt);
+            editor?.commands.setContent(article.body_html || "");
+            if (article.seo_title) setSeoTitle(article.seo_title);
+            if (article.seo_description) setSeoDescription(article.seo_description);
+            if (article.focus_keyword) setFocusKeyword(article.focus_keyword);
+            if (article.keywords?.length) setSeoKeywords(article.keywords.join(", "));
           }}
         />
 
@@ -305,6 +300,70 @@ export function PostEditor({ initial, onSubmit, onDelete, postId, categories, ai
             className="w-full bg-transparent border-b border-cocoa/15 focus:border-cocoa outline-none py-3 text-ink/75 resize-none"
           />
         </label>
+
+        <div className="editorial-card rounded-3xl p-6 space-y-4">
+          <div className="flex items-center gap-2 text-[10px] uppercase tracking-widest3 text-toffee">
+            <Search className="h-3.5 w-3.5" /> SEO
+          </div>
+          <label className="block">
+            <span className="text-[10px] uppercase tracking-widest3 text-ink/55">Título SEO</span>
+            <input
+              value={seoTitle}
+              onChange={(e) => setSeoTitle(e.target.value)}
+              placeholder="Vazio usa o título do post"
+              className="w-full bg-transparent border-b border-cocoa/15 focus:border-cocoa outline-none py-2 text-ink mt-1"
+            />
+          </label>
+          <label className="block">
+            <span className="text-[10px] uppercase tracking-widest3 text-ink/55">Meta descrição</span>
+            <textarea
+              value={seoDescription}
+              onChange={(e) => setSeoDescription(e.target.value)}
+              rows={2}
+              placeholder="Resumo que aparece no Google (até ~155 caracteres)."
+              className="w-full bg-transparent border-b border-cocoa/15 focus:border-cocoa outline-none py-2 text-ink/75 mt-1 resize-none"
+            />
+          </label>
+          <div className="grid sm:grid-cols-2 gap-4">
+            <label className="block">
+              <span className="text-[10px] uppercase tracking-widest3 text-ink/55">Palavra-chave foco</span>
+              <input
+                value={focusKeyword}
+                onChange={(e) => setFocusKeyword(e.target.value)}
+                placeholder="ex: laser fotona"
+                className="w-full bg-transparent border-b border-cocoa/15 focus:border-cocoa outline-none py-2 text-ink mt-1"
+              />
+            </label>
+            <label className="block">
+              <span className="text-[10px] uppercase tracking-widest3 text-ink/55">Palavras-chave (vírgula)</span>
+              <input
+                value={seoKeywords}
+                onChange={(e) => setSeoKeywords(e.target.value)}
+                placeholder="laser, rejuvenescimento, pele"
+                className="w-full bg-transparent border-b border-cocoa/15 focus:border-cocoa outline-none py-2 text-ink mt-1"
+              />
+            </label>
+          </div>
+          <label className="block">
+            <span className="text-[10px] uppercase tracking-widest3 text-ink/55">URL canônica (opcional)</span>
+            <input
+              value={canonicalUrl}
+              onChange={(e) => setCanonicalUrl(e.target.value)}
+              placeholder="https://draannabomtempo.com.br/blog/..."
+              className="w-full bg-transparent border-b border-cocoa/15 focus:border-cocoa outline-none py-2 text-ink mt-1"
+            />
+          </label>
+          <label className="flex items-center justify-between gap-3 pt-1 cursor-pointer">
+            <span className="text-[11px] text-ink/65">Não indexar no Google (noindex)</span>
+            <input
+              type="checkbox"
+              checked={noIndex}
+              onChange={(e) => setNoIndex(e.target.checked)}
+              className="peer sr-only"
+            />
+            <span className="relative h-6 w-11 shrink-0 rounded-full bg-ink/15 transition-colors duration-200 peer-checked:bg-cocoa after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:h-5 after:w-5 after:rounded-full after:bg-white after:shadow after:transition-transform peer-checked:after:translate-x-5" />
+          </label>
+        </div>
       </div>
 
       <aside className="space-y-4">
@@ -338,23 +397,11 @@ export function PostEditor({ initial, onSubmit, onDelete, postId, categories, ai
 
           <div>
             <div className="text-[10px] uppercase tracking-widest3 text-toffee mb-3">Capa</div>
-            {coverImage ? (
-              <div className="space-y-3">
-                <img src={coverImage} alt="capa" className="w-full aspect-[5/4] object-cover rounded-2xl" />
-                <button
-                  type="button"
-                  onClick={() => setCoverImage("")}
-                  className="text-[11px] uppercase tracking-widest2 text-ink/55 hover:text-cocoa"
-                >
-                  Remover capa
-                </button>
-              </div>
-            ) : (
-              <label className="block cursor-pointer border border-dashed border-cocoa/30 rounded-2xl p-6 text-center text-sm text-ink/55 hover:border-cocoa hover:text-cocoa transition-colors">
-                {uploading ? "Enviando..." : "Clique para enviar imagem"}
-                <input type="file" accept="image/*" className="hidden" onChange={onCoverUpload} />
-              </label>
-            )}
+            <CoverImageField
+              value={coverImage}
+              onChange={setCoverImage}
+              getContext={() => ({ title, excerpt })}
+            />
           </div>
 
           <div className="pt-2 space-y-2">

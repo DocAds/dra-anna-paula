@@ -9,6 +9,7 @@ import { createNote, updateNote, deleteNote } from "../../notes-actions";
 import { LeadActions } from "./LeadActions";
 import { LeadNotes } from "./LeadNotes";
 import type { Lead } from "@/lib/supabase/types";
+import { TEMP_BADGE } from "@/lib/crmStatus";
 
 export const dynamic = "force-dynamic";
 
@@ -35,7 +36,7 @@ function traduzSource(s: string | null) {
     "cta-final": "CTA do final da página",
     "bloco-dra": "Bloco da Dra. Anna",
     "tratamentos-final": "Final da página de tratamentos",
-    signature: "Bloco do tratamento de destaque (Ultraformer)",
+    signature: "Bloco do tratamento de destaque (Ultraformer MPT)",
     "signature-agendar": "Tratamento de destaque (botão Agendar)",
     "sobre-hero": "Página Sobre — topo",
     "sobre-final": "Página Sobre — final",
@@ -86,22 +87,18 @@ export default async function LeadDetail({
 
   return (
     <main className="p-8 md:p-12">
-      <Link href="/admin/crm/leads" className="text-[11px] uppercase tracking-widest3 text-toffee underline-editorial">
+      <Link href="/admin/crm/leads" className="text-[11px] uppercase tracking-widest3 text-cocoa underline-editorial">
         ← Leads
       </Link>
       <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mt-3 mb-8">
         <div>
           <div className="flex items-center gap-3 mb-3">
             <h1 className="font-display text-4xl text-ink leading-tight">{lead.nome}</h1>
-            <span className={`text-[10px] uppercase tracking-widest2 px-3 py-1 rounded-full ${
-              lead.temperatura === "quente" ? "bg-cocoa text-bone"
-              : lead.temperatura === "morno" ? "bg-biscotti/30 text-toffee"
-              : "bg-latte/30 text-cocoa"
-            }`}>
+            <span className={`text-[10px] uppercase tracking-widest2 px-3 py-1 rounded-full ${TEMP_BADGE[lead.temperatura]}`}>
               {lead.temperatura}
             </span>
           </div>
-          <div className="text-sm text-ink/55">
+          <div className="text-sm text-ink/70">
             Recebido em {format(new Date(lead.created_at), "dd 'de' MMM yyyy 'às' HH:mm", { locale: ptBR })}
           </div>
         </div>
@@ -120,7 +117,7 @@ export default async function LeadDetail({
       <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
         <div className="space-y-6">
           <section className="editorial-card rounded-3xl p-7">
-            <h2 className="text-[10px] uppercase tracking-widest3 text-toffee mb-5">Contato</h2>
+            <h2 className="text-[10px] uppercase tracking-widest3 text-cocoa mb-5">Contato</h2>
             <div className="grid sm:grid-cols-2 gap-5">
               <Block icon={MessageCircle} label="WhatsApp" value={`${lead.whatsapp || "—"}`} sub={lead.whatsapp_country ? `País: ${lead.whatsapp_country}` : undefined} />
               <Block icon={Mail} label="E-mail" value={lead.email || "Não informado"} />
@@ -130,21 +127,21 @@ export default async function LeadDetail({
           </section>
 
           <section className="editorial-card rounded-3xl p-7">
-            <h2 className="text-[10px] uppercase tracking-widest3 text-toffee mb-5">Interesse</h2>
+            <h2 className="text-[10px] uppercase tracking-widest3 text-cocoa mb-5">Interesse</h2>
             <div className="grid sm:grid-cols-2 gap-5">
               <Block icon={Sparkles} label="Procurando por" value={lead.interesse || "Não informado"} />
               <Block icon={Clock} label="Urgência" value={lead.urgencia || "Não informada"} />
             </div>
             {lead.mensagem && (
               <div className="mt-6 pt-5 border-t border-cocoa/10">
-                <div className="text-[10px] uppercase tracking-widest3 text-ink/45 mb-2">Mensagem escrita pelo lead</div>
+                <div className="text-[10px] uppercase tracking-widest3 text-ink/70 mb-2">Mensagem escrita pelo lead</div>
                 <p className="text-ink/85 leading-relaxed italic">&ldquo;{lead.mensagem}&rdquo;</p>
               </div>
             )}
           </section>
 
           <section className="editorial-card rounded-3xl p-7">
-            <h2 className="text-[10px] uppercase tracking-widest3 text-toffee mb-5">Origem do lead</h2>
+            <h2 className="text-[10px] uppercase tracking-widest3 text-cocoa mb-5">Origem do lead</h2>
             <div className="grid sm:grid-cols-2 gap-5">
               <Block icon={Megaphone} label="Como chegou até nós" value={canal} />
               <Block icon={Smartphone} label="Botão que clicou" value={traduzSource(lead.source)} />
@@ -179,13 +176,13 @@ export default async function LeadDetail({
           />
 
           <section className="editorial-card rounded-3xl p-7">
-            <h2 className="text-[10px] uppercase tracking-widest3 text-toffee mb-5">Como o sistema classifica</h2>
+            <h2 className="text-[10px] uppercase tracking-widest3 text-cocoa mb-5">Como o sistema classifica</h2>
             <ul className="space-y-3 text-sm text-ink/75 leading-relaxed">
               <li><strong className="text-cocoa">Quente</strong> — lead disse que tem urgência "hoje" ou "esta semana"</li>
               <li><strong className="text-cocoa">Morno</strong> — lead pretende fazer "este mês"</li>
               <li><strong className="text-cocoa">Frio</strong> — lead respondeu "sem pressa"</li>
             </ul>
-            <p className="text-xs text-ink/45 mt-4">
+            <p className="text-xs text-ink/70 mt-4">
               A temperatura é definida automaticamente pela urgência informada no pop-up.
               Você pode mudar manualmente no painel à direita.
             </p>
@@ -224,9 +221,9 @@ function Block({
         <Icon className="h-4 w-4" />
       </span>
       <div className="min-w-0">
-        <div className="text-[10px] uppercase tracking-widest3 text-ink/45">{label}</div>
+        <div className="text-[10px] uppercase tracking-widest3 text-ink/70">{label}</div>
         <div className="text-ink text-sm leading-snug break-words mt-1">{value}</div>
-        {sub && <div className="text-[11px] text-ink/45 mt-0.5">{sub}</div>}
+        {sub && <div className="text-[11px] text-ink/70 mt-0.5">{sub}</div>}
       </div>
     </div>
   );

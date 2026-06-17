@@ -48,7 +48,7 @@ export function LeadActions({
     <aside className="space-y-4">
       <form onSubmit={submit} className="editorial-card rounded-3xl p-6 space-y-5">
         <div>
-          <div className="text-[10px] uppercase tracking-widest3 text-toffee mb-2">Fase do atendimento</div>
+          <div className="text-[10px] uppercase tracking-widest3 text-cocoa mb-2">Fase do atendimento</div>
           <select
             name="fase"
             defaultValue={lead.fase}
@@ -58,13 +58,13 @@ export function LeadActions({
               <option key={f.v} value={f.v}>{f.l}</option>
             ))}
           </select>
-          <div className="text-[10px] text-ink/45 mt-2">
+          <div className="text-[10px] text-ink/70 mt-2">
             {FASES.find((f) => f.v === lead.fase)?.help}
           </div>
         </div>
 
         <div>
-          <div className="text-[10px] uppercase tracking-widest3 text-toffee mb-2">Temperatura</div>
+          <div className="text-[10px] uppercase tracking-widest3 text-cocoa mb-2">Temperatura</div>
           <select
             name="temperatura"
             defaultValue={lead.temperatura}
@@ -74,13 +74,13 @@ export function LeadActions({
               <option key={t.v} value={t.v}>{t.l}</option>
             ))}
           </select>
-          <div className="text-[10px] text-ink/45 mt-2">
+          <div className="text-[10px] text-ink/70 mt-2">
             {TEMPS.find((t) => t.v === lead.temperatura)?.help}
           </div>
         </div>
 
         <div>
-          <div className="text-[10px] uppercase tracking-widest3 text-toffee mb-2">Cidade</div>
+          <div className="text-[10px] uppercase tracking-widest3 text-cocoa mb-2">Cidade</div>
           <input
             name="cidade"
             defaultValue={lead.cidade || ""}
@@ -90,7 +90,7 @@ export function LeadActions({
         </div>
 
         <div>
-          <div className="text-[10px] uppercase tracking-widest3 text-toffee mb-2">Anotações internas</div>
+          <div className="text-[10px] uppercase tracking-widest3 text-cocoa mb-2">Anotações internas</div>
           <textarea
             name="notas"
             rows={6}
@@ -113,7 +113,7 @@ export function LeadActions({
         type="button"
         onClick={confirmDelete}
         disabled={pending}
-        className="w-full text-[11px] uppercase tracking-widest2 text-ink/55 hover:text-red-700 transition-colors py-3"
+        className="w-full text-[11px] uppercase tracking-widest2 text-ink/70 hover:text-red-700 transition-colors py-3"
       >
         Excluir lead
       </button>

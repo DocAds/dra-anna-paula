@@ -6,30 +6,19 @@ import { ptBR } from "date-fns/locale";
 import type { Lead } from "@/lib/supabase/types";
 import { KanbanBoard } from "../kanban/KanbanBoard";
 import { moveLeadFase } from "../actions";
+import { FASE_BADGE, TEMP_BADGE } from "@/lib/crmStatus";
+import { requireSection } from "@/lib/admin-guard";
 
 export const dynamic = "force-dynamic";
 
 const FASES = ["novo", "contatado", "agendado", "compareceu", "convertido", "perdido"] as const;
-
-const FASE_COLOR: Record<string, string> = {
-  novo: "bg-toffee/15 text-toffee",
-  contatado: "bg-cocoa/15 text-cocoa",
-  agendado: "bg-biscotti/20 text-toffee",
-  compareceu: "bg-latte/30 text-cocoa",
-  convertido: "bg-cocoa text-bone",
-  perdido: "bg-ink/10 text-ink/55",
-};
-const TEMP_COLOR: Record<string, string> = {
-  frio: "bg-latte/30 text-cocoa",
-  morno: "bg-biscotti/30 text-toffee",
-  quente: "bg-cocoa text-bone",
-};
 
 export default async function LeadsPage({
   searchParams,
 }: {
   searchParams: Promise<{ fase?: string; q?: string; view?: string }>;
 }) {
+  await requireSection("leads");
   const sp = await searchParams;
   const view = sp.view === "kanban" ? "kanban" : "lista";
   const sb = await createClient();
@@ -47,9 +36,9 @@ export default async function LeadsPage({
     <main className="p-8 md:p-12">
       <div className="flex flex-wrap items-end justify-between gap-6 mb-6">
         <div>
-          <div className="text-[11px] uppercase tracking-widest3 text-toffee mb-3">CRM</div>
+          <div className="text-[11px] uppercase tracking-widest3 text-cocoa mb-3">CRM</div>
           <h1 className="font-display text-4xl text-ink leading-tight">Leads</h1>
-          <p className="text-sm text-ink/55 mt-2">
+          <p className="text-sm text-ink/70 mt-2">
             {(leads?.length || 0).toString().padStart(2, "0")} leads no total.
           </p>
         </div>
@@ -99,7 +88,7 @@ export default async function LeadsPage({
           </form>
 
           {!leads?.length ? (
-            <div className="editorial-card rounded-3xl p-10 text-center text-ink/55">
+            <div className="editorial-card rounded-3xl p-10 text-center text-ink/70">
               Nenhum lead {sp.fase ? `na fase ${sp.fase}` : "ainda"}.
             </div>
           ) : (
@@ -112,19 +101,19 @@ export default async function LeadsPage({
                   >
                     <div className="min-w-0">
                       <div className="font-display text-lg text-ink truncate">{l.nome}</div>
-                      <div className="text-[11px] uppercase tracking-widest2 text-ink/45 mt-1 flex flex-wrap gap-3">
+                      <div className="text-[11px] uppercase tracking-widest2 text-ink/70 mt-1 flex flex-wrap gap-3">
                         <span>{l.whatsapp}</span>
                         {l.interesse && <span>· {l.interesse}</span>}
                         {l.source && <span>· {l.source}</span>}
                       </div>
                     </div>
-                    <span className={`text-[10px] uppercase tracking-widest2 px-3 py-1 rounded-full ${TEMP_COLOR[l.temperatura]}`}>
+                    <span className={`text-[10px] uppercase tracking-widest2 px-3 py-1 rounded-full ${TEMP_BADGE[l.temperatura]}`}>
                       {l.temperatura}
                     </span>
-                    <span className={`text-[10px] uppercase tracking-widest2 px-3 py-1 rounded-full ${FASE_COLOR[l.fase]}`}>
+                    <span className={`text-[10px] uppercase tracking-widest2 px-3 py-1 rounded-full ${FASE_BADGE[l.fase]}`}>
                       {l.fase}
                     </span>
-                    <div className="hidden sm:flex items-center gap-3 text-[11px] text-ink/55">
+                    <div className="hidden sm:flex items-center gap-3 text-[11px] text-ink/70">
                       <span>{format(new Date(l.created_at), "dd MMM HH:mm", { locale: ptBR })}</span>
                       <ArrowRight className="h-4 w-4 text-cocoa" />
                     </div>

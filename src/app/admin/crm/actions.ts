@@ -7,6 +7,8 @@ import type { LeadFase, LeadTemperatura } from "@/lib/supabase/types";
 
 export async function updateLead(id: string, formData: FormData) {
   const sb = await createClient();
+  const { data: { user } } = await sb.auth.getUser();
+  if (!user) throw new Error("Não autenticado");
   const fase = formData.get("fase") as LeadFase | null;
   const temperatura = formData.get("temperatura") as LeadTemperatura | null;
   const notas = String(formData.get("notas") || "");
@@ -28,6 +30,8 @@ export async function updateLead(id: string, formData: FormData) {
 
 export async function moveLeadFase(id: string, fase: LeadFase) {
   const sb = await createClient();
+  const { data: { user } } = await sb.auth.getUser();
+  if (!user) throw new Error("Não autenticado");
   const { error } = await sb.from("leads").update({ fase }).eq("id", id);
   if (error) throw new Error(error.message);
   revalidatePath("/admin/crm/kanban");
@@ -37,6 +41,8 @@ export async function moveLeadFase(id: string, fase: LeadFase) {
 
 export async function deleteLead(id: string) {
   const sb = await createClient();
+  const { data: { user } } = await sb.auth.getUser();
+  if (!user) throw new Error("Não autenticado");
   const { error } = await sb.from("leads").delete().eq("id", id);
   if (error) throw new Error(error.message);
   revalidatePath("/admin/crm/leads");

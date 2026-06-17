@@ -6,6 +6,7 @@ import { format } from "date-fns/format";
 import { ptBR } from "date-fns/locale";
 import { GripVertical, ExternalLink } from "lucide-react";
 import type { Lead, LeadFase } from "@/lib/supabase/types";
+import { TEMP_BADGE } from "@/lib/crmStatus";
 
 type LeadLite = Pick<
   Lead,
@@ -20,12 +21,6 @@ const COLUNAS: { v: LeadFase; l: string; desc: string }[] = [
   { v: "convertido", l: "Convertido", desc: "Iniciou tratamento" },
   { v: "perdido", l: "Perdido", desc: "Não respondeu ou desistiu" },
 ];
-
-const tempColor: Record<string, string> = {
-  frio: "bg-latte/40 text-cocoa",
-  morno: "bg-biscotti/40 text-toffee",
-  quente: "bg-cocoa text-bone",
-};
 
 export function KanbanBoard({
   initialLeads,
@@ -89,7 +84,7 @@ export function KanbanBoard({
             <div className="px-4 pt-4 pb-3 border-b border-cocoa/10 flex items-baseline justify-between">
               <div>
                 <div className="font-display text-lg text-ink leading-none">{col.l}</div>
-                <div className="text-[10px] uppercase tracking-widest3 text-ink/45 mt-1">
+                <div className="text-[10px] uppercase tracking-widest3 text-ink/70 mt-1">
                   {col.desc}
                 </div>
               </div>
@@ -99,7 +94,7 @@ export function KanbanBoard({
             </div>
             <div className="p-3 space-y-2 min-h-[160px] max-h-[70vh] overflow-y-auto">
               {items.length === 0 && (
-                <div className="text-[11px] text-ink/35 text-center py-8">
+                <div className="text-[11px] text-ink/60 text-center py-8">
                   Solte cartões aqui
                 </div>
               )}
@@ -122,7 +117,7 @@ export function KanbanBoard({
                       {l.nome}
                     </Link>
                   </div>
-                  <div className="text-[11px] text-ink/55 mb-2 truncate">
+                  <div className="text-[11px] text-ink/70 mb-2 truncate">
                     {l.whatsapp}
                   </div>
                   {l.interesse && (
@@ -131,10 +126,10 @@ export function KanbanBoard({
                     </div>
                   )}
                   <div className="flex items-center gap-2 mt-3 pt-2 border-t border-cocoa/10">
-                    <span className={`text-[9px] uppercase tracking-widest2 px-2 py-0.5 rounded-full ${tempColor[l.temperatura]}`}>
+                    <span className={`text-[9px] uppercase tracking-widest2 px-2 py-0.5 rounded-full ${TEMP_BADGE[l.temperatura]}`}>
                       {l.temperatura}
                     </span>
-                    <span className="text-[10px] text-ink/45 ml-auto">
+                    <span className="text-[10px] text-ink/70 ml-auto">
                       {format(new Date(l.created_at), "dd MMM", { locale: ptBR })}
                     </span>
                     <Link

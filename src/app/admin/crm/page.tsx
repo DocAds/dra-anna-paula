@@ -3,10 +3,12 @@ import { createClient } from "@/lib/supabase/server";
 import { TrendingUp, Users, Thermometer, Target } from "lucide-react";
 import { CrmCharts } from "./CrmCharts";
 import type { Lead } from "@/lib/supabase/types";
+import { requireSection } from "@/lib/admin-guard";
 
 export const dynamic = "force-dynamic";
 
 export default async function CrmDashboard() {
+  await requireSection("dashboard");
   const sb = await createClient();
   const { data: leads = [] } = await sb
     .from("leads")

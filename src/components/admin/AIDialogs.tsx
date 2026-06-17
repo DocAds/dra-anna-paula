@@ -5,21 +5,55 @@ import { X, Sparkles, Settings2 } from "lucide-react";
 
 type Provider = "gemini" | "openai" | "anthropic";
 
-const PROVIDERS: { v: Provider; l: string; defaultModel: string; modelHelp: string }[] = [
-  { v: "gemini", l: "Google Gemini", defaultModel: "gemini-2.5-flash", modelHelp: "Ex: gemini-2.5-flash, gemini-3-pro-preview" },
-  { v: "openai", l: "OpenAI ChatGPT", defaultModel: "gpt-4o-mini", modelHelp: "Ex: gpt-4o, gpt-4o-mini, gpt-4.1" },
-  { v: "anthropic", l: "Anthropic Claude", defaultModel: "claude-sonnet-4-5", modelHelp: "Ex: claude-sonnet-4-5, claude-haiku-4-5" },
+const PROVIDERS: { v: Provider; l: string; defaultModel: string; models: string[] }[] = [
+  { v: "gemini", l: "Google Gemini", defaultModel: "gemini-2.5-flash", models: ["gemini-2.5-flash", "gemini-2.5-pro", "gemini-3-pro-preview"] },
+  { v: "openai", l: "OpenAI ChatGPT", defaultModel: "gpt-4o-mini", models: ["gpt-4o-mini", "gpt-4o", "gpt-4.1"] },
+  { v: "anthropic", l: "Anthropic Claude", defaultModel: "claude-sonnet-4-6", models: ["claude-sonnet-4-6", "claude-haiku-4-5", "claude-opus-4-8"] },
 ];
 
-type Cfg = {
+type SaveCfg = {
   provider: Provider;
-  api_token: string;
+  api_token?: string;
   instructions: string;
   model: string;
 };
 
+type InitialCfg = {
+  provider?: Provider;
+  model?: string;
+  instructions?: string;
+  hasToken?: boolean;
+};
+
 const DEFAULT_INSTRUCTIONS =
   "Você escreve para o blog da Dra. Anna Paula Bomtempo (dermatologista premium em São Paulo). Tom editorial, elegante, em português do Brasil. Quiet beauty, sem exageros. NUNCA prometa resultado, NUNCA mencione antes e depois. Em conformidade com o Código de Ética Médica e CFM 1.974/2011. Use HTML simples (h2, h3, p, ul, strong, em) sem inline styles.";
+
+// Custo aproximado de geração. Preços em USD por 1M tokens (estimativa).
+const USD_BRL = 5.4;
+const ARTIGO_IN = 500; // tokens do prompt
+const ARTIGO_OUT = 3000; // tokens do artigo gerado (~1200 a 2000 palavras em HTML)
+const IMAGEM_USD = 0.04; // 1 imagem de capa, gerada à parte
+const PRICING: Record<string, { in: number; out: number }> = {
+  "gemini-2.5-flash": { in: 0.3, out: 2.5 },
+  "gemini-2.5-pro": { in: 1.25, out: 10 },
+  "gemini-3-pro-preview": { in: 2, out: 12 },
+  "gpt-4o-mini": { in: 0.15, out: 0.6 },
+  "gpt-4o": { in: 2.5, out: 10 },
+  "gpt-4.1": { in: 2, out: 8 },
+  "claude-haiku-4-5": { in: 1, out: 5 },
+  "claude-sonnet-4-6": { in: 3, out: 15 },
+  "claude-opus-4-8": { in: 5, out: 25 },
+};
+function artigoUsd(model: string): number | null {
+  const p = PRICING[model];
+  if (!p) return null;
+  return (ARTIGO_IN * p.in + ARTIGO_OUT * p.out) / 1_000_000;
+}
+function brl(usd: number): string {
+  const v = usd * USD_BRL;
+  if (v < 0.01) return "< R$ 0,01";
+  return "R$ " + v.toFixed(2).replace(".", ",");
+}
 
 export function AIConfigDialog({
   open,
@@ -29,15 +63,16 @@ export function AIConfigDialog({
 }: {
   open: boolean;
   onClose: () => void;
-  initial: Partial<Cfg> | null;
-  onSave: (c: Cfg) => Promise<void>;
+  initial: InitialCfg | null;
+  onSave: (c: SaveCfg) => Promise<void>;
 }) {
   const [provider, setProvider] = useState<Provider>((initial?.provider as Provider) || "gemini");
-  const [token, setToken] = useState(initial?.api_token || "");
+  const [token, setToken] = useState("");
   const [model, setModel] = useState(initial?.model || "");
   const [instructions, setInstructions] = useState(initial?.instructions || DEFAULT_INSTRUCTIONS);
   const [showToken, setShowToken] = useState(false);
   const [pending, start] = useTransition();
+  const hasToken = Boolean(initial?.hasToken);
 
   useEffect(() => {
     if (!model && PROVIDERS.find((p) => p.v === provider)) {
@@ -94,13 +129,18 @@ export function AIConfigDialog({
 
           <div>
             <div className="text-[10px] uppercase tracking-widest3 text-ink/55 mb-2">Modelo</div>
-            <input
-              value={model}
+            <select
+              value={current.models.includes(model) ? model : model || current.defaultModel}
               onChange={(e) => setModel(e.target.value)}
-              placeholder={current.defaultModel}
-              className="w-full bg-transparent border-b border-cocoa/25 focus:border-cocoa outline-none py-2 text-ink"
-            />
-            <div className="text-[10px] text-ink/45 mt-1">{current.modelHelp}</div>
+              className="w-full bg-transparent border-b border-cocoa/25 focus:border-cocoa outline-none py-2.5 text-ink"
+            >
+              {(model && !current.models.includes(model)
+                ? [model, ...current.models]
+                : current.models
+              ).map((mod) => (
+                <option key={mod} value={mod}>{mod}</option>
+              ))}
+            </select>
           </div>
 
           <div>
@@ -110,7 +150,7 @@ export function AIConfigDialog({
                 type={showToken ? "text" : "password"}
                 value={token}
                 onChange={(e) => setToken(e.target.value)}
-                placeholder="Cole a chave de API aqui"
+                placeholder={hasToken ? "•••••••••• configurado — deixe em branco para manter" : "Cole a chave de API aqui"}
                 autoComplete="off"
                 className="w-full bg-transparent border-b border-cocoa/25 focus:border-cocoa outline-none py-2 pr-16 text-ink font-mono text-sm"
               />
@@ -122,6 +162,11 @@ export function AIConfigDialog({
                 {showToken ? "Ocultar" : "Mostrar"}
               </button>
             </div>
+            {hasToken && (
+              <div className="text-[10px] text-emerald-700 mt-2">
+                ✓ Token já configurado. Por segurança ele não é exibido. Deixe em branco para manter, ou cole um novo para substituir.
+              </div>
+            )}
             <div className="text-[10px] text-ink/45 mt-1">
               {provider === "gemini" && "Pegue em aistudio.google.com/app/apikey"}
               {provider === "openai" && "Pegue em platform.openai.com/api-keys"}
@@ -144,10 +189,38 @@ export function AIConfigDialog({
             </div>
           </div>
 
+          {(() => {
+            const a = artigoUsd(model || current.defaultModel);
+            return (
+              <div className="rounded-2xl bg-cocoa/5 border border-cocoa/10 p-4">
+                <span className="block text-[10px] uppercase tracking-widest3 text-toffee mb-1.5">
+                  Custo aproximado por publicação
+                </span>
+                <p className="text-[13px] text-ink/80 leading-relaxed">
+                  {a != null ? (
+                    <>
+                      Artigo: <strong className="text-ink">{brl(a)}</strong> · Imagem de capa:{" "}
+                      <strong className="text-ink">{brl(IMAGEM_USD)}</strong> · Total:{" "}
+                      <strong className="text-cocoa">{brl(a + IMAGEM_USD)}</strong>
+                    </>
+                  ) : (
+                    <>
+                      Imagem de capa: <strong className="text-ink">{brl(IMAGEM_USD)}</strong>
+                    </>
+                  )}
+                </p>
+                <span className="block text-[10px] text-ink/55 mt-1.5">
+                  Estimativa: 1 artigo (1.200 a 2.000 palavras) + 1 imagem (gerada à parte). Varia com o
+                  tamanho do texto e o câmbio (USD ≈ R$ {USD_BRL.toFixed(2).replace(".", ",")}).
+                </span>
+              </div>
+            );
+          })()}
+
           <button
             type="button"
             onClick={save}
-            disabled={pending || !token}
+            disabled={pending || (!token && !hasToken)}
             className="w-full rounded-full bg-cocoa text-bone py-3 text-[12px] uppercase tracking-widest2 hover:bg-ink transition-colors disabled:opacity-50"
           >
             {pending ? "Salvando..." : "Salvar configuração"}
@@ -158,6 +231,16 @@ export function AIConfigDialog({
   );
 }
 
+export type GeneratedArticle = {
+  title: string;
+  excerpt: string;
+  body_html: string;
+  seo_title: string;
+  seo_description: string;
+  focus_keyword: string;
+  keywords: string[];
+};
+
 export function AIGenerateDialog({
   open,
   onClose,
@@ -166,8 +249,8 @@ export function AIGenerateDialog({
 }: {
   open: boolean;
   onClose: () => void;
-  onGenerate: (input: { topic: string; description: string }) => Promise<string>;
-  onResult: (html: string, topic: string) => void;
+  onGenerate: (input: { topic: string; description: string }) => Promise<GeneratedArticle>;
+  onResult: (article: GeneratedArticle, topic: string) => void;
 }) {
   const [topic, setTopic] = useState("");
   const [description, setDescription] = useState("");
@@ -181,8 +264,8 @@ export function AIGenerateDialog({
     setError(null);
     start(async () => {
       try {
-        const html = await onGenerate({ topic, description });
-        onResult(html, topic);
+        const article = await onGenerate({ topic, description });
+        onResult(article, topic);
         onClose();
       } catch (e) {
         setError(e instanceof Error ? e.message : String(e));
