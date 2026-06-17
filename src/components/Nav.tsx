@@ -33,7 +33,7 @@ export function Nav() {
           }`}
         >
           <Link href="/" aria-label="Início" className="flex items-center shrink-0">
-            <LogoAB variant="full" className="h-7 md:h-10 w-auto" />
+            <LogoAB variant="full" className="h-7 md:h-8 w-auto" />
           </Link>
 
           <nav className="hidden md:flex items-center gap-8 absolute left-1/2 -translate-x-1/2 text-[12px] tracking-widest2 uppercase text-ink/75">
