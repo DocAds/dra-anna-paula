@@ -32,7 +32,7 @@ export default async function BlogPage() {
         </div>
       </section>
 
-      <section className="relative pb-32">
+      <section className="relative pt-10 md:pt-16 pb-32">
         <div className="mx-auto max-w-5xl px-6 grid gap-4">
           {posts.length === 0 ? (
             <p className="text-ink/55 text-center py-20">Em breve, novos conteúdos.</p>
