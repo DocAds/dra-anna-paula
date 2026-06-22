@@ -176,15 +176,14 @@ function HeroDesktop() {
                       sizes="(min-width: 1024px) 45vw, 85vw"
                       className="object-cover"
                     />
-                  </div>
-                </div>
-
-                <div className="absolute -top-4 -right-4 editorial-card rounded-2xl px-5 py-3 text-ink">
-                  <div className="text-[10px] uppercase tracking-widest3 text-toffee mb-1">
-                    Registro médico
-                  </div>
-                  <div className="font-display text-base leading-tight text-ink">
-                    CRM 177.888 · RQE 85.823
+                    <div className="absolute top-7 right-7 z-10 border-r border-ink/35 pr-3 text-right">
+                      <div className="font-display text-sm md:text-base leading-relaxed tracking-wide text-ink/85">
+                        CRM 177.888
+                      </div>
+                      <div className="font-display text-sm md:text-base leading-relaxed tracking-wide text-ink/85">
+                        RQE 85.823
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -265,7 +264,6 @@ function Categorias() {
         </Reveal>
         <div className="mt-16 grid gap-6 md:grid-cols-3">
           {grupos.map((g, i) => {
-            const count = tratamentos.filter((t) => t.grupo === g.slug).length;
             return (
               <Reveal key={g.slug} delay={i * 0.12}>
                 <Link
@@ -281,9 +279,6 @@ function Categorias() {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-ink/75 via-ink/15 to-transparent" />
                   <div className="absolute inset-x-0 bottom-0 p-7 text-cream">
-                    <div className="text-[10px] uppercase tracking-widest3 text-cream/70 mb-2">
-                      {count.toString().padStart(2, "0")} tratamentos
-                    </div>
                     <h3 className="font-display text-3xl mb-2 leading-tight">
                       {g.titulo}
                     </h3>
