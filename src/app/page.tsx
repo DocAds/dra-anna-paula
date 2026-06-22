@@ -562,12 +562,14 @@ function Dra() {
             </Reveal>
           ))}
         </div>
-        <Reveal delay={0.3} className="mt-10 flex flex-wrap items-center gap-5">
-          <span className="inline-flex items-center gap-3 rounded-full border border-cream/25 px-5 py-3">
-            <span className="font-display text-base text-cream">SBD</span>
-            <span className="h-4 w-px bg-cream/25" />
-            <span className="font-display text-base text-cream">SBCD</span>
-          </span>
+        <Reveal delay={0.3} className="mt-10 flex flex-wrap items-center gap-6">
+          <Image
+            src="/logo/sbd-white-480.webp"
+            alt="Sociedade Brasileira de Dermatologia"
+            width={400}
+            height={394}
+            className="h-16 w-auto"
+          />
           <p className="text-sm text-cream/65 max-w-md leading-relaxed">
             Membro da Sociedade Brasileira de Dermatologia e da Sociedade Brasileira de Cirurgia
             Dermatológica.
