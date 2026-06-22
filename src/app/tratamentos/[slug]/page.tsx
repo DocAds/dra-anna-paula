@@ -96,14 +96,6 @@ export default async function TratamentoPage({ params }: Params) {
                       className="object-cover"
                     />
                   </div>
-                  <div className="absolute -bottom-6 -left-6 editorial-card rounded-2xl px-6 py-5 max-w-[260px]">
-                    <div className="text-[10px] uppercase tracking-widest3 text-toffee mb-1">
-                      Promessa
-                    </div>
-                    <div className="font-display text-base text-ink leading-tight">
-                      {t.promessa}
-                    </div>
-                  </div>
                 </div>
               </Reveal>
             </Parallax>
