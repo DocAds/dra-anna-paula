@@ -8,6 +8,8 @@ import { CTA } from "@/components/CTA";
 import { Parallax } from "@/components/Parallax";
 import { tratamentos, grupos, stats, tecnologiasParceiras, type Categoria } from "@/lib/tratamentos";
 import { SITE } from "@/lib/site";
+import { Depoimentos } from "@/components/Depoimentos";
+import { DiscreetMap } from "@/components/DiscreetMap";
 import {
   Sparkles,
   Hand,
@@ -24,8 +26,10 @@ import {
 const txImg = (slug: string) => `/img/bg/tx-${slug}-1200.webp`;
 
 export default function HomePage() {
-  const destaques = tratamentos.filter((t) => t.destaque).slice(0, 6);
-  const signature = tratamentos.find((t) => t.slug === "ultraformer-mpt")!;
+  const destaques = tratamentos
+    .filter((t) => t.destaque && t.slug !== "volformer")
+    .slice(0, 6);
+  const signature = tratamentos.find((t) => t.slug === "volformer")!;
 
   return (
     <>
@@ -38,7 +42,7 @@ export default function HomePage() {
       <Signature t={signature} />
       <Dra />
       <Stats />
-      <Confianca />
+      <Depoimentos />
       <Insights />
       <Localizacao />
       <CTAFinal />
@@ -105,7 +109,7 @@ function HeroMobile() {
 }
 
 function HeroDesktop() {
-  const micro = ["Ultraformer MPT", "Volnewmer", "Laser CO₂", "Fotona", "Injetáveis premium", "Skinbooster"];
+  const micro = ["Ultraformer MPT", "Volnewmer", "Laser CO₂", "Fotona", "Bioestimuladores", "Toxina Botulínica", "Preenchimento", "MesojetGun"];
   return (
     <section className="hidden lg:block relative min-h-screen overflow-hidden pt-28 pb-20">
       <SceneBackdrop scene="drapery" intensity={0.85} />
@@ -115,7 +119,7 @@ function HeroDesktop() {
           <Reveal>
             <div className="mb-6 flex items-center gap-3 text-[11px] uppercase tracking-widest3 text-toffee">
               <span className="h-px w-12 bg-toffee/60" />
-              <span>Dermatologia · São Paulo</span>
+              <span>Dermatologista · São Paulo</span>
             </div>
           </Reveal>
 
@@ -130,8 +134,8 @@ function HeroDesktop() {
           <Reveal delay={0.55} className="mt-8 max-w-xl">
             <p className="text-lg md:text-xl leading-relaxed text-ink/75">
               Rejuvenescimento facial, lasers e tratamentos personalizados em
-              uma experiência discreta, sofisticada e focada em resultados
-              naturais. Cada protocolo é desenhado para a sua pele.
+              uma experiência sofisticada e focada em resultados naturais.
+              Cada protocolo é desenhado para a sua pele.
             </p>
           </Reveal>
 
@@ -175,20 +179,13 @@ function HeroDesktop() {
                   </div>
                 </div>
 
-                <div className="absolute -bottom-6 -left-6 editorial-card rounded-2xl px-5 py-4 max-w-[230px]">
+                <div className="absolute -top-4 -right-4 editorial-card rounded-2xl px-5 py-3 text-ink">
                   <div className="text-[10px] uppercase tracking-widest3 text-toffee mb-1">
-                    Atendimento
+                    Registro médico
                   </div>
-                  <div className="font-display text-base text-ink leading-tight">
-                    Avaliação personalizada com método próprio.
+                  <div className="font-display text-base leading-tight text-ink">
+                    CRM 177.888 · RQE 85.823
                   </div>
-                </div>
-
-                <div className="absolute -top-4 -right-4 glass-dark rounded-2xl px-4 py-3 text-cream">
-                  <div className="text-[10px] uppercase tracking-widest3 text-cream/70">
-                    CRM
-                  </div>
-                  <div className="font-display text-lg">177.888</div>
                 </div>
               </div>
             </Parallax>
@@ -205,7 +202,7 @@ function RibbonTecnologias() {
       <div className="mx-auto max-w-7xl px-6">
         <Reveal>
           <div className="text-[10px] uppercase tracking-widest3 text-toffee text-center mb-6">
-            Plataformas e parceiros
+            Tecnologias e portfólio de produtos na clínica
           </div>
         </Reveal>
         <Marquee items={tecnologiasParceiras as unknown as string[]} duration={15} />
@@ -242,6 +239,9 @@ function Welcome() {
             Dra. Anna Paula Bomtempo
           </span>
         </Reveal>
+        <Reveal delay={0.5} className="mt-12">
+          <CTA source="manifesto">Agendar avaliação</CTA>
+        </Reveal>
       </div>
     </section>
   );
@@ -260,7 +260,7 @@ function Categorias() {
                 com a sua pele.
               </>
             }
-            description="Da saúde dérmica essencial à tecnologia mais avançada, cada paciente segue um caminho clínico individualizado."
+            description="Da saúde e equilíbrio da pele às tecnologias mais avançadas, cada paciente segue um caminho clínico individualizado."
           />
         </Reveal>
         <div className="mt-16 grid gap-6 md:grid-cols-3">
@@ -298,6 +298,11 @@ function Categorias() {
             );
           })}
         </div>
+        <Reveal delay={0.3} className="mt-12">
+          <CTA source="categorias" href="/tratamentos" variant="outline">
+            Ver todos os tratamentos
+          </CTA>
+        </Reveal>
       </div>
     </section>
   );
@@ -451,7 +456,7 @@ function Signature({ t }: { t: typeof tratamentos[number] }) {
           </Reveal>
           <Reveal delay={0.6} className="mt-10 flex flex-wrap gap-3">
             <CTA source="signature" href={`/tratamentos/${t.slug}`}>
-              Conhecer {t.nome}
+              Conhecer protocolo {t.nome}
             </CTA>
             <CTA source="signature-agendar" variant="outline">
               Agendar avaliação
@@ -464,6 +469,12 @@ function Signature({ t }: { t: typeof tratamentos[number] }) {
 }
 
 function Dra() {
+  const credenciais = [
+    { icon: GraduationCap, label: "Formação", value: "Medicina · Universidade Federal de Uberlândia (MG)" },
+    { icon: Stethoscope, label: "Residência médica", value: "Dermatologia · Hospital Sírio-Libanês (SP)" },
+    { icon: ShieldCheck, label: "Registro médico", value: "CRM 177.888 · RQE 85.823" },
+    { icon: Award, label: "Sociedades", value: "SBD · SBCD" },
+  ];
   return (
     <section className="relative py-28 md:py-40 bg-cocoa text-cream overflow-hidden">
       <div
@@ -518,18 +529,50 @@ function Dra() {
           </Reveal>
           <Reveal delay={0.3}>
             <p className="mt-8 text-lg leading-relaxed text-cream/80 max-w-2xl">
-              Formada pela Universidade Federal de Uberlândia, com especialização e prática em
-              dermatologia clínica, cirúrgica e estética. CRM 177.888 · RQE 85.823. A Dra. Anna
-              conduz pessoalmente cada protocolo, com escuta clínica e foco em resultados naturais
-              ao longo do tempo.
+              Formada em Medicina pela Universidade Federal de Uberlândia (MG) e com Residência
+              Médica em Dermatologia pelo Hospital Sírio-Libanês (SP), a Dra. Anna une conhecimento
+              científico, experiência clínica e olhar individualizado para criar protocolos
+              personalizados. Com foco na dermatologia clínica, cirúrgica e estética, cada
+              tratamento é conduzido de forma próxima e cuidadosa, respeitando a naturalidade, a
+              identidade e o tempo de cada paciente.
             </p>
           </Reveal>
-          <Reveal delay={0.45} className="mt-10">
+          <Reveal delay={0.45} className="mt-10 flex flex-wrap gap-3">
             <CTA source="bloco-dra" href="/sobre" variant="outline">
               Conhecer a Dra. Anna
             </CTA>
+            <CTA source="bloco-dra-agendar">Agendar avaliação</CTA>
           </Reveal>
         </div>
+      </div>
+
+      <div className="relative mx-auto max-w-7xl px-6 mt-16">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {credenciais.map((c, i) => (
+            <Reveal key={c.label} delay={i * 0.08}>
+              <div className="editorial-card-dark rounded-3xl p-6 h-full">
+                <div className="mb-5 inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-cream/10 text-cream">
+                  <c.icon className="h-5 w-5" />
+                </div>
+                <div className="text-[10px] uppercase tracking-widest3 text-cream/55 mb-2">
+                  {c.label}
+                </div>
+                <div className="font-display text-lg text-cream leading-snug">{c.value}</div>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+        <Reveal delay={0.3} className="mt-10 flex flex-wrap items-center gap-5">
+          <span className="inline-flex items-center gap-3 rounded-full border border-cream/25 px-5 py-3">
+            <span className="font-display text-base text-cream">SBD</span>
+            <span className="h-4 w-px bg-cream/25" />
+            <span className="font-display text-base text-cream">SBCD</span>
+          </span>
+          <p className="text-sm text-cream/65 max-w-md leading-relaxed">
+            Membro da Sociedade Brasileira de Dermatologia e da Sociedade Brasileira de Cirurgia
+            Dermatológica.
+          </p>
+        </Reveal>
       </div>
     </section>
   );
@@ -553,50 +596,6 @@ function Stats() {
             </Reveal>
           ))}
         </div>
-      </div>
-    </section>
-  );
-}
-
-function Confianca() {
-  const credenciais = [
-    { icon: GraduationCap, label: "Formação", value: "Universidade Federal de Uberlândia" },
-    { icon: Stethoscope, label: "Especialização", value: "Dermatologia clínica, cirúrgica e estética" },
-    { icon: ShieldCheck, label: "Registro médico", value: "CRM 177.888 · RQE 85.823" },
-    { icon: Award, label: "Sociedades", value: "Sociedade Brasileira de Dermatologia" },
-  ];
-  return (
-    <section className="relative py-24 md:py-28">
-      <div className="mx-auto max-w-7xl px-6">
-        <Reveal>
-          <SectionHeading
-            eyebrow="Confiança"
-            title="Medicina séria, conduzida por médica registrada."
-            description="Sem promessas e sem antes-e-depois: esse é o nosso compromisso ético."
-          />
-        </Reveal>
-        <div className="mt-14 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {credenciais.map((c, i) => (
-            <Reveal key={c.label} delay={i * 0.08}>
-              <div className="editorial-card rounded-3xl p-6 h-full">
-                <div className="mb-5 inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-cocoa/10 text-cocoa">
-                  <c.icon className="h-5 w-5" />
-                </div>
-                <div className="text-[10px] uppercase tracking-widest3 text-toffee mb-2">
-                  {c.label}
-                </div>
-                <div className="font-display text-lg text-ink leading-snug">{c.value}</div>
-              </div>
-            </Reveal>
-          ))}
-        </div>
-        <Reveal delay={0.45} className="mt-10 max-w-3xl mx-auto text-center">
-          <p className="text-sm text-ink/55 leading-relaxed italic">
-            Em conformidade com a Resolução CFM nº 1.974/2011 e Código de Ética Médica,
-            este site não publica imagens de antes e depois, depoimentos com promessa de
-            resultado, nem garantias terapêuticas.
-          </p>
-        </Reveal>
       </div>
     </section>
   );
@@ -665,7 +664,8 @@ function Localizacao() {
             description="Na Vila Olímpia, com estrutura premium e equipe dedicada."
           />
         </Reveal>
-        <div className="mt-14 grid gap-6 max-w-xl">
+        <div className="mt-14 grid gap-8 lg:grid-cols-2 lg:items-start">
+          <div className="grid gap-6">
           {SITE.enderecos.map((e, i) => (
             <Reveal key={e.label} delay={i * 0.15}>
               <a
@@ -689,6 +689,14 @@ function Localizacao() {
               </a>
             </Reveal>
           ))}
+          </div>
+          <Reveal delay={0.2}>
+            <DiscreetMap
+              query={SITE.enderecos[0].mapsQuery}
+              minHeight={380}
+              className="lg:sticky lg:top-28"
+            />
+          </Reveal>
         </div>
       </div>
     </section>

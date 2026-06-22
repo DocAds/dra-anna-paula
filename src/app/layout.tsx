@@ -15,16 +15,16 @@ gtag('set','ads_data_redaction',true);
 
 export const metadata: Metadata = {
   title: {
-    default: "Dra. Anna Paula Bomtempo — Dermatologia em São Paulo",
+    default: "Dra. Anna Paula Bomtempo · Dermatologista em São Paulo",
     template: "%s · Dra. Anna Bomtempo",
   },
   description:
-    "Dermatologia premium em São Paulo. Tratamentos personalizados, tecnologia de ponta e acompanhamento próximo. Vila Olímpia e Jardim Paulista.",
+    "Dermatologia premium em São Paulo. Tratamentos personalizados, tecnologia de ponta e acompanhamento próximo, na Vila Olímpia.",
   metadataBase: new URL("https://draannabomtempo.com.br"),
   openGraph: {
     type: "website",
     locale: "pt_BR",
-    title: "Dra. Anna Paula Bomtempo — Dermatologia",
+    title: "Dra. Anna Paula Bomtempo · Dermatologista",
     description:
       "Rejuvenescimento facial, lasers e tratamentos premium personalizados. CRM 177.888.",
     siteName: "Dra. Anna Bomtempo",

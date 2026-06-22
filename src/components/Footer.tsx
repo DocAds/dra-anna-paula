@@ -16,6 +16,10 @@ export function Footer() {
           <div className="text-xs uppercase tracking-widest2 text-cream/55">
             {SITE.crm} · {SITE.rqe}
           </div>
+          <p className="text-[11px] leading-relaxed text-cream/45 max-w-md">
+            Em conformidade com a Resolução CFM nº 1.974/2011 e o Código de Ética Médica,
+            este site não publica imagens de antes e depois nem garantias de resultado.
+          </p>
         </div>
 
         <div className="md:col-span-3 space-y-4">
@@ -54,7 +58,7 @@ export function Footer() {
       </div>
       <div className="border-t border-cream/15">
         <div className="mx-auto max-w-6xl px-6 py-6 flex flex-col md:flex-row items-center justify-between gap-3 text-[11px] uppercase tracking-widest2 text-cream/55">
-          <span>© {new Date().getFullYear()} Anna Bomtempo Dermatologia</span>
+          <span>© {new Date().getFullYear()} Dra. Anna Bomtempo · Dermatologista</span>
           <span className="flex items-center gap-5">
             <Link href="/privacidade" className="underline-editorial">
               Política de privacidade

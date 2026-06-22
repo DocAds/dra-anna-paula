@@ -4,11 +4,12 @@ import { LiquidBackdrop } from "@/components/LiquidBackdrop";
 import { CTA } from "@/components/CTA";
 import { SITE } from "@/lib/site";
 import { LeadForm } from "@/components/LeadForm";
+import { DiscreetMap } from "@/components/DiscreetMap";
 import { MapPin, Instagram, Phone, Mail } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Contato",
-  description: "Agendamento e atendimento Dra. Anna Bomtempo · Vila Olímpia e Jardim Paulista.",
+  description: "Agendamento e atendimento Dra. Anna Bomtempo · Vila Olímpia, São Paulo.",
 };
 
 export default function ContatoPage() {
@@ -103,7 +104,8 @@ export default function ContatoPage() {
               Onde eu te recebo.
             </h2>
           </Reveal>
-          <div className="mt-12 grid gap-6 max-w-xl">
+          <div className="mt-12 grid gap-8 lg:grid-cols-2 lg:items-start">
+            <div className="grid gap-6">
             {SITE.enderecos.map((e, i) => (
               <Reveal key={e.label} delay={i * 0.15}>
                 <a
@@ -122,6 +124,10 @@ export default function ContatoPage() {
                 </a>
               </Reveal>
             ))}
+            </div>
+            <Reveal delay={0.2}>
+              <DiscreetMap query={SITE.enderecos[0].mapsQuery} minHeight={360} />
+            </Reveal>
           </div>
         </div>
       </section>

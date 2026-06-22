@@ -10,7 +10,7 @@ import { SITE } from "@/lib/site";
 export const metadata: Metadata = {
   title: "A Dra. Anna",
   description:
-    "Dermatologista formada pela UFU com prática em clínica, cirúrgica e estética. CRM 177.888 · RQE 85.823.",
+    "Dermatologista formada pela UFU (MG) e com Residência Médica em Dermatologia pelo Hospital Sírio-Libanês. Atuação clínica, cirúrgica e estética. CRM 177.888 · RQE 85.823.",
 };
 
 export default function SobrePage() {
@@ -22,7 +22,7 @@ export default function SobrePage() {
           <div className="lg:col-span-6 z-10">
             <Reveal>
               <div className="text-[11px] uppercase tracking-widest3 text-toffee mb-6 flex items-center gap-3">
-                <span className="h-px w-12 bg-toffee/60" /> A Dra. Anna
+                <span className="h-px w-12 bg-toffee/60" /> A Dra. Anna Bomtempo
               </div>
             </Reveal>
             <Reveal delay={0.1}>
@@ -33,17 +33,18 @@ export default function SobrePage() {
             </Reveal>
             <Reveal delay={0.3}>
               <p className="mt-8 text-lg leading-relaxed text-ink/75 max-w-xl">
-                A Dra. Anna Paula Bomtempo é médica dermatologista formada pela
-                Universidade Federal de Uberlândia, com prática em dermatologia
-                clínica, cirúrgica e estética. Acredita em uma medicina que
-                escuta antes de prescrever, e em uma estética que respeita o
-                tempo natural de cada pele.
+                A Dra. Anna Paula Bomtempo é médica dermatologista, formada em
+                Medicina pela Universidade Federal de Uberlândia (MG) e com
+                Residência Médica em Dermatologia pelo Hospital Sírio-Libanês (SP).
+                Atua em dermatologia clínica, cirúrgica e estética, com mais de 10
+                anos de prática. Acredita em uma medicina que escuta antes de
+                prescrever, e em uma estética que respeita o tempo natural de cada pele.
               </p>
             </Reveal>
             <Reveal delay={0.45} className="mt-10 flex flex-wrap gap-3 text-[11px] uppercase tracking-widest3 text-cocoa">
               <span className="rounded-full border border-cocoa/30 px-4 py-2">CRM 177.888</span>
               <span className="rounded-full border border-cocoa/30 px-4 py-2">RQE 85.823</span>
-              <span className="rounded-full border border-cocoa/30 px-4 py-2">+8 anos de prática</span>
+              <span className="rounded-full border border-cocoa/30 px-4 py-2">Residência · Sírio-Libanês</span>
             </Reveal>
             <Reveal delay={0.6} className="mt-10">
               <CTA source="sobre-hero">Marcar uma avaliação</CTA>
@@ -72,9 +73,9 @@ export default function SobrePage() {
                   <div className="col-span-2 col-start-5 row-span-2 row-start-3 relative rounded-[20px] overflow-hidden glass-dark p-2">
                     <div className="grid h-full w-full place-items-center text-cream text-center">
                       <div>
-                        <div className="font-display text-3xl">2023</div>
+                        <div className="font-display text-3xl">+10</div>
                         <div className="text-[10px] uppercase tracking-widest3 text-cream/70">
-                          Início da clínica própria
+                          anos de prática
                         </div>
                       </div>
                     </div>
@@ -142,18 +143,18 @@ export default function SobrePage() {
             {[
               {
                 ano: "Atual",
-                titulo: "Consultório próprio em São Paulo",
-                desc: "Atendimento na Vila Olímpia, com foco em dermatologia clínica e rejuvenescimento facial.",
+                titulo: "Consultório na Vila Olímpia, em São Paulo",
+                desc: "Atendimento personalizado com foco em dermatologia clínica, estética avançada e rejuvenescimento facial.",
               },
               {
-                ano: "Especialização",
-                titulo: "Dermatologia clínica, cirúrgica e estética",
-                desc: "Título de Especialista em Dermatologia · RQE 85.823.",
+                ano: "Formação e experiência",
+                titulo: "UFU e Hospital Sírio-Libanês",
+                desc: "Medicina pela Universidade Federal de Uberlândia (MG) e Residência Médica em Dermatologia pelo Hospital Sírio-Libanês. Atuação em grandes clínicas de Dermatologia em São Paulo (SP). Formação especializada em dermatologia clínica, cirúrgica e estética, com sólida experiência em diagnóstico, tratamentos e inovação.",
               },
               {
-                ano: "Graduação",
-                titulo: "Universidade Federal de Uberlândia — MG",
-                desc: "Formação médica com base sólida em clínica e pesquisa.",
+                ano: "Produção científica e congressos",
+                titulo: "Trabalhos científicos, artigos e congressos",
+                desc: "Apresentação de trabalhos científicos e atuação como palestrante em eventos da dermatologia, incluindo AMWC e congressos da Sociedade Brasileira de Dermatologia. Atualização contínua em tecnologias e tratamentos inovadores, integrando conhecimento científico, inovação e protocolos personalizados.",
               },
             ].map((b, i) => (
               <Reveal key={b.titulo} delay={i * 0.12}>

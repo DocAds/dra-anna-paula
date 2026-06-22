@@ -39,22 +39,27 @@ export const grupos: { slug: Categoria; titulo: string; sub: string; img: string
   },
 ];
 
+// Tecnologias e portfólio de produtos disponíveis na clínica (não são patrocínios).
 export const tecnologiasParceiras = [
-  "Ultraformer MPT",
-  "Volnewmer",
-  "Fotona StarWalker",
-  "CO₂ Fracionado",
-  "Hyperqual",
-  "Allergan Aesthetics",
+  "Ultraformer MPT Medsystems",
+  "Volnewmer Medsystems",
+  "Hegon MedicalSan",
+  "Fotona 4D",
+  "MesojetGun Toskani",
+  "Etherea Vydence",
+  "Harmonyca Allergan",
+  "Profhilo",
   "Galderma",
-  "Vydence",
+  "DermaDream",
+  "Merz",
+  "Fios MedBeauty",
 ];
 
 export const stats = [
-  { v: "+8", l: "Anos de prática clínica" },
-  { v: "+5.000", l: "Procedimentos realizados" },
-  { v: "1", l: "Unidade na Vila Olímpia" },
-  { v: "1", l: "Médica responsável por cada caso" },
+  { v: "+10", l: "Anos de experiência clínica" },
+  { v: "+5.000", l: "Pacientes acompanhados" },
+  { v: "+10.000", l: "Procedimentos e tratamentos conduzidos" },
+  { v: "1", l: "Médica responsável por cada jornada de cuidado" },
 ];
 
 export const tratamentos: Tratamento[] = [
@@ -109,7 +114,7 @@ export const tratamentos: Tratamento[] = [
     nome: "Volnewmer",
     subtitulo: "Radiofrequência monopolar de última geração",
     categoria: "Tecnologia",
-    grupo: "Tecnologia",
+    grupo: "Rejuvenescimento",
     destaque: true,
     resumo:
       "Aquecimento controlado e profundo da derme para retração de pele e estímulo de colágeno em face, pescoço, colo e corpo.",
@@ -185,8 +190,8 @@ export const tratamentos: Tratamento[] = [
     ],
   },
   {
-    slug: "fotona-starwalker",
-    nome: "Fotona StarWalker",
+    slug: "etherea-vydence",
+    nome: "Etherea Vydence",
     subtitulo: "Plataforma laser para manchas, melasma e rejuvenescimento",
     categoria: "Laser",
     grupo: "Pele",
@@ -265,9 +270,9 @@ export const tratamentos: Tratamento[] = [
     ],
   },
   {
-    slug: "skinbooster",
-    nome: "Skinbooster",
-    subtitulo: "Hidratação profunda e qualidade de pele",
+    slug: "mesojetgun",
+    nome: "MesojetGun Toskani",
+    subtitulo: "Hidratação e qualidade de pele",
     categoria: "Injetável",
     grupo: "Pele",
     destaque: true,
@@ -286,21 +291,63 @@ export const tratamentos: Tratamento[] = [
     comoFunciona: [
       "Avaliação da textura, hidratação e elasticidade da pele.",
       "Aplicação distribuída em malha por toda a área indicada.",
-      "Ação progressiva de hidratação profunda e estímulo de qualidade dérmica.",
+      "Ação progressiva de hidratação e estímulo de qualidade dérmica.",
     ],
     diferenciais: [
-      "Produto reconhecido e seguro, com perfil próprio para Skinbooster.",
+      "Tecnologia reconhecida e segura, com perfil próprio para a hidratação injetável.",
       "Excelente complemento a protocolos de bioestimulação e laser.",
       "Indicado também como manutenção entre tratamentos mais intensos.",
     ],
     faq: [
       {
         q: "Faz volume?",
-        a: "Não. O Skinbooster é hidratação dérmica, não preenchimento de volume. Atua na qualidade da pele.",
+        a: "Não. O MesojetGun é hidratação dérmica, não preenchimento de volume. Atua na qualidade da pele.",
       },
       {
         q: "Tem efeito imediato?",
         a: "Você nota a pele mais hidratada já nas primeiras semanas. O efeito de qualidade dérmica se consolida ao longo do protocolo.",
+      },
+    ],
+  },
+  {
+    slug: "volformer",
+    nome: "Volformer",
+    subtitulo: "Lifting, firmeza e qualidade da pele sem cirurgia",
+    categoria: "Tecnologia",
+    grupo: "Rejuvenescimento",
+    destaque: true,
+    resumo:
+      "Uma abordagem avançada que combina ultrassom microfocado e radiofrequência monopolar para atuar em diferentes camadas da pele, estimulando colágeno, promovendo retração tecidual e redefinindo os contornos faciais.",
+    promessa: "Lifting, firmeza e qualidade da pele, sem cirurgia.",
+    duracao: "60 a 90 minutos",
+    sessoes: "Protocolo personalizado",
+    retorno: "Imediato",
+    indicacoes: [
+      "Flacidez facial e do terço inferior",
+      "Perda de definição do contorno e da mandíbula",
+      "Pele com firmeza e textura comprometidas",
+      "Quem busca rejuvenescimento sem cirurgia",
+    ],
+    comoFunciona: [
+      "Mapeamento facial individualizado pela Dra. Anna, definindo áreas e profundidades de tratamento.",
+      "Ultraformer MPT: ultrassom microfocado nas camadas SMAS e derme para efeito lifting e sustentação.",
+      "Volnewmer: radiofrequência monopolar com aquecimento controlado para remodelação do colágeno e melhora da firmeza e textura da pele.",
+      "Associação de injetáveis premium quando necessário, após avaliação médica cuidadosa.",
+    ],
+    diferenciais: [
+      "Protocolo integrado que une ultrassom microfocado e radiofrequência em uma só jornada.",
+      "Atuação em diferentes camadas da pele para um resultado mais completo.",
+      "Estímulo de colágeno com retração tecidual e redefinição dos contornos faciais.",
+      "Plano personalizado, conduzido pessoalmente pela Dra. Anna.",
+    ],
+    faq: [
+      {
+        q: "O Volformer é cirúrgico?",
+        a: "Não. É um protocolo não cirúrgico que combina ultrassom microfocado e radiofrequência, sem cortes e sem afastamento social.",
+      },
+      {
+        q: "Quando vejo o resultado?",
+        a: "O efeito tensor inicial aparece nas primeiras semanas e a remodelação de colágeno se consolida ao longo dos meses seguintes.",
       },
     ],
   },
