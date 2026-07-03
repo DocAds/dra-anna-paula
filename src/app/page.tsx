@@ -136,7 +136,7 @@ function HeroDesktop() {
             <RevealText text="A medicina da pele," />
             <br />
             <span className="italic font-serif text-cocoa">
-              <RevealText text="conduzida com tempo." delay={0.2} />
+              <RevealText text={"conduzida com tempo."} delay={0.2} />
             </span>
           </h1>
 
