@@ -111,10 +111,19 @@ function HeroMobile() {
 function HeroDesktop() {
   const micro = ["Ultraformer MPT", "Volnewmer", "Laser CO₂", "Fotona", "Bioestimuladores", "Toxina Botulínica", "Preenchimento", "MesojetGun"];
   return (
-    <section className="hidden lg:block relative min-h-screen overflow-hidden pt-28 pb-20">
-      <SceneBackdrop scene="drapery" intensity={0.85} />
+    <section className="hidden lg:flex relative min-h-screen overflow-hidden pt-28 pb-20 items-center">
+      <Image
+        src="/img/dra/dra-hero-bg-1672.webp"
+        alt="Dra. Anna Paula Bomtempo"
+        fill
+        priority
+        sizes="100vw"
+        className="object-cover object-[72%_center]"
+      />
+      {/* Véu suave à esquerda para leitura do texto sobre a foto */}
+      <div className="absolute inset-0 bg-gradient-to-r from-bone/75 via-bone/25 to-transparent" />
 
-      <div className="relative mx-auto grid max-w-7xl gap-12 px-6 lg:grid-cols-12 lg:gap-8 lg:px-12 items-center">
+      <div className="relative w-full mx-auto grid max-w-7xl gap-12 px-6 lg:grid-cols-12 lg:gap-8 lg:px-12 items-center">
         <div className="lg:col-span-6 lg:pt-10 z-10">
           <Reveal>
             <div className="mb-6 flex items-center gap-3 text-[11px] uppercase tracking-widest3 text-toffee">
@@ -161,34 +170,14 @@ function HeroDesktop() {
           </Reveal>
         </div>
 
-        <div className="lg:col-span-6 relative">
-          <Reveal delay={0.35}>
-            <Parallax offset={30}>
-              <div className="relative aspect-[3/4] w-full max-w-lg mx-auto">
-                <div className="absolute -inset-6 rounded-[36px] bg-gradient-to-br from-latte/50 via-biscotti/30 to-transparent blur-2xl" />
-                <div className="absolute inset-0 rounded-[28px] overflow-hidden editorial-card p-2">
-                  <div className="relative h-full w-full rounded-[22px] overflow-hidden bg-cream">
-                    <Image
-                      src="/img/dra/dra-hero-1440.webp"
-                      alt="Dra. Anna Paula Bomtempo"
-                      fill
-                      priority
-                      sizes="(min-width: 1024px) 45vw, 85vw"
-                      className="object-cover"
-                    />
-                    <div className="absolute top-7 right-7 z-10 border-r border-ink/35 pr-3 text-right">
-                      <div className="font-display text-sm md:text-base leading-relaxed tracking-wide text-ink/85">
-                        CRM 177.888
-                      </div>
-                      <div className="font-display text-sm md:text-base leading-relaxed tracking-wide text-ink/85">
-                        RQE 85.823
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </Parallax>
-          </Reveal>
+      </div>
+
+      <div className="absolute bottom-10 right-10 z-10 border-r border-ink/35 pr-3 text-right">
+        <div className="font-display text-sm md:text-base leading-relaxed tracking-wide text-ink/85">
+          CRM 177.888
+        </div>
+        <div className="font-display text-sm md:text-base leading-relaxed tracking-wide text-ink/85">
+          RQE 85.823
         </div>
       </div>
     </section>
