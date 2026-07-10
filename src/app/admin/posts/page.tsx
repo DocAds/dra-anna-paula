@@ -35,7 +35,7 @@ export default async function PostsList({
 
   return (
     <main className="p-8 md:p-12">
-      <div className="flex items-end justify-between gap-6 mb-8">
+      <div className="flex flex-wrap items-end justify-between gap-6 mb-8">
         <div>
           <div className="text-[11px] uppercase tracking-widest3 text-toffee mb-3">Conteúdo</div>
           <h1 className="font-display text-4xl text-ink leading-tight">Posts</h1>

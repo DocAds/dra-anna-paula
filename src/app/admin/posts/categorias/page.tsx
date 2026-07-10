@@ -15,7 +15,7 @@ export default async function CategoriasPage() {
 
   return (
     <main className="p-8 md:p-12">
-      <div className="flex items-end justify-between gap-6 mb-2">
+      <div className="flex flex-wrap items-end justify-between gap-6 mb-2">
         <div>
           <Link href="/admin/posts" className="text-[11px] uppercase tracking-widest3 text-toffee underline-editorial">
             ← Posts

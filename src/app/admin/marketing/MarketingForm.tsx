@@ -165,10 +165,10 @@ export function MarketingForm({
                         {c.conversionId}/{c.label} · {EVENT_LABELS[c.event]}
                       </div>
                     </div>
-                    <button type="button" onClick={() => openEdit(c)} className="text-ink/60 hover:text-cocoa transition p-1" aria-label="Editar">
+                    <button type="button" onClick={() => openEdit(c)} className="grid place-items-center h-11 w-11 shrink-0 rounded-full text-ink/60 hover:text-cocoa transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cocoa/40" aria-label="Editar">
                       <Pencil className="h-4 w-4" />
                     </button>
-                    <button type="button" onClick={() => removeConversion(c.id)} className="text-ink/60 hover:text-red-600 transition p-1" aria-label="Remover">
+                    <button type="button" onClick={() => removeConversion(c.id)} className="grid place-items-center h-11 w-11 shrink-0 rounded-full text-ink/60 hover:text-rose-700 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400/50" aria-label="Remover">
                       <Trash2 className="h-4 w-4" />
                     </button>
                   </li>
@@ -260,7 +260,7 @@ export function MarketingForm({
           <div className="bg-bone rounded-3xl p-7 w-full max-w-md shadow-2xl" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-5">
               <h3 className="font-display text-xl text-ink">Conversão do Google Ads</h3>
-              <button type="button" onClick={() => setModalOpen(false)} className="text-ink/60 hover:text-ink p-1">
+              <button type="button" onClick={() => setModalOpen(false)} aria-label="Fechar" className="grid place-items-center h-10 w-10 -mr-1 rounded-full text-ink/60 hover:text-ink hover:bg-cocoa/10 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cocoa/40">
                 <X className="h-5 w-5" />
               </button>
             </div>

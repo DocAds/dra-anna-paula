@@ -29,7 +29,7 @@ export default async function AccountPage() {
           ["Permissão", profile?.role],
           ["Membro desde", profile && format(new Date(profile.created_at), "dd 'de' MMMM yyyy", { locale: ptBR })],
         ].map(([k, v]) => (
-          <div key={String(k)} className="grid grid-cols-[120px_1fr] gap-4">
+          <div key={String(k)} className="grid grid-cols-1 gap-1 sm:grid-cols-[120px_1fr] sm:gap-4">
             <dt className="text-[10px] uppercase tracking-widest3 text-ink/45 mt-1">{k}</dt>
             <dd className="text-ink">{v as string}</dd>
           </div>
