@@ -6,7 +6,7 @@ import { TrackingScripts } from "@/components/TrackingScripts";
 import { CookieConsent } from "@/components/CookieConsent";
 import { JsonLd } from "@/components/JsonLd";
 import { organizationSchema } from "@/lib/schema";
-import { BASE_URL } from "@/lib/seo";
+import { BASE_URL, OG_IMAGE_PADRAO } from "@/lib/seo";
 
 // Google Consent Mode v2 — default NEGADO, roda antes de qualquer tag do Google.
 const CONSENT_DEFAULT = `
@@ -52,6 +52,7 @@ export const metadata: Metadata = {
     description:
       "Rejuvenescimento facial, lasers e tratamentos premium personalizados. CRM 177.888.",
     siteName: "Dra. Anna Bomtempo",
+    images: [OG_IMAGE_PADRAO],
   },
 };
 

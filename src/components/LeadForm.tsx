@@ -8,6 +8,7 @@ import { whatsappLink } from "@/lib/site";
 import { interessesLead } from "@/lib/tratamentos";
 import { newEventId, readClickId, trackLead } from "@/lib/tracking";
 import { openWhatsapp } from "@/lib/whatsapp";
+import { getConsent } from "@/lib/consent";
 
 export function LeadForm({ source = "contato" }: { source?: string }) {
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
@@ -69,6 +70,9 @@ export function LeadForm({ source = "contato" }: { source?: string }) {
       event_id: eventId,
       consent: true,
       consent_ts: new Date().toISOString(),
+      // Consentimento de cookies: separado do checkbox do formulário. É ele que
+      // libera o CAPI a mandar PII pra Meta.
+      consent_marketing: getConsent().marketing,
       ts: Date.now(),
     };
 

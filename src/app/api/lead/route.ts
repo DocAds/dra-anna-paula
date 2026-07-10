@@ -36,7 +36,12 @@ export async function POST(req: Request) {
     fbclid,
     event_id,
     ts,
-  } = body as Record<string, string | number | undefined>;
+    consent_marketing,
+  } = body as Record<string, string | number | boolean | undefined>;
+
+  // Consentimento de marketing do banner. Só ele libera o envio de PII à Meta.
+  // Ausente ou qualquer coisa diferente de true significa negado.
+  const marketingConsentido = consent_marketing === true;
 
   const phoneClean = String(whatsapp || "").replace(/\D/g, "");
   const ua = req.headers.get("user-agent") ?? "";
@@ -120,7 +125,11 @@ export async function POST(req: Request) {
   const TOKEN = mkt.meta_capi_token || process.env.META_CAPI_ACCESS_TOKEN;
   const TEST = mkt.meta_capi_test_code || process.env.META_CAPI_TEST_CODE;
 
-  if (PIXEL && TOKEN) {
+  // O lead é gravado de qualquer jeito (é o dado do atendimento), mas sem
+  // consentimento de marketing nada de PII, nem hasheada, sai para a Meta.
+  // O CAPI exige ao menos um identificador de usuário, então o evento inteiro
+  // é suprimido em vez de enviado sem user_data.
+  if (PIXEL && TOKEN && marketingConsentido) {
     const userData: Record<string, string | string[]> = {
       client_user_agent: ua,
       client_ip_address: ip,

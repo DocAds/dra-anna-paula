@@ -8,7 +8,7 @@ import { CTA } from "@/components/CTA";
 import { tratamentos, tratamentoBySlug } from "@/lib/tratamentos";
 import { JsonLd } from "@/components/JsonLd";
 import { breadcrumbSchema, faqSchema, tratamentoSchema } from "@/lib/schema";
-import { absoluteUrl } from "@/lib/seo";
+import { openGraph } from "@/lib/seo";
 import { Clock, CalendarRange, Repeat, ArrowRight, Check } from "lucide-react";
 
 type Params = { params: Promise<{ slug: string }> };
@@ -30,13 +30,14 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
     title: t.nome,
     description,
     alternates: { canonical: `/tratamentos/${t.slug}` },
-    openGraph: {
+    // A imagem do tratamento é WebP, que o WhatsApp não renderiza no preview,
+    // então openGraph cai no card padrão.
+    openGraph: openGraph({
       type: "article",
       title: t.nome,
       description,
-      url: absoluteUrl(`/tratamentos/${t.slug}`),
-      images: [absoluteUrl(`/img/bg/tx-${t.slug}-1600.webp`)],
-    },
+      path: `/tratamentos/${t.slug}`,
+    }),
   };
 }
 

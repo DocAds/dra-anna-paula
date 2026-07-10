@@ -7,7 +7,8 @@ import { CTA } from "@/components/CTA";
 import { getPostBySlug, listPublishedSlugs, listPublishedPosts } from "@/lib/posts";
 import { JsonLd } from "@/components/JsonLd";
 import { breadcrumbSchema, postSchema } from "@/lib/schema";
-import { absoluteUrl, canonicalInterno } from "@/lib/seo";
+import { absoluteUrl, canonicalInterno, ogImage } from "@/lib/seo";
+import { SITE } from "@/lib/site";
 import { format } from "date-fns/format";
 import { ptBR } from "date-fns/locale";
 import { ArrowRight } from "lucide-react";
@@ -41,10 +42,13 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
     robots: post.no_index ? { index: false, follow: true } : { index: true, follow: true },
     openGraph: {
       type: "article",
+      locale: "pt_BR",
+      siteName: SITE.shortName,
       title: titulo,
       description: descricao,
       url: absoluteUrl(`/blog/${post.slug}`),
-      images: capa ? [capa] : undefined,
+      // capa WebP não renderiza no preview do WhatsApp; ogImage cai no card padrão.
+      images: ogImage(capa),
       publishedTime: post.published_at ?? undefined,
       modifiedTime: post.updated_at,
     },

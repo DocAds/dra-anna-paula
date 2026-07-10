@@ -6,16 +6,34 @@ export const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? SITE.url;
 
 export const absoluteUrl = (path = "/") => new URL(path, BASE_URL).toString();
 
+export const OG_IMAGE_PADRAO = {
+  url: absoluteUrl("/og/og-default.jpg"),
+  width: 1200,
+  height: 630,
+  alt: `${SITE.name} · ${SITE.role} · ${SITE.crm}`,
+};
+
+/**
+ * O scraper do WhatsApp (e o do iMessage) não renderiza WebP em preview de link.
+ * O site é todo WebP, então qualquer imagem que não seja jpg/png cai no card
+ * padrão em vez de gerar um compartilhamento sem imagem.
+ */
+export function ogImage(url: string | null | undefined) {
+  if (url && /\.(jpe?g|png)(\?.*)?$/i.test(url)) return [url];
+  return [OG_IMAGE_PADRAO];
+}
+
 /**
  * O Next faz merge raso do metadata: declarar openGraph numa página substitui o
- * do layout por inteiro. Sem este helper, cada página perderia siteName e locale,
- * e o card compartilhado no WhatsApp mostraria o título da home.
+ * do layout por inteiro. Sem este helper, cada página perderia siteName, locale
+ * e a imagem, e o card compartilhado no WhatsApp mostraria o título da home.
  */
 export function openGraph(params: {
   title: string;
   description: string;
   path: string;
   type?: "website" | "article";
+  image?: string | null;
 }): Metadata["openGraph"] {
   return {
     type: params.type ?? "website",
@@ -24,6 +42,7 @@ export function openGraph(params: {
     url: absoluteUrl(params.path),
     title: params.title,
     description: params.description,
+    images: ogImage(params.image),
   };
 }
 
