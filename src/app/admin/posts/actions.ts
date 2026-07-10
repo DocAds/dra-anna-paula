@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import slugify from "slugify";
 import type { PostStatus } from "@/lib/supabase/types";
+import { canonicalInterno } from "@/lib/seo";
 
 function uniqueSlug(base: string) {
   const slug = slugify(base, { lower: true, strict: true });
@@ -22,7 +23,7 @@ function seoFields(formData: FormData) {
     seo_description: String(formData.get("seo_description") || "") || null,
     focus_keyword: String(formData.get("focus_keyword") || "") || null,
     seo_keywords: kw.length ? kw : null,
-    canonical_url: String(formData.get("canonical_url") || "") || null,
+    canonical_url: canonicalInterno(String(formData.get("canonical_url") || "")),
     og_image_url: String(formData.get("og_image_url") || "") || null,
     no_index: formData.get("no_index") === "on" || formData.get("no_index") === "true",
   };

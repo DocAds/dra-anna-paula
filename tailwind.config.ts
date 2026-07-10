@@ -15,10 +15,10 @@ const config: Config = {
         porcelain: "#FBF7F1",
       },
       fontFamily: {
-        display: ['"Hatton"', '"Fraunces"', '"Cormorant Garamond"', "serif"],
-        serif: ['"Fraunces"', '"Cormorant Garamond"', "Georgia", "serif"],
-        sans: ['"Inter"', "system-ui", "sans-serif"],
-        mono: ['"JetBrains Mono"', "ui-monospace", "monospace"],
+        display: ['"Hatton"', "var(--font-fraunces)", "Georgia", "serif"],
+        serif: ["var(--font-fraunces)", "Georgia", "serif"],
+        sans: ["var(--font-inter)", "system-ui", "sans-serif"],
+        mono: ["ui-monospace", "SFMono-Regular", "monospace"],
       },
       letterSpacing: {
         widest2: "0.28em",

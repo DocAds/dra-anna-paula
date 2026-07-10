@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import type { Metadata } from "next";
 import { SceneBackdrop } from "@/components/SceneBackdrop";
 import { Reveal, RevealText } from "@/components/Reveal";
 import { Marquee } from "@/components/Marquee";
@@ -24,6 +25,10 @@ import {
 } from "lucide-react";
 
 const txImg = (slug: string) => `/img/bg/tx-${slug}-1200.webp`;
+
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+};
 
 export default function HomePage() {
   const destaques = tratamentos

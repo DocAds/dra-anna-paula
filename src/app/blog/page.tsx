@@ -4,10 +4,23 @@ import type { Metadata } from "next";
 import { Reveal } from "@/components/Reveal";
 import { SceneBackdrop } from "@/components/SceneBackdrop";
 import { listPublishedPosts } from "@/lib/posts";
+import { openGraph } from "@/lib/seo";
 import { format } from "date-fns/format";
 import { ptBR } from "date-fns/locale";
 
-export const metadata: Metadata = { title: "Diário · Blog" };
+const DESCRICAO_BLOG =
+  "Estudos, anotações e cuidados de pele assinados pela Dra. Anna Bomtempo, dermatologista em São Paulo.";
+
+export const metadata: Metadata = {
+  title: "Diário · Blog",
+  description: DESCRICAO_BLOG,
+  alternates: { canonical: "/blog" },
+  openGraph: openGraph({
+    title: "Diário · Dra. Anna Bomtempo",
+    description: DESCRICAO_BLOG,
+    path: "/blog",
+  }),
+};
 export const revalidate = 60;
 
 export default async function BlogPage() {

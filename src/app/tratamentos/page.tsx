@@ -6,12 +6,20 @@ import { SceneBackdrop } from "@/components/SceneBackdrop";
 import { SectionHeading } from "@/components/SectionHeading";
 import { CTA } from "@/components/CTA";
 import { tratamentos, grupos } from "@/lib/tratamentos";
+import { openGraph } from "@/lib/seo";
 import { ArrowRight } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Tratamentos",
   description:
     "Tecnologia premium para dermatologia clínica e rejuvenescimento. Ultraformer MPT, Volnewmer, CO₂ fracionado, Fotona e injetáveis.",
+  alternates: { canonical: "/tratamentos" },
+  openGraph: openGraph({
+    title: "Tratamentos · Dra. Anna Bomtempo",
+    description:
+      "Tecnologia premium para dermatologia clínica e rejuvenescimento, na Vila Olímpia, São Paulo.",
+    path: "/tratamentos",
+  }),
 };
 
 const txImg = (slug: string) => `/img/bg/tx-${slug}-1200.webp`;

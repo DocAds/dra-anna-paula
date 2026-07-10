@@ -6,6 +6,9 @@ import { Reveal } from "@/components/Reveal";
 import { Parallax } from "@/components/Parallax";
 import { CTA } from "@/components/CTA";
 import { tratamentos, tratamentoBySlug } from "@/lib/tratamentos";
+import { JsonLd } from "@/components/JsonLd";
+import { breadcrumbSchema, faqSchema, tratamentoSchema } from "@/lib/schema";
+import { absoluteUrl } from "@/lib/seo";
 import { Clock, CalendarRange, Repeat, ArrowRight, Check } from "lucide-react";
 
 type Params = { params: Promise<{ slug: string }> };
@@ -20,9 +23,20 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { slug } = await params;
   const t = tratamentoBySlug(slug);
   if (!t) return { title: "Tratamento" };
+  // resumo, não promessa: a description vira o snippet do Google, e o CFM não
+  // admite promessa de resultado em publicidade médica.
+  const description = `${t.subtitulo}. ${t.resumo}`;
   return {
     title: t.nome,
-    description: `${t.subtitulo}. ${t.promessa}`,
+    description,
+    alternates: { canonical: `/tratamentos/${t.slug}` },
+    openGraph: {
+      type: "article",
+      title: t.nome,
+      description,
+      url: absoluteUrl(`/tratamentos/${t.slug}`),
+      images: [absoluteUrl(`/img/bg/tx-${t.slug}-1600.webp`)],
+    },
   };
 }
 
@@ -37,8 +51,18 @@ export default async function TratamentoPage({ params }: Params) {
   const fallback = tratamentos.filter((x) => x.slug !== t.slug).slice(0, 3);
   const outros = relacionados.length >= 2 ? relacionados : fallback;
 
+  const trilha = [
+    { nome: "Início", path: "/" },
+    { nome: "Tratamentos", path: "/tratamentos" },
+    { nome: t.nome, path: `/tratamentos/${t.slug}` },
+  ];
+
   return (
     <>
+      <JsonLd schema={tratamentoSchema(t)} />
+      <JsonLd schema={breadcrumbSchema(trilha)} />
+      {t.faq.length > 0 && <JsonLd schema={faqSchema(t.faq)} />}
+
       <section className="relative pt-32 pb-20 overflow-hidden bg-porcelain">
         <div className="mx-auto max-w-7xl px-6 grid gap-14 lg:grid-cols-12 items-start relative">
           <div className="lg:col-span-6 z-10 lg:pt-12">

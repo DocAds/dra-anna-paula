@@ -6,11 +6,19 @@ import { Parallax } from "@/components/Parallax";
 import { SectionHeading } from "@/components/SectionHeading";
 import { CTA } from "@/components/CTA";
 import { SITE } from "@/lib/site";
+import { openGraph } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: "A Dra. Anna",
   description:
     "Dermatologista formada pela UFU (MG) e com Residência Médica em Dermatologia pelo Hospital Sírio-Libanês. Atuação clínica, cirúrgica e estética. CRM 177.888 · RQE 85.823.",
+  alternates: { canonical: "/sobre" },
+  openGraph: openGraph({
+    title: "A Dra. Anna Paula Bomtempo · Dermatologista",
+    description:
+      "Residência em Dermatologia pelo Hospital Sírio-Libanês. Atuação clínica, cirúrgica e estética na Vila Olímpia. CRM 177.888 · RQE 85.823.",
+    path: "/sobre",
+  }),
 };
 
 export default function SobrePage() {

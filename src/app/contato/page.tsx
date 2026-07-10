@@ -3,6 +3,7 @@ import { Reveal } from "@/components/Reveal";
 import { LiquidBackdrop } from "@/components/LiquidBackdrop";
 import { CTA } from "@/components/CTA";
 import { SITE } from "@/lib/site";
+import { openGraph } from "@/lib/seo";
 import { LeadForm } from "@/components/LeadForm";
 import { DiscreetMap } from "@/components/DiscreetMap";
 import { MapPin, Instagram, Phone, Mail } from "lucide-react";
@@ -10,6 +11,12 @@ import { MapPin, Instagram, Phone, Mail } from "lucide-react";
 export const metadata: Metadata = {
   title: "Contato",
   description: "Agendamento e atendimento Dra. Anna Bomtempo · Vila Olímpia, São Paulo.",
+  alternates: { canonical: "/contato" },
+  openGraph: openGraph({
+    title: "Contato · Dra. Anna Bomtempo",
+    description: "Agendamento e atendimento na Vila Olímpia, São Paulo.",
+    path: "/contato",
+  }),
 };
 
 export default function ContatoPage() {

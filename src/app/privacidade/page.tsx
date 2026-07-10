@@ -3,11 +3,18 @@ import { Reveal } from "@/components/Reveal";
 import { LiquidBackdrop } from "@/components/LiquidBackdrop";
 import { CTA } from "@/components/CTA";
 import { SITE } from "@/lib/site";
+import { openGraph } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: "Política de Privacidade",
   description:
     "Como a Dra. Anna Bomtempo coleta, usa e protege seus dados pessoais, e quais são os seus direitos sob a LGPD.",
+  alternates: { canonical: "/privacidade" },
+  openGraph: openGraph({
+    title: "Política de Privacidade · Dra. Anna Bomtempo",
+    description: "Como seus dados pessoais são coletados, usados e protegidos, sob a LGPD.",
+    path: "/privacidade",
+  }),
 };
 
 const ATUALIZADA_EM = "junho de 2026";

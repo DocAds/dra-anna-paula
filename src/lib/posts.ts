@@ -49,6 +49,23 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
   return data;
 }
 
+/**
+ * Posts reais do banco para o sitemap. Diferente de listPublishedPosts, não cai
+ * nos fallbackPosts: o sitemap não pode anunciar URL que responde 404, e um post
+ * com no_index não deve ser listado.
+ */
+export async function listPostsForSitemap(): Promise<
+  Pick<Post, "slug" | "updated_at" | "published_at">[]
+> {
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL) return [];
+  const { data } = await pub()
+    .from("posts")
+    .select("slug, updated_at, published_at")
+    .eq("status", "published")
+    .eq("no_index", false);
+  return data ?? [];
+}
+
 export async function listPublishedSlugs(): Promise<string[]> {
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL) return [];
   const { data } = await pub()

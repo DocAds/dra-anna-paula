@@ -5,6 +5,9 @@ import type { Metadata } from "next";
 import { Reveal } from "@/components/Reveal";
 import { CTA } from "@/components/CTA";
 import { getPostBySlug, listPublishedSlugs, listPublishedPosts } from "@/lib/posts";
+import { JsonLd } from "@/components/JsonLd";
+import { breadcrumbSchema, postSchema } from "@/lib/schema";
+import { absoluteUrl, canonicalInterno } from "@/lib/seo";
 import { format } from "date-fns/format";
 import { ptBR } from "date-fns/locale";
 import { ArrowRight } from "lucide-react";
@@ -23,13 +26,27 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { slug } = await params;
   const post = await getPostBySlug(slug);
   if (!post) return { title: "Post" };
+
+  const titulo = post.seo_title || post.title;
+  const descricao = post.seo_description || post.excerpt || post.title;
+  const capa = post.og_image_url || post.cover_image;
+  // canonicalInterno descarta um valor apontando pra fora do domínio.
+  const canonical = canonicalInterno(post.canonical_url) ?? `/blog/${post.slug}`;
+
   return {
-    title: post.title,
-    description: post.excerpt || post.title,
+    title: titulo,
+    description: descricao,
+    keywords: post.seo_keywords ?? undefined,
+    alternates: { canonical },
+    robots: post.no_index ? { index: false, follow: true } : { index: true, follow: true },
     openGraph: {
-      title: post.title,
-      description: post.excerpt || undefined,
-      images: post.cover_image ? [post.cover_image] : undefined,
+      type: "article",
+      title: titulo,
+      description: descricao,
+      url: absoluteUrl(`/blog/${post.slug}`),
+      images: capa ? [capa] : undefined,
+      publishedTime: post.published_at ?? undefined,
+      modifiedTime: post.updated_at,
     },
   };
 }
@@ -41,8 +58,21 @@ export default async function PostPage({ params }: Params) {
 
   const otherPosts = (await listPublishedPosts()).filter((p) => p.slug !== slug).slice(0, 3);
 
+  const trilha = [
+    { nome: "Início", path: "/" },
+    { nome: "Diário", path: "/blog" },
+    { nome: post.title, path: `/blog/${post.slug}` },
+  ];
+
   return (
     <>
+      {!post.no_index && (
+        <>
+          <JsonLd schema={postSchema(post)} />
+          <JsonLd schema={breadcrumbSchema(trilha)} />
+        </>
+      )}
+
       <article className="relative pt-32 pb-16 bg-porcelain">
         <div className="mx-auto max-w-[1400px] px-6">
           <Reveal>

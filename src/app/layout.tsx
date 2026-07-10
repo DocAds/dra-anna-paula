@@ -1,8 +1,12 @@
 import type { Metadata } from "next";
+import { Fraunces, Inter } from "next/font/google";
 import "./globals.css";
 import { PublicChrome } from "@/components/PublicChrome";
 import { TrackingScripts } from "@/components/TrackingScripts";
 import { CookieConsent } from "@/components/CookieConsent";
+import { JsonLd } from "@/components/JsonLd";
+import { organizationSchema } from "@/lib/schema";
+import { BASE_URL } from "@/lib/seo";
 
 // Google Consent Mode v2 — default NEGADO, roda antes de qualquer tag do Google.
 const CONSENT_DEFAULT = `
@@ -13,6 +17,22 @@ gtag('consent','default',{ad_storage:'denied',analytics_storage:'denied',ad_user
 gtag('set','ads_data_redaction',true);
 `;
 
+// Self-hospedadas pelo next/font: sem request ao fonts.googleapis.com no caminho
+// crítico. Os eixos SOFT/opsz alimentam o font-variation-settings do globals.css.
+const fraunces = Fraunces({
+  subsets: ["latin"],
+  style: ["normal", "italic"],
+  axes: ["SOFT", "WONK", "opsz"],
+  variable: "--font-fraunces",
+  display: "swap",
+});
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: {
     default: "Dra. Anna Paula Bomtempo · Dermatologista em São Paulo",
@@ -20,10 +40,14 @@ export const metadata: Metadata = {
   },
   description:
     "Dermatologia premium em São Paulo. Tratamentos personalizados, tecnologia de ponta e acompanhamento próximo, na Vila Olímpia.",
-  metadataBase: new URL("https://draannabomtempo.com.br"),
+  metadataBase: new URL(BASE_URL),
+  // Sem alternates aqui: canonical é herdado pelas rotas filhas, e uma página
+  // que esquecesse de declarar o seu apontaria para a home.
+  robots: { index: true, follow: true },
   openGraph: {
     type: "website",
     locale: "pt_BR",
+    url: BASE_URL,
     title: "Dra. Anna Paula Bomtempo · Dermatologista",
     description:
       "Rejuvenescimento facial, lasers e tratamentos premium personalizados. CRM 177.888.",
@@ -33,17 +57,12 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="pt-BR">
+    <html lang="pt-BR" className={`${fraunces.variable} ${inter.variable}`}>
       <head>
         <script dangerouslySetInnerHTML={{ __html: CONSENT_DEFAULT }} />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,144,400..700,50;0,144,500..700,100;1,144,400..600,50&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap"
-        />
       </head>
       <body className="font-sans antialiased">
+        <JsonLd schema={organizationSchema} />
         <TrackingScripts />
         <CookieConsent />
         <PublicChrome>{children}</PublicChrome>
