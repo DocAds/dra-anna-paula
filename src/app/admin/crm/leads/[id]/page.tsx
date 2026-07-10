@@ -9,7 +9,7 @@ import { createNote, updateNote, deleteNote } from "../../notes-actions";
 import { LeadActions } from "./LeadActions";
 import { LeadNotes } from "./LeadNotes";
 import type { Lead } from "@/lib/supabase/types";
-import { TEMP_BADGE } from "@/lib/crmStatus";
+import { TEMP_BADGE, TEMP_LABEL } from "@/lib/crmStatus";
 
 export const dynamic = "force-dynamic";
 
@@ -31,7 +31,10 @@ function traduzCanalUtm(u: Pick<Lead, "utm_source" | "utm_medium" | "utm_campaig
 function traduzSource(s: string | null) {
   const map: Record<string, string> = {
     hero: "Botão principal do topo (Hero)",
-    "nav": "Botão 'Agendar' no cabeçalho",
+    nav: "Botão 'Agendar' no cabeçalho (desktop)",
+    "nav-mobile": "Botão 'Agendar' no menu do celular",
+    footer: "Botão de WhatsApp no rodapé",
+    link: "Link de WhatsApp no texto da página",
     float: "Botão flutuante do WhatsApp",
     "cta-final": "CTA do final da página",
     "bloco-dra": "Bloco da Dra. Anna",
@@ -95,7 +98,7 @@ export default async function LeadDetail({
           <div className="flex items-center gap-3 mb-3">
             <h1 className="font-display text-4xl text-ink leading-tight">{lead.nome}</h1>
             <span className={`text-[10px] uppercase tracking-widest2 px-3 py-1 rounded-full ${TEMP_BADGE[lead.temperatura]}`}>
-              {lead.temperatura}
+              {TEMP_LABEL[lead.temperatura]}
             </span>
           </div>
           <div className="text-sm text-ink/70">
