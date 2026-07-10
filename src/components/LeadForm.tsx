@@ -4,18 +4,10 @@ import { useEffect, useState, useTransition } from "react";
 import { motion } from "framer-motion";
 import { PhoneInput } from "react-international-phone";
 import "react-international-phone/style.css";
-import { whatsappLink, SITE } from "@/lib/site";
+import { whatsappLink } from "@/lib/site";
 import { interessesLead } from "@/lib/tratamentos";
-import { readClickId } from "@/lib/tracking";
-import { fireAdsConversion } from "@/lib/fire-conversion";
-
-declare global {
-  interface Window {
-    fbq?: (...args: unknown[]) => void;
-    gtag?: (...args: unknown[]) => void;
-    dataLayer?: unknown[];
-  }
-}
+import { newEventId, readClickId, trackLead } from "@/lib/tracking";
+import { openWhatsapp } from "@/lib/whatsapp";
 
 export function LeadForm({ source = "contato" }: { source?: string }) {
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
@@ -55,10 +47,7 @@ export function LeadForm({ source = "contato" }: { source?: string }) {
     }
 
     setStatus("sending");
-    const eventId =
-      typeof crypto !== "undefined" && "randomUUID" in crypto
-        ? crypto.randomUUID()
-        : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    const eventId = newEventId();
     const params = new URLSearchParams(window.location.search);
 
     const payload = {
@@ -83,37 +72,27 @@ export function LeadForm({ source = "contato" }: { source?: string }) {
       ts: Date.now(),
     };
 
-    // Pixel + GA com dedupe pelo mesmo event_id do CAPI (server)
-    if (window.fbq) {
-      window.fbq("track", "Lead", { content_name: payload.source, value: 0, currency: "BRL" }, { eventID: eventId });
-    }
-    if (window.gtag) {
-      window.gtag("event", "generate_lead", {
-        currency: "BRL",
-        value: 0,
-        transaction_id: eventId,
-        source: payload.source,
-      });
-    }
-    if (window.dataLayer) {
-      window.dataLayer.push({ event: "lead", source: payload.source, event_id: eventId });
-    }
-    fireAdsConversion("lead", { transaction_id: eventId });
-
     const msg =
       `Olá Dra. Anna, sou ${nome}.\n` +
       `Tenho interesse em: ${interesse}.\n` +
       (mensagem ? `Mensagem: ${mensagem}` : "");
 
+    trackLead({ source: payload.source, eventId });
+
+    // Abre antes de qualquer await: fora do gesto do usuário o popup é barrado.
+    // O lead vai pro banco em paralelo, com keepalive, e não segura o redirect.
+    openWhatsapp(whatsappLink(msg));
+    setStatus("sent");
+
     start(async () => {
       try {
-        await fetch("/api/lead", {
+        const res = await fetch("/api/lead", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
+          keepalive: true,
         });
-        setStatus("sent");
-        window.open(`https://wa.me/${SITE.whatsappE164}?text=${encodeURIComponent(msg)}`, "_blank");
+        if (!res.ok) setStatus("error");
       } catch {
         setStatus("error");
       }
@@ -200,8 +179,11 @@ export function LeadForm({ source = "contato" }: { source?: string }) {
       )}
       {status === "error" && (
         <p className="text-sm text-red-700">
-          Tivemos um problema. Tente novamente ou fale direto no{" "}
-          <a className="underline" href={whatsappLink()} target="_blank" rel="noopener">WhatsApp</a>.
+          Te encaminhamos pro WhatsApp, mas não conseguimos registrar seus dados por aqui.
+          Se a conversa não abrir, fale direto no{" "}
+          <a className="underline" href={whatsappLink()} target="_blank" rel="noopener" data-wa-direct="">
+            WhatsApp
+          </a>.
         </p>
       )}
 

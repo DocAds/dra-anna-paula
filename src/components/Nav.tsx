@@ -101,6 +101,7 @@ export function Nav() {
                 href={whatsappLink()}
                 target="_blank"
                 rel="noopener"
+                data-wa-source="nav-mobile"
                 onClick={() => setOpen(false)}
                 className="mt-12 inline-flex w-full justify-center items-center rounded-full bg-cocoa px-5 py-4 text-[12px] uppercase tracking-widest text-bone"
               >

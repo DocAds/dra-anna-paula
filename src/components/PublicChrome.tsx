@@ -5,6 +5,7 @@ import { Nav } from "./Nav";
 import { Footer } from "./Footer";
 import { WhatsAppFloat } from "./WhatsAppFloat";
 import { LeadQualifyModal } from "./LeadQualifyModal";
+import { WhatsAppInterceptor } from "./WhatsAppInterceptor";
 
 export function PublicChrome({ children }: { children: React.ReactNode }) {
   const path = usePathname() || "";
@@ -16,6 +17,7 @@ export function PublicChrome({ children }: { children: React.ReactNode }) {
 
   return (
     <>
+      <WhatsAppInterceptor />
       <Nav />
       <main className="overflow-hidden">{children}</main>
       <Footer />

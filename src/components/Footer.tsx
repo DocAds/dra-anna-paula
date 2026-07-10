@@ -38,7 +38,7 @@ export function Footer() {
         <div className="md:col-span-4 space-y-6">
           <div>
             <div className="text-[11px] uppercase tracking-widest3 text-cream/55 mb-3">Atendimento</div>
-            <a href={whatsappLink()} target="_blank" rel="noopener" className="block font-display text-2xl">
+            <a href={whatsappLink()} target="_blank" rel="noopener" data-wa-source="footer" className="block font-display text-2xl">
               {SITE.phone}
             </a>
             <a href={SITE.instagram} target="_blank" rel="noopener" className="underline-editorial text-sm">

@@ -1,3 +1,5 @@
+import { fireAdsConversion } from "@/lib/fire-conversion";
+
 declare global {
   interface Window {
     dataLayer?: unknown[];
@@ -6,39 +8,49 @@ declare global {
   }
 }
 
-const uuid = () =>
+export const newEventId = () =>
   typeof crypto !== "undefined" && "randomUUID" in crypto
     ? crypto.randomUUID()
     : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
-export const trackLead = (payload: { source: string; value?: number; phone?: string; email?: string }) => {
+/**
+ * Dispara o lead em todos os destinos com o mesmo event_id.
+ * O event_id é o que deduplica o Pixel client-side contra o CAPI server-side
+ * (/api/lead reenvia o mesmo id pro Graph).
+ */
+export const trackLead = (payload: { source: string; eventId: string; value?: number }) => {
   if (typeof window === "undefined") return;
-  const eventId = uuid();
+  const { source, eventId, value = 0 } = payload;
 
-  if (window.fbq) {
-    window.fbq("track", "Lead", { content_name: payload.source, value: payload.value ?? 0, currency: "BRL" }, { eventID: eventId });
-  }
-  if (window.gtag) {
-    window.gtag("event", "generate_lead", {
-      currency: "BRL",
-      value: payload.value ?? 0,
-      transaction_id: eventId,
-      source: payload.source,
-    });
-  }
-  if (window.dataLayer) {
-    window.dataLayer.push({ event: "lead", source: payload.source, value: payload.value ?? 0, event_id: eventId });
-  }
-
-  fetch("/api/lead", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ ...payload, event_id: eventId, ts: Date.now() }),
-  }).catch(() => undefined);
+  window.fbq?.(
+    "track",
+    "Lead",
+    { content_name: source, value, currency: "BRL" },
+    { eventID: eventId }
+  );
+  window.gtag?.("event", "generate_lead", {
+    currency: "BRL",
+    value,
+    transaction_id: eventId,
+    source,
+  });
+  window.dataLayer?.push({ event: "lead", source, value, event_id: eventId });
+  fireAdsConversion("lead", { transaction_id: eventId });
 };
 
-export const trackWhatsapp = (source: string) =>
-  trackLead({ source: `whatsapp:${source}` });
+/**
+ * Clique em qualquer CTA de WhatsApp. É intenção, não lead: o lead só existe
+ * depois que o modal é enviado. Só vira conversão do Ads se houver uma conversão
+ * cadastrada no painel com event="whatsapp".
+ */
+export const trackWhatsappClick = (source: string) => {
+  if (typeof window === "undefined") return;
+  const eventId = newEventId();
+
+  window.fbq?.("track", "Contact", { content_name: source }, { eventID: eventId });
+  window.dataLayer?.push({ event: "whatsapp_click", source, event_id: eventId });
+  fireAdsConversion("whatsapp", { transaction_id: eventId });
+};
 
 export const persistGclid = () => {
   if (typeof window === "undefined") return;

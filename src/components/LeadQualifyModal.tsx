@@ -6,18 +6,10 @@ import { X } from "lucide-react";
 import { PhoneInput } from "react-international-phone";
 import "react-international-phone/style.css";
 import { leadModal } from "@/lib/leadModal";
-import { SITE } from "@/lib/site";
+import { whatsappLink } from "@/lib/site";
 import { interessesLead } from "@/lib/tratamentos";
-import { readClickId } from "@/lib/tracking";
-import { fireAdsConversion } from "@/lib/fire-conversion";
-
-declare global {
-  interface Window {
-    fbq?: (...args: unknown[]) => void;
-    gtag?: (...args: unknown[]) => void;
-    dataLayer?: unknown[];
-  }
-}
+import { newEventId, readClickId, trackLead } from "@/lib/tracking";
+import { openWhatsapp } from "@/lib/whatsapp";
 
 const INTERESSES = interessesLead;
 
@@ -93,7 +85,7 @@ export function LeadQualifyModal() {
     const mensagemExtra = String(fd.get("mensagem") || "").trim();
     if (!nome) return;
 
-    const eventId = crypto.randomUUID();
+    const eventId = newEventId();
     const params = new URLSearchParams(window.location.search);
 
     const payload = {
@@ -119,24 +111,19 @@ export function LeadQualifyModal() {
       ts: Date.now(),
     };
 
-    // Pixel client-side (dedupe via eventID)
-    if (typeof window !== "undefined" && window.fbq) {
-      window.fbq(
-        "track",
-        "Lead",
-        { content_name: payload.source, value: 0, currency: "BRL" },
-        { eventID: eventId }
-      );
-    }
-    if (window.gtag) {
-      window.gtag("event", "generate_lead", {
-        currency: "BRL",
-        value: 0,
-        transaction_id: eventId,
-        source: payload.source,
-      });
-    }
-    fireAdsConversion("lead", { transaction_id: eventId });
+    const msg =
+      `Olá Dra. Anna, sou ${nome}.\n` +
+      `Tenho interesse em: ${interesse}.\n` +
+      `Urgência: ${urgencia}.\n` +
+      (mensagemExtra ? `Mensagem: ${mensagemExtra}\n` : "") +
+      (vis.message ? `Origem: ${vis.message}` : "");
+
+    trackLead({ source: payload.source, eventId });
+
+    // Abre antes de qualquer await: fora do gesto do usuário o popup é barrado.
+    // O lead vai pro banco em paralelo, com keepalive, e não segura o redirect.
+    openWhatsapp(whatsappLink(msg));
+    setSent(true);
 
     start(async () => {
       try {
@@ -144,21 +131,11 @@ export function LeadQualifyModal() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
+          keepalive: true,
         });
       } catch {
-        /* segue mesmo se falhar — abre WhatsApp */
+        /* o WhatsApp já abriu; não bloqueia o contato */
       }
-
-      const msg =
-        `Olá Dra. Anna, sou ${nome}.\n` +
-        `Tenho interesse em: ${interesse}.\n` +
-        `Urgência: ${urgencia}.\n` +
-        (mensagemExtra ? `Mensagem: ${mensagemExtra}\n` : "") +
-        (vis.message ? `Origem: ${vis.message}` : "");
-
-      setSent(true);
-      const url = `https://wa.me/${SITE.whatsappE164}?text=${encodeURIComponent(msg)}`;
-      window.open(url, "_blank");
       setTimeout(() => leadModal.close(), 400);
     });
   }
