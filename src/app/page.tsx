@@ -69,12 +69,12 @@ function HeroMobile() {
     <section className="lg:hidden relative flex min-h-[100svh] flex-col overflow-hidden bg-bone">
       <div className="relative flex-1 min-h-[34svh] w-full">
         <Image
-          src="/img/dra/dra-hero-1440.webp"
-          alt="Dra. Anna Paula Bomtempo"
+          src="/img/dra/dra-hero-office-1672.webp"
+          alt="Dra. Anna Paula Bomtempo sorrindo em seu consultório de dermatologia"
           fill
           priority
           sizes="100vw"
-          className="object-cover object-[center_8%]"
+          className="object-cover object-[66%_12%]"
         />
         {/* Scrim no topo para leitura do menu flutuante */}
         <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-ink/35 via-ink/5 to-transparent" />
@@ -118,15 +118,15 @@ function HeroDesktop() {
   return (
     <section className="hidden lg:flex relative min-h-screen overflow-hidden pt-28 pb-20 items-center">
       <Image
-        src="/img/dra/dra-hero-bg-1672.webp"
-        alt="Dra. Anna Paula Bomtempo"
+        src="/img/dra/dra-hero-office-1672.webp"
+        alt="Dra. Anna Paula Bomtempo sorrindo em seu consultório de dermatologia"
         fill
         priority
         sizes="100vw"
         className="object-cover object-[72%_center]"
       />
-      {/* Véu suave à esquerda para leitura do texto sobre a foto */}
-      <div className="absolute inset-0 bg-gradient-to-r from-bone/75 via-bone/25 to-transparent" />
+      {/* Véu à esquerda: bege forte p/ contraste do texto, transparente à direita p/ a Dra. em destaque */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#F5EFE6_0%,rgba(245,239,230,0.72)_42%,transparent_68%)]" />
 
       <div className="relative w-full mx-auto grid max-w-7xl gap-12 px-6 lg:grid-cols-12 lg:gap-8 lg:px-12 items-center">
         <div className="lg:col-span-6 lg:pt-10 z-10">
