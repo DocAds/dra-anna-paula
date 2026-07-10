@@ -66,8 +66,8 @@ export default function SobrePage() {
                   <div className="col-span-4 row-span-4 relative rounded-[28px] overflow-hidden editorial-card p-2">
                     <div className="relative h-full w-full rounded-[20px] overflow-hidden bg-cream">
                       <Image
-                        src="/img/dra/sobre-main-1440.webp"
-                        alt="Dra. Anna Paula Bomtempo"
+                        src="/img/dra/sobre-anna-retrato.webp"
+                        alt="Dra. Anna Paula Bomtempo, dermatologista"
                         fill
                         priority
                         sizes="(min-width: 1024px) 36vw, 80vw"
