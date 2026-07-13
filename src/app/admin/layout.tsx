@@ -52,7 +52,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         <aside className="hidden border-r border-cocoa/10 bg-gradient-to-b from-porcelain to-bone p-6 md:sticky md:top-0 md:flex md:h-screen md:flex-col">
           <AdminSidebarContent isAdmin={isAdmin} sections={sections} name={name} role={profile.role} />
         </aside>
-        <div className="flex flex-col">{children}</div>
+        <div className="flex flex-col min-w-0">{children}</div>
       </div>
     </div>
   );
