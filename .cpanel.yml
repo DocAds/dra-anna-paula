@@ -1,0 +1,8 @@
+---
+deployment:
+  tasks:
+    # Usa o Node do app (nodevenv) se já existir; senão, o Node 20 do sistema (CloudLinux).
+    - if [ -f /home/murilosp/nodevenv/dra-anna-next/20/bin/activate ]; then source /home/murilosp/nodevenv/dra-anna-next/20/bin/activate; else export PATH=/opt/alt/alt-nodejs20/root/usr/bin:$PATH; fi
+    - node -v && npm -v
+    - npm ci --include=dev --no-audit --no-fund
+    - npm run build
