@@ -5,6 +5,7 @@ declare global {
     dataLayer?: unknown[];
     fbq?: (...args: unknown[]) => void;
     gtag?: (...args: unknown[]) => void;
+    __adsConversions?: Array<{ event: string }>;
   }
 }
 
@@ -12,6 +13,23 @@ export const newEventId = () =>
   typeof crypto !== "undefined" && "randomUUID" in crypto
     ? crypto.randomUUID()
     : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+
+// Quantas conversões do Google Ads estão ligadas a um evento (só p/ diagnóstico).
+const adsCount = (event: string) =>
+  typeof window !== "undefined" && Array.isArray(window.__adsConversions)
+    ? window.__adsConversions.filter((c) => c.event === event).length
+    : 0;
+
+// Espelha cada disparo para o painel de diagnóstico (TrackingDebugPanel), que
+// escuta este evento. Não faz nada em produção sem o painel montado.
+function emitTrackDebug(detail: Record<string, unknown>) {
+  if (typeof window === "undefined") return;
+  try {
+    window.dispatchEvent(new CustomEvent("anna:track:debug", { detail: { ...detail, t: Date.now() } }));
+  } catch {
+    /* CustomEvent indisponível: ignora */
+  }
+}
 
 /**
  * Dispara o lead em todos os destinos com o mesmo event_id.
@@ -36,6 +54,15 @@ export const trackLead = (payload: { source: string; eventId: string; value?: nu
   });
   window.dataLayer?.push({ event: "lead", source, value, event_id: eventId });
   fireAdsConversion("lead", { transaction_id: eventId });
+
+  emitTrackDebug({
+    type: "lead",
+    source,
+    eventId,
+    fbq: !!window.fbq,
+    gtag: !!window.gtag,
+    ads: adsCount("lead"),
+  });
 };
 
 /**
@@ -48,8 +75,18 @@ export const trackWhatsappClick = (source: string) => {
   const eventId = newEventId();
 
   window.fbq?.("track", "Contact", { content_name: source }, { eventID: eventId });
+  window.gtag?.("event", "whatsapp_click", { source, transaction_id: eventId });
   window.dataLayer?.push({ event: "whatsapp_click", source, event_id: eventId });
   fireAdsConversion("whatsapp", { transaction_id: eventId });
+
+  emitTrackDebug({
+    type: "whatsapp_click",
+    source,
+    eventId,
+    fbq: !!window.fbq,
+    gtag: !!window.gtag,
+    ads: adsCount("whatsapp"),
+  });
 };
 
 export const persistGclid = () => {

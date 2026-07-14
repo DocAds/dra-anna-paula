@@ -6,6 +6,7 @@ import { Footer } from "./Footer";
 import { WhatsAppFloat } from "./WhatsAppFloat";
 import { LeadQualifyModal } from "./LeadQualifyModal";
 import { WhatsAppInterceptor } from "./WhatsAppInterceptor";
+import { TrackingDebugPanel } from "./TrackingDebugPanel";
 
 export function PublicChrome({ children }: { children: React.ReactNode }) {
   const path = usePathname() || "";
@@ -23,6 +24,7 @@ export function PublicChrome({ children }: { children: React.ReactNode }) {
       <Footer />
       <WhatsAppFloat />
       <LeadQualifyModal />
+      <TrackingDebugPanel />
     </>
   );
 }
