@@ -11,6 +11,7 @@ import { tratamentos, grupos, stats, tecnologiasParceiras, type Categoria } from
 import { SITE } from "@/lib/site";
 import { Depoimentos } from "@/components/Depoimentos";
 import { DiscreetMap } from "@/components/DiscreetMap";
+import { VideoApresentacao } from "@/components/VideoApresentacao";
 import {
   Sparkles,
   Hand,
@@ -40,12 +41,12 @@ export default function HomePage() {
     <>
       <Hero />
       <RibbonTecnologias />
+      <Dra />
       <Welcome />
       <Categorias />
       <Pilares />
       <TratamentosGrid destaques={destaques} />
       <Signature t={signature} />
-      <Dra />
       <Stats />
       <Depoimentos />
       <Insights />
@@ -465,7 +466,7 @@ function Dra() {
     { icon: Award, label: "Sociedades", value: "SBD · SBCD" },
   ];
   return (
-    <section className="relative py-28 md:py-40 bg-cocoa text-cream overflow-hidden">
+    <section className="superficie-escura relative py-28 md:py-40 bg-cocoa text-cream overflow-hidden">
       <div
         aria-hidden
         className="absolute inset-0 opacity-30"
@@ -533,6 +534,22 @@ function Dra() {
             <CTA source="bloco-dra-agendar">Agendar avaliação</CTA>
           </Reveal>
         </div>
+      </div>
+
+      <div className="relative mx-auto max-w-5xl px-6 mt-20 md:mt-24">
+        <Reveal>
+          <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-baseline md:justify-between md:gap-6">
+            <div className="text-[11px] uppercase tracking-widest3 text-cream/55 flex items-center gap-3">
+              <span className="h-px w-12 bg-cream/40" /> Uma visita ao consultório
+            </div>
+            <p className="text-sm text-cream/60 md:max-w-xs md:text-right leading-relaxed">
+              O método, o tempo de consulta e as tecnologias, em um minuto e meio.
+            </p>
+          </div>
+        </Reveal>
+        <Reveal delay={0.15}>
+          <VideoApresentacao />
+        </Reveal>
       </div>
 
       <div className="relative mx-auto max-w-7xl px-6 mt-16">

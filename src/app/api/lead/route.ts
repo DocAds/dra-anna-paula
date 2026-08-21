@@ -6,6 +6,26 @@ import { getMarketingSettings } from "@/lib/marketing";
 const sha = (v: string) =>
   crypto.createHash("sha256").update(v.trim().toLowerCase()).digest("hex");
 
+// Anti-flood por IP, na memória do isolate. Não substitui uma regra de Rate
+// Limiting na borda (a Cloudflare vê todos os isolates, este contador não),
+// mas barra o envio repetido trivial num endpoint público que grava via
+// service role. Falha aberta de propósito: perder lead é pior que aceitar um
+// envio a mais.
+const JANELA_MS = 60 * 60 * 1000;
+const MAX_ENVIOS_POR_JANELA = 12;
+const TETO_DE_IPS = 5000;
+const enviosPorIp = new Map<string, number[]>();
+
+function excedeuLimite(ip: string): boolean {
+  if (!ip) return false;
+  const agora = Date.now();
+  const recentes = (enviosPorIp.get(ip) ?? []).filter((t) => agora - t < JANELA_MS);
+  recentes.push(agora);
+  if (enviosPorIp.size > TETO_DE_IPS) enviosPorIp.clear();
+  enviosPorIp.set(ip, recentes);
+  return recentes.length > MAX_ENVIOS_POR_JANELA;
+}
+
 function temperaturaFromUrgencia(u: string | undefined): "frio" | "morno" | "quente" {
   if (!u) return "morno";
   const v = u.toLowerCase();
@@ -49,6 +69,13 @@ export async function POST(req: Request) {
     req.headers.get("x-forwarded-for")?.split(",")[0].trim() ??
     req.headers.get("cf-connecting-ip") ??
     "";
+  if (excedeuLimite(ip)) {
+    return NextResponse.json(
+      { ok: false, error: "Muitas tentativas seguidas. Tente de novo em alguns minutos." },
+      { status: 429 }
+    );
+  }
+
   const ipCountry =
     req.headers.get("x-vercel-ip-country") ||
     req.headers.get("cf-ipcountry") ||

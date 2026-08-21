@@ -32,6 +32,27 @@ const nextConfig: NextConfig = {
   experimental: {
     optimizePackageImports: ["framer-motion", "lucide-react"],
   },
+  // Cabeçalhos de segurança. Falta a CSP: o site injeta tags de marketing
+  // gravadas no painel (custom_head/custom_body) e carrega GTM, GA4, Ads e
+  // Meta, então uma CSP feita no escuro derruba a medição de conversão. Ela
+  // entra em tarefa própria, com o inventário de origens e teste de hit.
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          { key: "Strict-Transport-Security", value: "max-age=31536000; includeSubDomains" },
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "X-Frame-Options", value: "SAMEORIGIN" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          {
+            key: "Permissions-Policy",
+            value: "camera=(), microphone=(), geolocation=(), interest-cohort=()",
+          },
+        ],
+      },
+    ];
+  },
 };
 
 export default nextConfig;

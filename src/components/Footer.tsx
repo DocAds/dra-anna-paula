@@ -4,7 +4,7 @@ import { SITE, NAV, whatsappLink } from "@/lib/site";
 
 export function Footer() {
   return (
-    <footer className="relative bg-cocoa text-cream">
+    <footer className="superficie-escura relative bg-cocoa text-cream">
       <div className="absolute inset-x-0 top-0 h-px shimmer-line animate-shimmer" />
       <div className="mx-auto max-w-6xl px-6 py-20 grid gap-14 md:grid-cols-12">
         <div className="md:col-span-5 space-y-6">

@@ -178,7 +178,7 @@ export default async function TratamentoPage({ params }: Params) {
         </div>
       </section>
 
-      <section className="relative py-24 bg-cocoa text-cream overflow-hidden">
+      <section className="superficie-escura relative py-24 bg-cocoa text-cream overflow-hidden">
         <div
           className="absolute inset-0 opacity-30"
           aria-hidden

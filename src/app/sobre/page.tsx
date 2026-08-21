@@ -181,7 +181,7 @@ export default function SobrePage() {
         </div>
       </section>
 
-      <section className="relative py-28 md:py-36 bg-cocoa text-cream overflow-hidden">
+      <section className="superficie-escura relative py-28 md:py-36 bg-cocoa text-cream overflow-hidden">
         <div className="absolute inset-0 opacity-30" aria-hidden style={{
           background:
             "radial-gradient(50% 50% at 70% 30%, rgba(231,222,208,0.25), transparent 70%)",

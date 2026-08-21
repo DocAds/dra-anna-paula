@@ -16,10 +16,14 @@ type Props = {
 export function CTA({ children, source = "default", variant = "primary", href, className }: Props) {
   const base =
     "group inline-flex items-center gap-3 rounded-full px-7 py-4 text-[12px] uppercase tracking-widest2 transition-all duration-500";
+  // Dentro de .superficie-escura (seções bg-cocoa e o rodapé) o botão inverte
+  // sozinho: cocoa sobre cocoa não tem contraste nenhum.
   const styles = {
-    primary: "bg-cocoa text-bone hover:bg-ink",
-    outline: "border border-cocoa/40 text-cocoa hover:border-cocoa hover:bg-cocoa hover:text-bone",
-    ghost: "text-cocoa hover:text-ink",
+    primary:
+      "bg-cocoa text-bone hover:bg-ink [.superficie-escura_&]:bg-cream [.superficie-escura_&]:text-ink [.superficie-escura_&]:hover:bg-bone",
+    outline:
+      "border border-cocoa/40 text-cocoa hover:border-cocoa hover:bg-cocoa hover:text-bone [.superficie-escura_&]:border-bone/60 [.superficie-escura_&]:text-bone [.superficie-escura_&]:hover:border-bone [.superficie-escura_&]:hover:bg-bone [.superficie-escura_&]:hover:text-ink",
+    ghost: "text-cocoa hover:text-ink [.superficie-escura_&]:text-bone [.superficie-escura_&]:hover:text-cream",
   } as const;
 
   const inner = (

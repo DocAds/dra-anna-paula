@@ -1,0 +1,345 @@
+<title>Auditoria de Segurança — Site Dra. Anna Bomtempo</title>
+<style>
+  :root {
+    --tinta: #2B1F17;
+    --papel: #FBF7F1;
+    --cacau: #82614A;
+    --creme: #E7DED0;
+    --osso: #F5EFE6;
+    --critico: #8E2A2A;
+    --alto: #B4571B;
+    --medio: #8A7320;
+    --baixo: #4A6741;
+    --linha: rgba(43, 31, 23, 0.12);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--papel);
+    color: var(--tinta);
+    font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  }
+  .envelope { max-width: 900px; margin: 0 auto; padding: 56px 24px 96px; }
+  header { border-bottom: 2px solid var(--tinta); padding-bottom: 28px; margin-bottom: 40px; }
+  .etiqueta {
+    font-size: 11px; letter-spacing: .18em; text-transform: uppercase;
+    color: var(--cacau); margin-bottom: 14px;
+  }
+  h1 { font-size: clamp(1.9rem, 4vw, 2.6rem); line-height: 1.1; margin: 0 0 10px; font-weight: 600; }
+  .subtitulo { color: rgba(43,31,23,.66); margin: 0; }
+  h2 {
+    font-size: 1.35rem; margin: 48px 0 16px; padding-bottom: 8px;
+    border-bottom: 1px solid var(--linha);
+  }
+  h3 { font-size: 1.02rem; margin: 28px 0 6px; }
+  .placar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 32px 0; }
+  .placar div {
+    border: 1px solid var(--linha); border-radius: 12px; padding: 16px; background: #fff;
+  }
+  .placar .n { font-size: 2rem; font-weight: 600; line-height: 1; }
+  .placar .r { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: rgba(43,31,23,.6); margin-top: 6px; }
+  .n.critico { color: var(--critico); } .n.alto { color: var(--alto); }
+  .n.medio { color: var(--medio); } .n.baixo { color: var(--baixo); }
+  .achado { border: 1px solid var(--linha); border-radius: 12px; padding: 20px 22px; margin: 16px 0; background: #fff; }
+  .achado.resolvido { background: #FAFBF8; }
+  .selo {
+    display: inline-block; font-size: 10px; letter-spacing: .14em; text-transform: uppercase;
+    padding: 4px 10px; border-radius: 999px; color: #fff; margin-right: 8px; vertical-align: 2px;
+  }
+  .selo.alto { background: var(--alto); } .selo.medio { background: var(--medio); }
+  .selo.baixo { background: var(--baixo); } .selo.ok { background: var(--baixo); }
+  code {
+    background: var(--osso); padding: 1px 6px; border-radius: 4px;
+    font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  pre {
+    background: var(--tinta); color: var(--osso); padding: 14px 16px; border-radius: 10px;
+    overflow-x: auto; font: 12.5px/1.6 ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  table { width: 100%; border-collapse: collapse; margin: 18px 0; font-size: 14.5px; }
+  th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--linha); vertical-align: top; }
+  th { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: rgba(43,31,23,.6); }
+  td.ok { color: var(--baixo); font-weight: 600; }
+  td.falta { color: var(--alto); font-weight: 600; }
+  .rodape { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--linha); font-size: 13px; color: rgba(43,31,23,.6); }
+  @media print {
+    body { background: #fff; }
+    .envelope { padding: 0; max-width: none; }
+    .achado, .placar div { break-inside: avoid; }
+  }
+</style>
+
+<div class="envelope">
+<header>
+  <div class="etiqueta">DocAds · Auditoria de segurança</div>
+  <h1>Site e painel da Dra. Anna Paula Bomtempo</h1>
+  <p class="subtitulo">
+    21 de agosto de 2026 · branch <code>feat/cloudflare-opennext</code> · Next.js 15.5.23 sobre Cloudflare Workers (OpenNext)
+  </p>
+</header>
+
+<h2>Veredito</h2>
+<p>
+  <strong>Aprovado para publicar.</strong> As três falhas altas foram corrigidas nesta rodada.
+  Nenhum segredo no código versionado, RLS ativa nas sete tabelas e PII hasheada antes de sair para a Meta.
+  Ficam seis pendências médias documentadas, sendo a CSP a mais relevante, deixada de fora de propósito
+  para não derrubar a medição de conversão num deploy que não tinha esse objetivo.
+</p>
+
+<div class="placar">
+  <div><div class="n critico">0</div><div class="r">Críticos</div></div>
+  <div><div class="n alto">0</div><div class="r">Altos abertos</div></div>
+  <div><div class="n medio">6</div><div class="r">Médios</div></div>
+  <div><div class="n baixo">2</div><div class="r">Baixos</div></div>
+</div>
+
+<h2>O que rodou</h2>
+<table>
+  <tr><th>Verificação</th><th>Resultado</th></tr>
+  <tr><td><code>scan-secrets.js --all</code> (122 arquivos)</td><td>1 médio: service_role em <code>.env.local</code>, fora do versionamento</td></tr>
+  <tr><td><code>npm audit</code></td><td>18 vulnerabilidades: 12 altas, 1 moderada, 5 baixas (ver M5)</td></tr>
+  <tr><td><code>ecc-agentshield scan</code></td><td>Nota A (100/100), nenhum achado</td></tr>
+  <tr><td>Revisão manual de código</td><td>Rotas de API, Server Actions, guard do admin, RLS das migrations, tracking</td></tr>
+  <tr><td><code>tsc --noEmit</code> e <code>next build</code></td><td>Ambos limpos após as correções</td></tr>
+</table>
+<p>
+  A revisão de código foi feita à mão, lendo os arquivos, e não por agentes de revisão:
+  a sessão está sob instrução de não disparar subagentes sem pedido explícito.
+  As rotas <code>/api/lead</code>, <code>/api/marketing</code>, <code>/api/geo</code>, o
+  <code>middleware.ts</code>, o <code>admin-guard.ts</code> e as sete migrations foram lidos na íntegra.
+</p>
+
+<h2>Altos corrigidos nesta rodada</h2>
+
+<div class="achado resolvido">
+  <h3><span class="selo ok">Corrigido</span> A1 · Next.js com falhas em Server Actions</h3>
+  <p>
+    <code>package.json</code> · A versão instalada era 15.5.18, dentro do intervalo de sete advisories,
+    três deles altos: negação de serviço no App Router via Server Actions, SSRF em Server Actions e
+    SSRF em rewrites por hostname controlado pelo atacante.
+  </p>
+  <p>
+    <strong>Por que importa aqui:</strong> o painel usa Server Actions de verdade
+    (<code>src/app/admin/actions.ts</code>, <code>posts/actions.ts</code>, <code>posts/ai-actions.ts</code>),
+    então não é superfície teórica.
+  </p>
+  <p><strong>Correção aplicada:</strong> atualizado para <code>next@15.5.23</code>, dentro da mesma minor. Build e tipos limpos depois da troca.</p>
+</div>
+
+<div class="achado resolvido">
+  <h3><span class="selo ok">Corrigido</span> A2 · Nenhum cabeçalho de segurança na resposta</h3>
+  <p>
+    <code>next.config.ts</code> · A resposta de produção não trazia HSTS, <code>X-Content-Type-Options</code>,
+    <code>Referrer-Policy</code>, <code>Permissions-Policy</code> nem proteção contra enquadramento.
+    Confirmado com <code>curl -sI https://draannabomtempo.com.br/</code> antes da correção.
+  </p>
+  <p><strong>Correção aplicada:</strong> bloco <code>headers()</code> no <code>next.config.ts</code>:</p>
+  <pre>Strict-Transport-Security: max-age=31536000; includeSubDomains
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+Referrer-Policy: strict-origin-when-cross-origin
+Permissions-Policy: camera=(), microphone=(), geolocation=(), interest-cohort=()</pre>
+  <p>
+    O <code>includeSubDomains</code> foi conferido antes: <code>www.draannabomtempo.com.br</code> responde
+    HTTPS 200, então não quebra o subdomínio em uso. Sem <code>preload</code>, que é compromisso difícil de desfazer.
+  </p>
+</div>
+
+<div class="achado resolvido">
+  <h3><span class="selo ok">Corrigido</span> A3 · <code>/api/lead</code> sem limite de envio</h3>
+  <p>
+    <code>src/app/api/lead/route.ts</code> · Endpoint público, sem autenticação, que grava na tabela
+    <code>leads</code> usando a chave <code>service_role</code> (que passa por cima da RLS). Não havia
+    limite nenhum: um laço simples enchia a base de leads do CRM e ainda disparava eventos à Meta.
+  </p>
+  <p>
+    <strong>Correção aplicada:</strong> janela deslizante por IP na memória do isolate, 12 envios por hora,
+    respondendo 429. Falha aberta de propósito (sem IP, ou em qualquer erro, o lead passa): perder um lead
+    real é pior que aceitar um envio a mais.
+  </p>
+  <p>
+    <strong>Limite conhecido desta correção:</strong> cada isolate do Worker tem a própria memória, então o
+    contador não é global. Isso barra o abuso trivial, não um ataque distribuído. A proteção robusta é uma
+    regra de Rate Limiting na borda da Cloudflare, configurada no painel, sem código. Recomendado como próximo passo.
+  </p>
+</div>
+
+<h2>Médios em aberto</h2>
+
+<div class="achado">
+  <h3><span class="selo medio">Médio</span> M1 · Sem Content-Security-Policy</h3>
+  <p>
+    Não há CSP. O caminho correto é nonce por requisição, sem <code>unsafe-inline</code> em script.
+  </p>
+  <p>
+    <strong>Por que não foi feito agora:</strong> o site injeta HTML e JavaScript livres gravados no painel
+    (<code>custom_head</code> e <code>custom_body</code>, recriados como <code>&lt;script&gt;</code> pelo
+    <code>RawInjector</code> em <code>TrackingScripts.tsx</code>) e carrega GTM, GA4, Google Ads e Meta Pixel.
+    Uma CSP escrita sem o inventário completo de origens bloqueia o hit de conversão em silêncio, com a tag
+    carregando normalmente. Numa conta que acabou de ter a medição arrumada, esse estrago é maior que o risco
+    que a CSP cobre.
+  </p>
+  <p><strong>Como resolver:</strong> tarefa própria, levantando as origens reais no relatório de rede, aplicando em Report-Only primeiro e conferindo o hit de conversão antes de forçar.</p>
+</div>
+
+<div class="achado">
+  <h3><span class="selo medio">Médio</span> M2 · Procedimento estético indo para a Meta como dado de saúde</h3>
+  <p>
+    <code>src/app/api/lead/route.ts</code> · O evento do CAPI leva <code>interesse</code> e <code>urgencia</code>
+    dentro de <code>custom_data</code>, e o <code>event_source_url</code> repassa a <code>page_url</code> do
+    navegador, que pode ser <code>/tratamentos/laser-co2-fracionado</code>.
+  </p>
+  <p>
+    <strong>Por que importa:</strong> a política de dados sensíveis da Meta trata procedimento médico e estético
+    associado a uma pessoa como categoria proibida. A punição costuma ser bloqueio do domínio ou da conta de
+    anúncios, não um aviso.
+  </p>
+  <p><strong>Como resolver:</strong> tirar <code>interesse</code> e <code>urgencia</code> do <code>custom_data</code> (eles já ficam no CRM, que é onde servem) e normalizar o <code>event_source_url</code> para a home.</p>
+</div>
+
+<div class="achado">
+  <h3><span class="selo medio">Médio</span> M3 · O build ignora erro de tipo e de lint</h3>
+  <p>
+    <code>next.config.ts</code> · <code>typescript.ignoreBuildErrors: true</code> e
+    <code>eslint.ignoreDuringBuilds: true</code>. Já existe um TODO no arquivo.
+  </p>
+  <p>
+    <strong>Isso não é teórico:</strong> durante esta auditoria, uma tentativa de <code>npm audit fix</code>
+    subiu o <code>@supabase/supabase-js</code> de 2.46.1 para 2.112.3 e quebrou a tipagem dos callbacks de
+    cookie em <code>src/lib/supabase/middleware.ts</code> e <code>server.ts</code>. O <code>next build</code>
+    passou mesmo assim, com dez erros de tipo. Sem rodar <code>tsc</code> à parte, isso teria ido para produção.
+    A atualização foi revertida.
+  </p>
+  <p><strong>Como resolver:</strong> desligar os dois flags e deixar o build falhar de verdade, ou garantir <code>tsc --noEmit</code> como etapa obrigatória do Workers Builds.</p>
+</div>
+
+<div class="achado">
+  <h3><span class="selo medio">Médio</span> M4 · Script livre do painel executa no site</h3>
+  <p>
+    <code>src/components/TrackingScripts.tsx</code> · <code>custom_head</code> e <code>custom_body</code> viram
+    <code>&lt;script&gt;</code> executável em todas as páginas públicas. É funcionalidade desejada (colar tag de
+    marketing sem deploy), mas é execução de código arbitrário a partir de uma linha do banco.
+  </p>
+  <p>
+    <strong>Mitigação existente:</strong> a policy <code>mkt_write_admin</code> em <code>marketing_settings</code>
+    restringe a escrita a <code>is_admin()</code>, e a leitura da tabela crua também é só admin (o site lê pelo servidor).
+    O risco fica limitado a uma conta de administrador comprometida.
+  </p>
+  <p><strong>Como reduzir:</strong> a CSP do M1 diminui bastante o alcance de um script injetado.</p>
+</div>
+
+<div class="achado">
+  <h3><span class="selo medio">Médio</span> M5 · Onze vulnerabilidades altas em dependências de build</h3>
+  <p>
+    <code>npm audit</code> aponta 12 altas. Lendo o campo <code>via</code> de cada uma, a origem é:
+  </p>
+  <table>
+    <tr><th>Pacote</th><th>Quem arrasta</th><th>Alcance</th></tr>
+    <tr><td>miniflare, undici, sharp</td><td>wrangler (deploy)</td><td>Máquina de build</td></tr>
+    <tr><td>path-to-regexp, form-data, brace-expansion</td><td>@opennextjs/cloudflare</td><td>Máquina de build</td></tr>
+    <tr><td>js-yaml</td><td>eslint</td><td>Máquina de build</td></tr>
+    <tr><td>postcss, nanoid</td><td>next (build de CSS)</td><td>Máquina de build</td></tr>
+    <tr><td>linkify-it</td><td>@tiptap/extension-link</td><td>Editor do painel</td></tr>
+  </table>
+  <p>
+    Nenhuma delas roda no site servido ao visitante, e a entrada que processam é o nosso próprio código.
+    O <code>next</code> aparece na lista apenas por depender de postcss e sharp: os advisories próprios dele foram
+    resolvidos no A1.
+  </p>
+  <p>
+    <strong>Por que não corrigi agora:</strong> sairia com <code>next@16</code> (major) ou subindo wrangler e
+    @opennextjs/cloudflare, que são exatamente as ferramentas que publicam o site. Trocá-las na véspera do deploy
+    troca um risco pequeno e contido por um risco grande e imediato. Fica para uma janela com teste de preview.
+  </p>
+  <p>
+    O caso do <code>linkify-it</code> é o único no runtime do painel: complexidade quadrática ao varrer texto colado,
+    o que trava a aba de quem colou. Não vaza dado.
+  </p>
+</div>
+
+<div class="achado">
+  <h3><span class="selo medio">Médio</span> M6 · Tipo de arquivo do upload vem do cliente</h3>
+  <p>
+    <code>src/app/admin/posts/ai-actions.ts:26</code> · A validação é <code>file.type.startsWith("image/")</code>,
+    e <code>file.type</code> é declarado pelo navegador, não lido do conteúdo.
+  </p>
+  <p>
+    <strong>O que segura na prática:</strong> todo arquivo passa por <code>sharp(...).webp()</code> antes de subir
+    ao bucket. Conteúdo que não é imagem de verdade quebra ali, e um SVG seria rasterizado em WebP em vez de
+    virar SVG servido, que é o vetor de XSS clássico. Sobe apenas <code>image/webp</code>.
+  </p>
+  <p><strong>Como fechar:</strong> conferir os bytes iniciais (magic number) antes do sharp, e recusar explicitamente <code>image/svg+xml</code>.</p>
+</div>
+
+<h2>Baixos</h2>
+
+<div class="achado">
+  <h3><span class="selo baixo">Baixo</span> B1 · service_role no <code>.env.local</code></h3>
+  <p>
+    Único achado do scanner de segredos. <code>.gitignore</code> cobre <code>.env*</code> com exceção do
+    <code>.env.example</code>, e <code>git check-ignore</code> confirma que <code>.env.local</code> está fora do
+    versionamento. Não houve exposição por commit. Fica o lembrete de que a chave passa por cima da RLS e não deve
+    circular por chat nem por anexo.
+  </p>
+</div>
+
+<div class="achado">
+  <h3><span class="selo baixo">Baixo</span> B2 · <code>event_source_url</code> sem validação</h3>
+  <p>
+    <code>src/app/api/lead/route.ts</code> · A <code>page_url</code> enviada pelo cliente vai direto ao CAPI.
+    Não há impacto no site; sujeita o relatório da Meta a URL forjada. Resolve junto do M2.
+  </p>
+</div>
+
+<h2>Checklist obrigatório da casa</h2>
+
+<h3>Entrada e sessão</h3>
+<table>
+  <tr><th>Item</th><th>Situação</th><th>Evidência</th></tr>
+  <tr><td>Validação server-side em quem grava</td><td class="ok">OK</td><td><code>api/lead/route.ts</code>: nome, telefone, e-mail e truncagem de todo campo antes do insert</td></tr>
+  <tr><td>Rate limiting em formulário, login e IA</td><td class="ok">OK</td><td>Formulário: A3 desta auditoria. Login: limite do Supabase Auth. IA: ações do painel, atrás de sessão autenticada</td></tr>
+  <tr><td>CSRF em rota que muda estado</td><td class="ok">OK</td><td>Server Actions do Next validam Origin nativamente; <code>/api/lead</code> não age sobre sessão autenticada</td></tr>
+  <tr><td>Autorização checada no banco</td><td class="ok">OK</td><td><code>admin-guard.ts</code> lê <code>profiles.role</code> e <code>sections</code>; RLS ativa nas 7 tabelas</td></tr>
+  <tr><td>Erro sem stack nem query</td><td class="ok">OK</td><td>Respostas curtas em português; nenhuma rota devolve <code>e.stack</code></td></tr>
+</table>
+
+<h3>Segredos</h3>
+<table>
+  <tr><th>Item</th><th>Situação</th><th>Evidência</th></tr>
+  <tr><td>Nada de chave no código ou no bundle</td><td class="ok">OK</td><td>scan-secrets em 122 arquivos: só o <code>.env.local</code></td></tr>
+  <tr><td><code>.env</code> ignorado, <code>.env.example</code> sem valor real</td><td class="ok">OK</td><td><code>.gitignore:4</code> <code>.env*</code> com <code>!.env.example</code></td></tr>
+  <tr><td>Variável exposta ao browser só com valor público</td><td class="ok">OK</td><td>Apenas <code>NEXT_PUBLIC_META_PIXEL_ID</code>, <code>NEXT_PUBLIC_SITE_URL</code>, <code>NEXT_PUBLIC_SUPABASE_URL</code> e <code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code></td></tr>
+  <tr><td>Token de servidor fora do cliente</td><td class="ok">OK</td><td><code>getPublicMarketing()</code> (marketing.ts:77) monta o retorno campo a campo e não inclui <code>meta_capi_token</code>. Confirmado na resposta real de <code>/api/marketing</code> em produção</td></tr>
+</table>
+
+<h3>Cabeçalhos e transporte</h3>
+<table>
+  <tr><th>Item</th><th>Situação</th><th>Evidência</th></tr>
+  <tr><td>CSP com nonce</td><td class="falta">Ausente</td><td>M1, com a justificativa</td></tr>
+  <tr><td>HSTS, nosniff, Referrer-Policy, Permissions-Policy</td><td class="ok">OK</td><td>A2, aplicado nesta rodada</td></tr>
+  <tr><td>CORS restrito</td><td class="ok">Não se aplica</td><td>Nenhuma rota define <code>Access-Control-Allow-Origin</code>; tudo é consumido pela própria origem</td></tr>
+  <tr><td>HTTPS obrigatório, sem conteúdo misto</td><td class="ok">OK</td><td>Cloudflare com HTTP/2 e HTTPS; assets locais ou do host declarado do Supabase</td></tr>
+</table>
+
+<h3>Dados de lead (LGPD)</h3>
+<table>
+  <tr><th>Item</th><th>Situação</th><th>Evidência</th></tr>
+  <tr><td>PII em canal autenticado</td><td class="ok">OK</td><td>Leitura de <code>leads</code> exige sessão (<code>leads_select_auth</code>); escrita pública é só insert</td></tr>
+  <tr><td>Dado hasheado antes do CAPI</td><td class="ok">OK</td><td><code>sha()</code> SHA-256 em telefone, e-mail e nome antes do envio, e só com consentimento de marketing</td></tr>
+  <tr><td>Exportação respeita permissão</td><td class="ok">OK</td><td>Telas de leads passam por <code>requireSection</code>; exclusão restrita a admin (<code>leads_delete_admin</code>)</td></tr>
+  <tr><td>Upload bloqueia SVG e valida tipo real</td><td class="falta">Parcial</td><td>M6: o tipo vem do cliente, mas o sharp converte tudo para WebP</td></tr>
+</table>
+
+<h3>Dependências</h3>
+<table>
+  <tr><th>Item</th><th>Situação</th><th>Evidência</th></tr>
+  <tr><td>Sem alta ou crítica sem correção ou justificativa</td><td class="ok">OK</td><td>A1 corrigido; as demais justificadas em M5</td></tr>
+  <tr><td>Script de terceiro com async/defer e SRI</td><td class="ok">Parcial, aceito</td><td>Tudo entra por <code>next/script</code> com <code>afterInteractive</code> (assíncrono). SRI não se aplica a GTM e gtag, que o Google serve sem hash estável</td></tr>
+</table>
+
+<div class="rodape">
+  Auditoria conduzida em 21/08/2026 sobre a branch <code>feat/cloudflare-opennext</code>.
+  O selo vence quando o código muda: qualquer alteração depois desta data pede nova rodada.
+  Para gerar PDF, imprima esta página pelo navegador (Cmd+P) e escolha salvar como PDF.
+</div>
+</div>
