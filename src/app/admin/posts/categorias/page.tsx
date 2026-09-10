@@ -2,10 +2,12 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { CategoriesManager } from "./CategoriesManager";
 import { createCategory, deleteCategory } from "./actions";
+import { requireSection } from "@/lib/admin-guard";
 
 export const dynamic = "force-dynamic";
 
 export default async function CategoriasPage() {
+  await requireSection("posts");
   const sb = await createClient();
   const { data: categories = [] } = await sb
     .from("post_categories")

@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { PostEditor } from "@/components/admin/PostEditor";
 import { updatePost, deletePost } from "../actions";
+import { requireSection } from "@/lib/admin-guard";
 
 export const dynamic = "force-dynamic";
 
@@ -11,6 +12,7 @@ export default async function EditPostPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  await requireSection("posts");
   const { id } = await params;
   const supabase = await createClient();
   const [{ data: post }, { data: categories }] = await Promise.all([

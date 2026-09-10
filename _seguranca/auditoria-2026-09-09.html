@@ -1,0 +1,374 @@
+<title>Auditoria de Segurança — Painel de Leads · Dra. Anna Bomtempo</title>
+<style>
+  :root {
+    --tinta: #2B1F17;
+    --papel: #FBF7F1;
+    --cacau: #82614A;
+    --creme: #E7DED0;
+    --osso: #F5EFE6;
+    --critico: #8E2A2A;
+    --alto: #B4571B;
+    --medio: #8A7320;
+    --baixo: #4A6741;
+    --linha: rgba(43, 31, 23, 0.12);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--papel);
+    color: var(--tinta);
+    font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  }
+  .envelope { max-width: 900px; margin: 0 auto; padding: 56px 24px 96px; }
+  header { border-bottom: 2px solid var(--tinta); padding-bottom: 28px; margin-bottom: 40px; }
+  .etiqueta {
+    font-size: 11px; letter-spacing: .18em; text-transform: uppercase;
+    color: var(--cacau); margin-bottom: 14px;
+  }
+  h1 { font-size: clamp(1.9rem, 4vw, 2.6rem); line-height: 1.1; margin: 0 0 10px; font-weight: 600; }
+  .subtitulo { color: rgba(43,31,23,.66); margin: 0; }
+  h2 {
+    font-size: 1.35rem; margin: 48px 0 16px; padding-bottom: 8px;
+    border-bottom: 1px solid var(--linha);
+  }
+  h3 { font-size: 1.02rem; margin: 28px 0 6px; }
+  .placar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 32px 0; }
+  .placar div {
+    border: 1px solid var(--linha); border-radius: 12px; padding: 16px; background: #fff;
+  }
+  .placar .n { font-size: 2rem; font-weight: 600; line-height: 1; }
+  .placar .r { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: rgba(43,31,23,.6); margin-top: 6px; }
+  .n.critico { color: var(--critico); } .n.alto { color: var(--alto); }
+  .n.medio { color: var(--medio); } .n.baixo { color: var(--baixo); }
+  .achado { border: 1px solid var(--linha); border-radius: 12px; padding: 20px 22px; margin: 16px 0; background: #fff; }
+  .achado.resolvido { background: #FAFBF8; }
+  .selo {
+    display: inline-block; font-size: 10px; letter-spacing: .14em; text-transform: uppercase;
+    padding: 4px 10px; border-radius: 999px; color: #fff; margin-right: 8px; vertical-align: 2px;
+  }
+  .selo.alto { background: var(--alto); } .selo.medio { background: var(--medio); }
+  .selo.baixo { background: var(--baixo); } .selo.ok { background: var(--baixo); }
+  code {
+    background: var(--osso); padding: 1px 6px; border-radius: 4px;
+    font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  pre {
+    background: var(--tinta); color: var(--osso); padding: 14px 16px; border-radius: 10px;
+    overflow-x: auto; font: 12.5px/1.6 ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  table { width: 100%; border-collapse: collapse; margin: 18px 0; font-size: 14.5px; }
+  th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--linha); vertical-align: top; }
+  th { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: rgba(43,31,23,.6); }
+  td.ok { color: var(--baixo); font-weight: 600; }
+  td.falta { color: var(--alto); font-weight: 600; }
+  .rodape { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--linha); font-size: 13px; color: rgba(43,31,23,.6); }
+  @media print {
+    body { background: #fff; }
+    .envelope { padding: 0; max-width: none; }
+    .achado, .placar div { break-inside: avoid; }
+  }
+</style>
+
+<div class="envelope">
+<header>
+  <div class="etiqueta">DocAds · Auditoria de segurança</div>
+  <h1>Painel de leads da Dra. Anna Paula Bomtempo</h1>
+  <p class="subtitulo">
+    9 de setembro de 2026, reauditada em 10 de setembro · branch <code>main</code> · Next.js 15.5.24 sobre Cloudflare Workers (OpenNext)
+  </p>
+</header>
+
+<h2>Veredito</h2>
+<p>
+  <strong>Aprovado para publicar.</strong> As migrations 008 e 009 foram aplicadas em produção em
+  10/09/2026 e os três críticos de banco fecharam. A permissão foi testada nos quatro cenários que
+  importam: conta sem a seção Leads enxerga zero leads (antes enxergava os 77), editor com a seção
+  liberada continua enxergando os 77, admin com <code>sections</code> vazio continua com acesso total
+  pelo papel, e editor deixou de conseguir ler o token de IA.
+</p>
+<p>
+  Fica uma pendência relevante, a CSP, reclassificada de alto para médio nesta releitura: não há vetor
+  de XSS conhecido no projeto, e o único ponto que executa HTML colado é gravável apenas por admin.
+  Sem vetor, a CSP é defesa em profundidade, não correção de falha aberta. Ela continua valendo e
+  segue na fila com janela própria.
+</p>
+
+<div class="placar">
+  <div><div class="n critico">0</div><div class="r">Críticos abertos</div></div>
+  <div><div class="n alto">0</div><div class="r">Altos abertos</div></div>
+  <div><div class="n medio">6</div><div class="r">Médios</div></div>
+  <div><div class="n baixo">3</div><div class="r">Baixos</div></div>
+</div>
+<p style="font-size:14px;color:rgba(43,31,23,.66)">
+  Selo liberado em 10/09/2026, depois de aplicar as migrations e conferir as policies no ar.
+</p>
+
+<h2>O que rodou</h2>
+<table>
+  <tr><th>Verificação</th><th>Resultado</th></tr>
+  <tr><td><code>scan-secrets.js --all</code> (131 arquivos)</td><td>1 médio: service_role em <code>.env.local</code>, fora do versionamento</td></tr>
+  <tr><td><code>npm audit</code></td><td>1 crítico (corrigido) + 12 altas de cadeia de build, 33 moderadas, 5 baixas</td></tr>
+  <tr><td><code>ecc-agentshield scan</code></td><td>Nota A (100/100) e <strong>0 arquivos varridos</strong>: o projeto não tem configuração de agente, então não há superfície ali. Não é atestado de nada.</td></tr>
+  <tr><td>Revisão por agentes</td><td><code>security-reviewer</code> (OWASP, 51 leituras) e <code>database-reviewer</code> (8 migrations)</td></tr>
+  <tr><td>Revisão adversarial do diff</td><td>6 dimensões, 44 achados confirmados por 3 céticos independentes cada</td></tr>
+  <tr><td><code>tsc --noEmit</code> e <code>next build</code></td><td>Ambos limpos depois das correções</td></tr>
+</table>
+
+<h2>Críticos fechados pela migration 009 (aplicada em 10/09)</h2>
+
+<div class="achado resolvido">
+  <h3><span class="selo ok">Corrigido</span> C1 · Permissão do painel não existe no banco</h3>
+  <p>
+    <code>supabase/migrations/002_crm.sql:68-77</code> e <code>003_lead_notes.sql:24-25</code> ·
+    As policies de <code>leads</code> e <code>lead_notes</code> respondem <code>using (true)</code> para
+    qualquer usuário autenticado. A seção Leads só é checada no Next, que é gate de rota.
+  </p>
+  <p>
+    <strong>Como se explora:</strong> um editor com acesso só a Posts abre o console do navegador e usa o
+    mesmo cliente Supabase que a página já carregou:
+    <code>supabase.from('leads').select('*')</code>. Volta a base inteira de pacientes, com telefone,
+    e-mail, mensagem e o procedimento de interesse, que é dado de saúde. Com
+    <code>.update()</code> ele também muda fase, temperatura e notas de qualquer lead.
+  </p>
+  <p><strong>Correção:</strong> função <code>has_section()</code> e policies por seção, escritas em <code>009_rls_por_secao.sql</code>.</p>
+</div>
+
+<div class="achado resolvido">
+  <h3><span class="selo ok">Corrigido</span> C2 · Token da IA legível por qualquer conta do painel</h3>
+  <p>
+    <code>supabase/migrations/004_categories_ai.sql:28</code> ·
+    <code>ai_settings</code> guarda <code>api_token</code> em texto puro e a policy de leitura é
+    <code>using (true)</code> para todo autenticado. O padrão certo já existia no projeto:
+    <code>marketing_settings</code> restringe a <code>is_admin()</code>. Aqui faltou aplicar.
+  </p>
+  <p><strong>Correção:</strong> policy <code>ai_select_admin</code> na 009. Se alguma conta de editor já foi usada por terceiro, a chave deve ser rotacionada.</p>
+</div>
+
+<div class="achado resolvido">
+  <h3><span class="selo ok">Corrigido</span> C3 · Prova de consentimento reescrevível</h3>
+  <p>
+    As colunas <code>consent</code>, <code>consent_ts</code> e <code>consent_marketing</code> nascem nesta
+    entrega, mas caem sob a mesma policy aberta de update: qualquer conta logada pode reescrevê-las sem
+    deixar rastro. Registro que qualquer pessoa altera não comprova nada, e a LGPD (art. 8º, §5) põe no
+    controlador o ônus de provar o consentimento.
+  </p>
+  <p><strong>Correção:</strong> gatilho <code>trava_consentimento</code> na 009, mais <code>consent_marketing_ts</code> e <code>consent_version</code>.</p>
+</div>
+
+<h2>Críticos corrigidos nesta rodada</h2>
+
+<div class="achado resolvido">
+  <h3><span class="selo ok">Corrigido</span> C4 · Lead que não gravava era contado como conversão</h3>
+  <p>
+    <code>src/app/api/lead/route.ts</code> · O <code>insert</code> não lia o retorno de erro (o
+    supabase-js não lança, devolve <code>{ error }</code>) e a rota terminava sempre em
+    <code>ok: true</code>. Um erro de banco significava: tela dizendo "enviado", WhatsApp abrindo,
+    Pixel e CAPI contando o Lead, e nada no CRM.
+  </p>
+  <p>
+    Agora a gravação é pré-requisito: erro vira log no servidor e resposta 500 com texto de atendimento,
+    e nem o CAPI nem o webhook externo disparam sem o lead existir.
+  </p>
+</div>
+
+<div class="achado resolvido">
+  <h3><span class="selo ok">Corrigido</span> C5 · Server Actions do CRM sem checagem de seção</h3>
+  <p>
+    <code>src/app/admin/crm/actions.ts</code> e <code>notes-actions.ts</code> ·
+    <code>updateLead</code>, <code>moveLeadFase</code> e <code>deleteLead</code> só checavam login;
+    <code>updateNote</code> e <code>deleteNote</code> não checavam nada. Server Action é endpoint: existe
+    no bundle e pode ser chamada sem nunca abrir a tela.
+  </p>
+  <p>Agora todas passam por <code>assertSection("leads")</code>, que lança em vez de redirecionar.</p>
+</div>
+
+<div class="achado resolvido">
+  <h3><span class="selo ok">Corrigido</span> C6 · Rotas do painel sem guarda</h3>
+  <p>
+    <code>/admin/posts/[id]</code>, <code>/admin/posts/new</code> e <code>/admin/posts/categorias</code>
+    não chamavam <code>requireSection("posts")</code>, e <code>/admin/users/[id]</code> abria o perfil de
+    qualquer usuário sem checar admin, expondo e-mail, papel e seções liberadas. As actions de posts,
+    categorias e IA também não checavam nada: qualquer conta publicava no blog e queimava orçamento de IA.
+  </p>
+  <p>Guardas aplicadas nas quatro páginas e nas onze actions.</p>
+</div>
+
+<div class="achado resolvido">
+  <h3><span class="selo ok">Corrigido</span> C7 · Next.js com execução remota de código</h3>
+  <p>
+    <code>package.json</code> · A versão instalada era 15.5.23, dentro do intervalo de dois advisories
+    críticos, um deles na API de otimização de imagem com arquivos AVIF. Atualizado para 15.5.24, que é
+    a primeira versão corrigida. Build e tipos limpos depois da troca.
+  </p>
+</div>
+
+<div class="achado resolvido">
+  <h3><span class="selo ok">Corrigido</span> C8 · Dado de saúde saindo para a Meta</h3>
+  <p>
+    <code>src/app/api/lead/route.ts</code> · O <code>custom_data</code> do CAPI levava
+    <code>interesse</code> e <code>urgencia</code>, e o <code>event_source_url</code> ia com a URL inteira,
+    inclusive <code>/tratamentos/&lt;procedimento&gt;</code>. Procedimento estético ligado a uma pessoa é
+    dado de saúde para a Meta, e a punição é bloqueio do domínio.
+  </p>
+  <p>
+    Os dois campos saíram, o rótulo do botão passa por <code>rotuloNeutro()</code> antes de sair do
+    servidor, e a URL preserva só os parâmetros de campanha, com página de tratamento normalizada para a
+    raiz. O dado continua no CRM, que é onde serve para atender.
+  </p>
+</div>
+
+<h2>Altos: um fechado, um reclassificado</h2>
+
+<div class="achado">
+  <h3><span class="selo medio">Médio agora</span> A1 · Content Security Policy ainda não existe</h3>
+  <p>
+    <code>next.config.ts:35-38</code> · Continua sendo a pendência declarada desde a auditoria de agosto.
+    O site injeta tags de marketing gravadas no painel e carrega GTM, GA4, Ads e Meta; uma CSP feita no
+    escuro derruba a medição de conversão em silêncio.
+  </p>
+  <p>
+    <strong>Como fazer:</strong> levantar as origens reais no relatório de rede, subir em
+    <code>Report-Only</code>, confirmar que o hit de conversão continua saindo e só então forçar.
+    Precisa de janela própria, não entra de carona neste deploy.
+  </p>
+</div>
+
+<div class="achado">
+  <h3><span class="selo ok">Corrigido</span> A2 · Seções do próprio perfil eram autoeditáveis</h3>
+  <p>
+    <code>supabase/migrations/001_init.sql:129-136</code> · A policy travava a troca de <code>role</code>,
+    mas não a de <code>sections</code>: um editor podia se autoliberar todas as seções do painel.
+    Corrigido na 009, já aplicada.
+  </p>
+</div>
+
+<h2>Médios</h2>
+
+<div class="achado">
+  <h3><span class="selo medio">M1</span> Doze vulnerabilidades altas na cadeia de build</h3>
+  <p>
+    Nenhuma é dependência direta de produção: vêm arrastadas por <code>wrangler</code>,
+    <code>sharp</code>, <code>postcss</code> e <code>miniflare</code> (o campo <code>via</code> confirma).
+    São ferramentas de build, não superfície do site publicado. A correção exige subir wrangler e
+    <code>@opennextjs/cloudflare</code>, que muda o runtime de publicação e precisa de teste em preview.
+  </p>
+</div>
+
+<div class="achado">
+  <h3><span class="selo medio">M2</span> Insert público sem limite de tamanho no banco</h3>
+  <p>
+    <code>leads_insert_anyone</code> libera INSERT para <code>anon</code> com <code>check (true)</code>.
+    A validação e o rate limit de <code>/api/lead</code> só protegem quem passa pela rota: com a chave
+    anon, que é pública e vai no HTML, dá para inserir direto. Constraints de tamanho entram na 009.
+  </p>
+</div>
+
+<div class="achado">
+  <h3><span class="selo medio">M3</span> Erro cru do Postgres em Server Actions</h3>
+  <p>
+    Várias actions fazem <code>throw new Error(error.message)</code>. Em produção o Next costuma redigir
+    esse texto, mas o projeto roda em OpenNext sobre Workers, que é runtime não padrão, então convém
+    padronizar o retorno <code>{ ok, error }</code> já usado em <code>marketing/actions.ts</code>.
+    Nas telas novas isso já é feito: só o código do erro vai para a tela, a mensagem fica no log.
+  </p>
+</div>
+
+<div class="achado resolvido">
+  <h3><span class="selo ok">Corrigido</span> M4 · Escape de filtro sem teste automatizado</h3>
+  <p>
+    Entrou suíte com <code>npm test</code>, 51 casos no test runner do próprio Node, sem dependência
+    nova. Cobre o escape (inclusive uma tentativa de injetar condição extra pela busca), a cascata de
+    origem, a normalização de telefone e o recorte de fuso. O teste da cascata é o contrato entre o
+    TypeScript, o insert e o backfill da migration, e já pegou o caso que motivou trocar
+    <code>includes("ig")</code> por palavra inteira.
+  </p>
+</div>
+
+<div class="achado">
+  <h3><span class="selo medio">M5</span> Chave service_role no <code>.env.local</code></h3>
+  <p>
+    Esperado e fora do versionamento (<code>.gitignore</code> cobre <code>.env*</code> com exceção do
+    <code>.env.example</code>, e o histórico do git confirma que o arquivo nunca subiu). Fica registrado
+    porque a chave ignora RLS: se a máquina for comprometida, ela abre a base inteira.
+  </p>
+</div>
+
+<h2>Baixos</h2>
+
+<div class="achado">
+  <h3><span class="selo baixo">B1</span> HSTS sem <code>preload</code></h3>
+  <p>
+    <code>next.config.ts:44</code> · Não apliquei de propósito: entrar na lista de preload vale para o
+    domínio e todos os subdomínios, e sair dela demora meses. Precisa da sua decisão, não de um commit
+    meu.
+  </p>
+</div>
+
+<div class="achado">
+  <h3><span class="selo baixo">B2</span> Migration longa numa transação só</h3>
+  <p>
+    A 008 faz <code>ALTER TABLE</code>, backfill e cinco índices na mesma execução. Na base de hoje
+    (algumas centenas de leads) roda em milissegundos. Quando a base crescer, os
+    <code>CREATE INDEX</code> não concorrentes travam INSERT durante a construção, e é exatamente a
+    tabela onde o formulário público grava: aí a aplicação precisa ser quebrada em execuções separadas
+    com <code>CONCURRENTLY</code>.
+  </p>
+</div>
+
+<div class="achado">
+  <h3><span class="selo baixo">B3</span> Upload de capa não recusa SVG explicitamente</h3>
+  <p>
+    A checagem é <code>file.type.startsWith("image/")</code>, que é o cabeçalho enviado pelo cliente. O
+    vetor está neutralizado na prática porque tudo passa por <code>sharp().webp()</code>, que rasteriza e
+    descarta script embutido, mas a recusa explícita de <code>image/svg+xml</code> e a checagem do número
+    mágico continuam na fila (item 4 da retomada de agosto).
+  </p>
+</div>
+
+<h2>Checklist da casa</h2>
+<table>
+  <tr><th>Item</th><th>Situação</th></tr>
+  <tr><td>Validação server-side em endpoint que grava</td><td class="ok">OK · <code>api/lead/route.ts</code>, nome, telefone, e-mail e truncagem</td></tr>
+  <tr><td>Rate limiting em formulário</td><td class="ok">OK · por IP, na memória do isolate, com limitação documentada</td></tr>
+  <tr><td>CSRF em rota que muda estado</td><td class="ok">OK · JSON force preflight; Server Actions com token do Next</td></tr>
+  <tr><td>Autorização checada no banco</td><td class="ok">OK · policies por seção, testadas nos 4 cenários</td></tr>
+  <tr><td>Erro ao usuário sem vazar interno</td><td class="ok">OK nas telas novas; M3 no resto</td></tr>
+  <tr><td>Nenhum segredo no código ou no bundle</td><td class="ok">OK · service_role e token do CAPI só no servidor</td></tr>
+  <tr><td><code>.env</code> no <code>.gitignore</code></td><td class="ok">OK · e <code>.env.example</code> sem valor real</td></tr>
+  <tr><td>Variável <code>NEXT_PUBLIC_</code> só com valor público</td><td class="ok">OK</td></tr>
+  <tr><td>CSP com nonce</td><td class="falta">AUSENTE, médio (A1)</td></tr>
+  <tr><td>HSTS, nosniff, Referrer-Policy, Permissions-Policy</td><td class="ok">OK · <code>next.config.ts:38-53</code></td></tr>
+  <tr><td>CORS restrito</td><td class="ok">OK · nenhum <code>Access-Control-Allow-Origin</code> no projeto</td></tr>
+  <tr><td>PII hasheada antes do CAPI</td><td class="ok">OK · sha256, e só com consentimento de marketing</td></tr>
+  <tr><td>Dado de saúde fora do CAPI</td><td class="ok">OK · corrigido nesta rodada (C8)</td></tr>
+  <tr><td>Exportação de leads respeita permissão</td><td class="ok">Não se aplica: o painel não exporta leads</td></tr>
+  <tr><td>Upload bloqueia SVG e valida tipo real</td><td class="falta">Parcial (B3)</td></tr>
+  <tr><td>Vulnerabilidade alta sem correção</td><td class="falta">12, todas de cadeia de build (M1)</td></tr>
+  <tr><td>Script de terceiro com async/defer</td><td class="ok">OK · tags de marketing carregadas por <code>next/script</code></td></tr>
+</table>
+
+<h2>O que foi aplicado em 10/09</h2>
+<table>
+  <tr><th>Passo</th><th>Resultado conferido no ar</th></tr>
+  <tr><td>Migration 008</td><td class="ok">7 colunas novas, 3 índices trigram, view de interesses, 77 leads classificados (61 Meta Ads, 9 Google Ads, 4 direto, 3 outro)</td></tr>
+  <tr><td>Migration 009</td><td class="ok">policies por seção em leads e notas, ai_settings restrito a admin, gatilho de consentimento, 4 constraints, 3 policies de storage</td></tr>
+  <tr><td>Teste sem a seção Leads</td><td class="ok">0 leads visíveis</td></tr>
+  <tr><td>Teste com a seção Leads</td><td class="ok">77 leads, acesso legítimo preservado</td></tr>
+  <tr><td>Teste do token de IA por editor</td><td class="ok">0 linhas</td></tr>
+  <tr><td>Backup antes de aplicar</td><td class="ok">77 leads exportados para fora do repositório</td></tr>
+</table>
+
+<h2>Fila que continua aberta</h2>
+<ol>
+  <li><strong>Rotacionar o PAT do Supabase</strong> usado nesta aplicação: ele trafegou em texto puro e ficou no registro da sessão.</li>
+  <li>CSP com nonce (A1), em janela própria com <code>Report-Only</code> antes de forçar.</li>
+  <li>Subir wrangler e <code>@opennextjs/cloudflare</code> para limpar as altas de cadeia de build (M1), testando em preview.</li>
+  <li>Padronizar o retorno das Server Actions antigas (M3) e a recusa explícita de SVG no upload (B3).</li>
+</ol>
+
+<div class="rodape">
+  Auditoria conduzida em 9 de setembro de 2026 · scanners determinísticos, dois agentes de revisão e
+  revisão adversarial do diff · Para exportar em PDF, imprima esta página pelo navegador e escolha
+  "Salvar como PDF".
+</div>
+</div>

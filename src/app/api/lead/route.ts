@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import crypto from "node:crypto";
 import { createClient as createSbClient } from "@supabase/supabase-js";
 import { getMarketingSettings } from "@/lib/marketing";
+import { classificaCanal } from "@/lib/leadOrigem";
 
 const sha = (v: string) =>
   crypto.createHash("sha256").update(v.trim().toLowerCase()).digest("hex");
@@ -26,6 +27,48 @@ function excedeuLimite(ip: string): boolean {
   return recentes.length > MAX_ENVIOS_POR_JANELA;
 }
 
+// A URL que vai para a Meta preserva os parâmetros de campanha (é o que faz o
+// evento casar com o anúncio) e descarta o resto da query. Página de
+// tratamento vira a raiz: o caminho /tratamentos/<procedimento> nomeia o
+// procedimento que a pessoa procurou, e isso é dado de saúde.
+const PARAMS_DE_CAMPANHA = [
+  "utm_source",
+  "utm_medium",
+  "utm_campaign",
+  "utm_content",
+  "utm_term",
+  "gclid",
+  "fbclid",
+];
+
+function normalizaUrl(u: string | undefined): string {
+  const padrao = "https://draannabomtempo.com.br";
+  if (!u) return padrao;
+  try {
+    const url = new URL(u);
+    const caminho = url.pathname.startsWith("/tratamentos") ? "/" : url.pathname;
+    const query = new URLSearchParams();
+    PARAMS_DE_CAMPANHA.forEach((k) => {
+      const v = url.searchParams.get(k);
+      if (v) query.set(k, v);
+    });
+    const qs = query.toString();
+    return `${url.origin}${caminho}${qs ? `?${qs}` : ""}`;
+  } catch {
+    return padrao;
+  }
+}
+
+// O rótulo do botão vira categoria genérica antes de sair do servidor. Dado de
+// saúde ligado a uma pessoa é o que custa bloqueio de domínio na Meta.
+function rotuloNeutro(source: string): string {
+  if (source.startsWith("tratamento-")) return "pagina-tratamento";
+  if (source.startsWith("form:")) return "formulario";
+  if (source.startsWith("whatsapp:")) return "whatsapp";
+  if (source === "signature" || source === "signature-agendar") return "tratamento-destaque";
+  return source;
+}
+
 function temperaturaFromUrgencia(u: string | undefined): "frio" | "morno" | "quente" {
   if (!u) return "morno";
   const v = u.toLowerCase();
@@ -47,6 +90,9 @@ export async function POST(req: Request) {
     cidade,
     source = "unknown",
     page_url,
+    landing_path,
+    form_path,
+    referrer,
     utm_source,
     utm_medium,
     utm_campaign,
@@ -56,6 +102,8 @@ export async function POST(req: Request) {
     fbclid,
     event_id,
     ts,
+    consent,
+    consent_ts,
     consent_marketing,
   } = body as Record<string, string | number | boolean | undefined>;
 
@@ -121,6 +169,9 @@ export async function POST(req: Request) {
     mensagem: trunc(mensagem, 2000),
     source: trunc(source, 80) || "unknown",
     page_url: trunc(page_url, 500),
+    landing_path: trunc(landing_path, 200),
+    form_path: trunc(form_path, 200),
+    referrer: trunc(referrer, 500),
     user_agent: ua.slice(0, 400),
     ip_country: ipCountry,
     utm_source: trunc(utm_source, 200),
@@ -132,18 +183,43 @@ export async function POST(req: Request) {
     fbclid: trunc(fbclid, 200),
   };
 
-  // Salva no Supabase se configurado
+  // Salva no Supabase se configurado.
+  //
+  // O supabase-js não lança em erro de API: devolve { error }. Ignorar esse
+  // retorno é como o lead sumia sem deixar rastro — a rota respondia ok, a tela
+  // dizia "enviado", o Pixel contava a conversão e o CRM ficava sem a linha.
+  // Aqui a gravação é pré-requisito: sem ela, ninguém dispara nada.
+  let gravou = false;
   if (process.env.NEXT_PUBLIC_SUPABASE_URL && nome && whatsapp) {
     const sb = createSbClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!,
       { auth: { persistSession: false, autoRefreshToken: false } }
     );
-    await sb.from("leads").insert({
+    const { error } = await sb.from("leads").insert({
       ...safe,
+      // Classificado na gravação, não na leitura: é o que permite o painel
+      // filtrar por origem com índice em vez de carregar tudo e descartar.
+      canal: classificaCanal(safe),
       temperatura: temperaturaFromUrgencia(urgencia ? String(urgencia) : undefined),
       fase: "novo",
+      consent: consent === true,
+      consent_ts: typeof consent_ts === "string" ? consent_ts : null,
+      consent_marketing: marketingConsentido,
     });
+    if (error) {
+      console.error("[lead] falha ao gravar", {
+        code: error.code,
+        message: error.message,
+        details: error.details,
+        source: safe.source,
+      });
+      return NextResponse.json(
+        { ok: false, error: "Não conseguimos registrar seu contato agora. Tente de novo em instantes." },
+        { status: 500 }
+      );
+    }
+    gravou = true;
   }
 
   // Meta CAPI — IDs/segredos vêm da aba Marketing do admin (fallback p/ env).
@@ -176,15 +252,19 @@ export async function POST(req: Request) {
           event_time: Math.floor(Number(ts ?? Date.now()) / 1000),
           event_id: event_id ?? crypto.randomUUID(),
           action_source: "website",
-          event_source_url:
-            (page_url as string) ??
-            req.headers.get("referer") ??
-            "https://draannabomtempo.com.br",
+          event_source_url: normalizaUrl(
+            (page_url as string) ?? req.headers.get("referer") ?? undefined
+          ),
           user_data: userData,
+          // custom_data NÃO leva interesse nem urgência: procedimento estético
+          // associado a uma pessoa é dado de saúde para a Meta, e o preço de
+          // mandar isso é bloqueio do domínio. O dado continua no CRM, que é
+          // onde ele serve para atender.
           custom_data: {
-            content_name: String(source),
-            interesse: interesse ? String(interesse) : undefined,
-            urgencia: urgencia ? String(urgencia) : undefined,
+            // Nem interesse, nem urgência, nem o nome do procedimento pelo
+            // caminho do botão: "tratamento-laser-co2" identifica o
+            // procedimento tão bem quanto o campo interesse identificaria.
+            content_name: rotuloNeutro(String(source)),
             value: 0,
             currency: "BRL",
           },
@@ -203,9 +283,11 @@ export async function POST(req: Request) {
     ).catch(() => undefined);
   }
 
-  // Webhook externo opcional — envia payload normalizado (nunca o body cru).
+  // Webhook externo opcional — envia payload normalizado (nunca o body cru), e
+  // só depois de o lead existir no banco: destino externo não pode receber
+  // contato que o CRM não tem.
   const hook = process.env.LEAD_WEBHOOK_URL;
-  if (hook) {
+  if (hook && gravou) {
     fetch(hook, {
       method: "POST",
       headers: { "Content-Type": "application/json" },

@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import { assertSection } from "@/lib/admin-guard";
 
 const COVER_MAX_BYTES = 8 * 1024 * 1024; // 8 MB
 
@@ -21,6 +22,7 @@ async function uploadImage(buf: Buffer, ext: string, contentType: string): Promi
 
 // Upload manual de capa — converte qualquer imagem para WebP antes de salvar.
 export async function uploadCoverImage(formData: FormData): Promise<{ url?: string; error?: string }> {
+  await assertSection("posts");
   const file = formData.get("file");
   if (!(file instanceof File)) return { error: "Arquivo inválido." };
   if (!file.type.startsWith("image/")) return { error: "Envie um arquivo de imagem." };
@@ -38,6 +40,7 @@ export async function uploadCoverImage(formData: FormData): Promise<{ url?: stri
 
 // Geração de capa por IA (Gemini image / nano-banana) → WebP no bucket.
 export async function generateCoverImage(title: string, excerpt: string): Promise<{ url?: string; error?: string }> {
+  await assertSection("posts");
   const sb = await createClient();
   const { data: cfg } = await sb.from("ai_settings").select("provider, api_token").eq("id", 1).maybeSingle();
   // Imagem exige Gemini: usa o token do painel se for Gemini, senão a env global.
@@ -81,6 +84,8 @@ export async function saveAiConfig(input: {
   instructions: string;
   model: string;
 }) {
+  await assertSection("posts");
+  await assertSection("posts");
   const sb = await createClient();
   const { data: { user } } = await sb.auth.getUser();
   if (!user) throw new Error("Não autenticado");
@@ -105,6 +110,7 @@ export async function saveAiConfig(input: {
 
 // Nunca devolve o api_token ao cliente — só indica se já existe um configurado.
 export async function getAiConfig() {
+  await assertSection("posts");
   const sb = await createClient();
   const { data } = await sb
     .from("ai_settings")
@@ -181,6 +187,7 @@ async function readJson(res: Response): Promise<Record<string, unknown>> {
 // a mensagem de erros lançados em server actions, então devolvemos o motivo real
 // para o editor exibir.
 export async function generateArticle(input: { topic: string; description: string }): Promise<GenerateResult> {
+  await assertSection("posts");
   try {
     const sb = await createClient();
     const { data: cfg } = await sb.from("ai_settings").select("*").eq("id", 1).maybeSingle();

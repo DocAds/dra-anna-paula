@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { UserForm } from "@/components/admin/UserForm";
 import { updateUser, deleteUser } from "../actions";
+import { requireAdmin } from "@/lib/admin-guard";
 
 export const dynamic = "force-dynamic";
 
@@ -11,6 +12,7 @@ export default async function EditUserPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  await requireAdmin();
   const { id } = await params;
   const supabase = await createClient();
   const { data: profile } = await supabase.from("profiles").select("*").eq("id", id).single();

@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import slugify from "slugify";
 import type { PostStatus } from "@/lib/supabase/types";
 import { canonicalInterno } from "@/lib/seo";
+import { assertSection } from "@/lib/admin-guard";
 
 function uniqueSlug(base: string) {
   const slug = slugify(base, { lower: true, strict: true });
@@ -30,6 +31,7 @@ function seoFields(formData: FormData) {
 }
 
 export async function createPost(formData: FormData) {
+  await assertSection("posts");
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Não autenticado");
@@ -66,6 +68,7 @@ export async function createPost(formData: FormData) {
 }
 
 export async function updatePost(id: string, formData: FormData) {
+  await assertSection("posts");
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Não autenticado");
@@ -108,6 +111,7 @@ export async function updatePost(id: string, formData: FormData) {
 }
 
 export async function deletePost(id: string) {
+  await assertSection("posts");
   const supabase = await createClient();
   const { error } = await supabase.from("posts").delete().eq("id", id);
   if (error) throw new Error(error.message);
@@ -119,6 +123,7 @@ export async function deletePost(id: string) {
 // --- Ações em massa (seleção múltipla na listagem) ---
 
 export async function bulkSetStatus(ids: string[], status: PostStatus) {
+  await assertSection("posts");
   if (!ids.length) return;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -132,6 +137,7 @@ export async function bulkSetStatus(ids: string[], status: PostStatus) {
 }
 
 export async function bulkDeletePosts(ids: string[]) {
+  await assertSection("posts");
   if (!ids.length) return;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
