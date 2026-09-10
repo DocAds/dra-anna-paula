@@ -39,12 +39,18 @@ export function SeletorPeriodo({
   de,
   ate,
   queryBase,
+  // A barra nasceu dentro da tela de leads e levava o caminho dela cravado em
+  // três lugares. Como prop com default, a tela de origem reusa a mesma barra
+  // sem ser jogada para os leads a cada clique.
+  pathname = "/admin/crm/leads",
 }: {
   periodo: PeriodoLead;
   de?: string;
   ate?: string;
   /** Demais filtros ativos, para o período não zerar o recorte da tela. */
   queryBase: Record<string, string>;
+  /** Rota que recebe o recorte. Padrão: a lista de leads. */
+  pathname?: string;
 }) {
   const router = useRouter();
   const [aberto, setAberto] = useState(false);
@@ -161,7 +167,7 @@ export function SeletorPeriodo({
     if (inicio) params.set("de", inicio);
     params.set("ate", fim ?? inicio ?? hoje);
     setAberto(false);
-    router.push(`/admin/crm/leads?${params.toString()}`);
+    router.push(`${pathname}?${params.toString()}`);
   }
 
   const rotuloBotao =
@@ -180,7 +186,7 @@ export function SeletorPeriodo({
         return (
           <Link
             key={p.v}
-            href={{ pathname: "/admin/crm/leads", query }}
+            href={{ pathname, query }}
             aria-current={ativo ? "true" : undefined}
             className={`${pill} ${
               ativo ? "bg-cocoa text-bone" : "border border-cocoa/15 text-ink/75 hover:text-cocoa hover:border-cocoa/40"
@@ -331,7 +337,7 @@ export function SeletorPeriodo({
                   setInicio(undefined);
                   setFim(undefined);
                   setAberto(false);
-                  router.push(`/admin/crm/leads?${new URLSearchParams(queryBase).toString()}`);
+                  router.push(`${pathname}?${new URLSearchParams(queryBase).toString()}`);
                 }}
                 className="rounded-full border border-cocoa/20 px-4 py-2.5 text-[11px] uppercase tracking-widest2 text-ink/75 hover:text-cocoa hover:border-cocoa transition-colors motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cocoa/60"
               >

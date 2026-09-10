@@ -2,13 +2,17 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, FileText, Users, Settings, BarChart3, Megaphone } from "lucide-react";
+import { LayoutDashboard, FileText, Users, Settings, BarChart3, Megaphone, Route } from "lucide-react";
 import type { AdminSection } from "@/lib/supabase/types";
 
 const ITEMS: { href: string; label: string; icon: typeof Users; key: AdminSection | "conta" }[] = [
   { href: "/admin", label: "Painel", icon: LayoutDashboard, key: "painel" },
   { href: "/admin/crm", label: "Dashboard", icon: BarChart3, key: "dashboard" },
   { href: "/admin/crm/leads", label: "Leads", icon: Users, key: "leads" },
+  // Origem é um recorte dos leads, não uma área nova: entra com a chave
+  // "leads" para aparecer a quem já tem a seção e não virar uma permissão a
+  // mais para conceder em profiles.sections.
+  { href: "/admin/crm/origem", label: "Origem", icon: Route, key: "leads" },
   { href: "/admin/posts", label: "Posts", icon: FileText, key: "posts" },
   { href: "/admin/marketing", label: "Marketing", icon: Megaphone, key: "marketing" },
   { href: "/admin/users", label: "Usuários", icon: Users, key: "usuarios" },

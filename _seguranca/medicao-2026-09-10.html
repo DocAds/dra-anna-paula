@@ -1,0 +1,217 @@
+<title>Medição da Dra. Anna — de onde vem cada lead</title>
+<style>
+  :root {
+    --tinta: #2B1F17;
+    --papel: #FBF7F1;
+    --cacau: #82614A;
+    --creme: #E7DED0;
+    --osso: #F5EFE6;
+    --critico: #8E2A2A;
+    --alto: #B4571B;
+    --medio: #8A7320;
+    --baixo: #4A6741;
+    --linha: rgba(43, 31, 23, 0.12);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--papel);
+    color: var(--tinta);
+    font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  }
+  .envelope { max-width: 900px; margin: 0 auto; padding: 56px 24px 96px; }
+  header { border-bottom: 2px solid var(--tinta); padding-bottom: 28px; margin-bottom: 40px; }
+  .etiqueta {
+    font-size: 11px; letter-spacing: .18em; text-transform: uppercase;
+    color: var(--cacau); margin-bottom: 14px;
+  }
+  h1 { font-size: clamp(1.9rem, 4vw, 2.6rem); line-height: 1.1; margin: 0 0 10px; font-weight: 600; }
+  .subtitulo { color: rgba(43,31,23,.66); margin: 0; }
+  h2 {
+    font-size: 1.35rem; margin: 48px 0 16px; padding-bottom: 8px;
+    border-bottom: 1px solid var(--linha);
+  }
+  h3 { font-size: 1.02rem; margin: 28px 0 6px; }
+  .placar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 32px 0; }
+  .placar div {
+    border: 1px solid var(--linha); border-radius: 12px; padding: 16px; background: #fff;
+  }
+  .placar .n { font-size: 2rem; font-weight: 600; line-height: 1; }
+  .placar .r { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: rgba(43,31,23,.6); margin-top: 6px; }
+  .n.critico { color: var(--critico); } .n.alto { color: var(--alto); }
+  .n.medio { color: var(--medio); } .n.baixo { color: var(--baixo); }
+  .achado { border: 1px solid var(--linha); border-radius: 12px; padding: 20px 22px; margin: 16px 0; background: #fff; }
+  .achado.resolvido { background: #FAFBF8; }
+  .selo {
+    display: inline-block; font-size: 10px; letter-spacing: .14em; text-transform: uppercase;
+    padding: 4px 10px; border-radius: 999px; color: #fff; margin-right: 8px; vertical-align: 2px;
+  }
+  .selo.alto { background: var(--alto); } .selo.medio { background: var(--medio); }
+  .selo.baixo { background: var(--baixo); } .selo.ok { background: var(--baixo); }
+  code {
+    background: var(--osso); padding: 1px 6px; border-radius: 4px;
+    font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  pre {
+    background: var(--tinta); color: var(--osso); padding: 14px 16px; border-radius: 10px;
+    overflow-x: auto; font: 12.5px/1.6 ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  table { width: 100%; border-collapse: collapse; margin: 18px 0; font-size: 14.5px; }
+  th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--linha); vertical-align: top; }
+  th { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: rgba(43,31,23,.6); }
+  td.ok { color: var(--baixo); font-weight: 600; }
+  td.falta { color: var(--alto); font-weight: 600; }
+  .rodape { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--linha); font-size: 13px; color: rgba(43,31,23,.6); }
+  @media print {
+    body { background: #fff; }
+    .envelope { padding: 0; max-width: none; }
+    .achado, .placar div { break-inside: avoid; }
+  }
+</style>
+
+<div class="envelope">
+<header>
+  <div class="etiqueta">DocAds · Auditoria de medição</div>
+  <h1>De onde vem cada lead da Dra. Anna</h1>
+  <p class="subtitulo">10 de setembro de 2026 · 77 leads no CRM · site, Google Ads, Meta, GA4 e o banco</p>
+</header>
+
+<h2>O diagnóstico</h2>
+<p>
+  A origem se perdia em três pontos, e nenhum deles era o CRM.
+</p>
+<ol>
+  <li>
+    <strong>O site só memorizava a origem depois do aceite de cookies.</strong> O banner é uma caixa no
+    canto que não bloqueia nada, e quem ignora nunca dispara callback nenhum: essa pessoa navegava até a
+    página do tratamento e convertia sem campanha, sem clique de anúncio e sem página de entrada.
+    São <strong>28 dos 77 leads (36%) sem nenhuma UTM</strong>.
+  </li>
+  <li>
+    <strong>O Google entrega só o gclid, que é opaco</strong>, e a conta não tem sufixo de URL em nível
+    nenhum. Resultado: <strong>0 de 9 leads do Google com campanha</strong>, mesmo com o número da
+    campanha viajando dentro do próprio endereço da página.
+  </li>
+  <li>
+    <strong>Na Meta os parâmetros estão invertidos:</strong> o nome do conjunto ocupa o campo de "meio"
+    (<code>utm_medium=[GEOLOCALIZADO | AMERICAN + BELEZA]</code>) e a campanha fica vazia. E os anúncios
+    se chamam pelo ID do post, então saber o criativo não diz nada.
+  </li>
+</ol>
+<p>
+  Por cima disso, dois números mentiam: o painel chamava de Meta Ads todo lead com <code>fbclid</code>,
+  inclusive os 21 que a própria UTM declarava orgânicos, e <strong>o CAPI não chegava na Meta</strong>
+  (708 eventos de navegador contra 1 de servidor em 28 dias).
+</p>
+
+<h2>O que já está no ar</h2>
+<table>
+  <tr><th>Correção</th><th>O que muda</th></tr>
+  <tr><td>Origem capturada no primeiro render, fora do gate de cookies</td><td class="ok">Ataca os 36% sem origem. Fica na sessão do navegador e só viaja junto do lead que a pessoa enviou.</td></tr>
+  <tr><td><code>gad_campaignid</code> e <code>gbraid</code> passam a ser gravados</td><td class="ok">7 dos 9 leads do Google já recuperaram o ID da campanha, de dado que estava no endereço e era descartado</td></tr>
+  <tr><td>Cascata de origem reescrita</td><td class="ok">21 leads saíram de Meta Ads para Redes sociais; 3 viraram Busca por IA; 4 deixaram de ser "direto" quando não se sabe</td></tr>
+  <tr><td>CAPI entregue com <code>waitUntil</code></td><td class="ok">O evento de servidor enfim sai, com external_id, fbp/fbc, cidade e país, e deixa trilha no log</td></tr>
+  <tr><td>Página de entrada e página de conversão separadas</td><td class="ok">Dá para saber por onde entrou e de onde pediu contato</td></tr>
+  <tr><td>Dado de saúde fora da Meta</td><td class="ok">Procedimento não vai mais no evento nem na URL</td></tr>
+</table>
+<p style="font-size:14px;color:rgba(43,31,23,.66)">
+  Tudo isso <strong>só vale daqui pra frente</strong>, com exceção da reclassificação e do resgate do
+  ID de campanha, que já corrigiram o histórico.
+</p>
+
+<h2>O que depende de você, em ordem de impacto</h2>
+
+<div class="achado">
+  <h3><span class="selo alto">1</span> Sufixo de URL no Google Ads</h3>
+  <p>Google Ads 155-698-9178 › Administrador › Configurações da conta › Acompanhamento › <em>Sufixo do URL final</em>. Colar sem "?" no começo:</p>
+  <pre>utm_source=google&amp;utm_medium=cpc&amp;utm_campaign={campaignid}&amp;utm_adgroup={adgroupid}&amp;utm_content={creative}&amp;utm_term={keyword}&amp;utm_matchtype={matchtype}&amp;utm_network={network}&amp;utm_device={device}</pre>
+  <p>É o item de maior impacto da lista: hoje o campo está vazio nos quatro níveis, e é por isso que 9 de 9 leads do Google chegam anônimos.</p>
+</div>
+
+<div class="achado">
+  <h3><span class="selo alto">2</span> Parâmetros de URL na Meta</h3>
+  <p>Gerenciador de Anúncios › conta act_7147051445329865 › campanha [DOC.MS] [LEADS SITE] › nível <strong>anúncio</strong> › Editar › Rastreamento › <em>Parâmetros de URL do site</em>. Substituir o que está lá, nos 6 anúncios:</p>
+  <pre>utm_source=meta&amp;utm_medium=paid_social&amp;utm_campaign={{campaign.name}}&amp;utm_content={{ad.name}}&amp;utm_term={{adset.name}}&amp;utm_id={{campaign.id}}&amp;ad_id={{ad.id}}&amp;adset_id={{adset.id}}&amp;placement={{placement}}&amp;site_source={{site_source_name}}</pre>
+  <p>Hoje o nome da campanha cai dentro do <code>utm_medium</code>, a campanha vem vazia e nem o GA4 classifica como tráfego pago.</p>
+</div>
+
+<div class="achado">
+  <h3><span class="selo alto">3</span> Uma conversão contando duas vezes</h3>
+  <p>
+    Google Ads › Metas › Conversões › a ação <strong>"generate_lead" (id 6932924872)</strong>, importada do
+    GA4, marca o mesmo instante que a ação nativa <strong>"Lead"</strong>. Nos dias 14/08 e 17/08 as duas
+    marcaram 1 no mesmo dia. Em 30 dias a campanha relata 7 conversões contra 5 leads reais: o CPA lido é
+    R$ 127,09 e o real é R$ 177,92.
+  </p>
+  <p><strong>O que fazer:</strong> desmarcar "Incluir em Conversões" na generate_lead, ficando só com a Lead.</p>
+</div>
+
+<div class="achado">
+  <h3><span class="selo medio">4</span> A conversão de WhatsApp parou de disparar</h3>
+  <p>
+    "Botão Canto WhatsApp" caiu de 194 conversões em 12 meses para <strong>uma</strong> desde o
+    relançamento de 21/08, com 617 cliques em agosto. O código dispara o evento; o que provavelmente
+    falta é o cadastro do rótulo na aba Marketing do painel: <code>AW-16465175919</code> /
+    <code>bgDGCPSAhugZEO_Kmqs9</code> / evento <code>whatsapp</code>.
+  </p>
+</div>
+
+<div class="achado">
+  <h3><span class="selo medio">5</span> Contagem "Todas" inflando o número</h3>
+  <p>
+    As 6 ações de conversão estão em "Todas" em vez de "Uma". Um clique no anúncio vale um lead, não três.
+    Google Ads › Ações de conversão › cada ação › Contagem › <strong>Uma</strong>.
+  </p>
+</div>
+
+<div class="achado">
+  <h3><span class="selo medio">6</span> Conversões aprimoradas desligadas</h3>
+  <p>
+    Os termos de dados do cliente já estão aceitos na conta, só o recurso está desligado. Google Ads ›
+    Conversões › Configurações › <em>Conversões otimizadas</em>, método "Tag do Google". Casa os leads
+    do Google por e-mail e telefone.
+  </p>
+</div>
+
+<div class="achado">
+  <h3><span class="selo baixo">7</span> Nomes dos anúncios na Meta</h3>
+  <p>
+    Os 6 anúncios se chamam pelo ID do post (<code>18100349188731366</code>). Enquanto isso, os 46 leads
+    com criativo identificado carregam um número sem significado. Sugestão de formato:
+    <code>REELS_cicatriz-acne_2026-07-24</code>. Vale saber que um único anúncio, o Reels de cicatriz de
+    acne, concentra R$ 538,66 dos R$ 545,80 e os 28 leads dos últimos 30 dias.
+  </p>
+</div>
+
+<h2>O que NÃO fazer agora</h2>
+<ul>
+  <li><strong>Não trocar Maximizar cliques por Maximizar conversões.</strong> Com o WhatsApp sem disparar e a conversão do GA4 contando em dobro, o algoritmo aprenderia num sinal falso. Espere 30 dias de dado limpo depois dos itens 3, 4 e 5.</li>
+  <li><strong>Não comparar CPA de agora com o de antes de fevereiro.</strong> A contagem era "Todas" e o WhatsApp ainda disparava: a piora aparente é mudança de contagem, não de desempenho.</li>
+  <li><strong>Não usar o GA4 como número oficial.</strong> Com banner opt-in ele não enxergou 2 dos 5 leads pagos dos últimos 30 dias. O número oficial é a tabela de leads.</li>
+  <li><strong>Não contar com a modelagem de conversão do Consent Mode.</strong> São 9 cliques com gclid em quase dois meses, muito abaixo do piso que o Google exige para estimar.</li>
+</ul>
+
+<h2>Uma observação que vale mais que tudo acima</h2>
+<p>
+  <strong>75 dos 77 leads estão parados em "novo".</strong> Um foi para contatado, um para perdido. Sem
+  alguém mover os cartões, não existe dado de agendamento nem de comparecimento, e aí nenhuma medição
+  responde a pergunta que importa: qual campanha traz paciente, e não só contato. É também o que
+  destrava a conversão offline, que é o passo em que o Google passa a otimizar por quem realmente marcou.
+</p>
+
+<h2>Como saber se funcionou</h2>
+<p>Olhando <strong>só os leads criados depois de hoje</strong>:</p>
+<table>
+  <tr><th>Em 7 dias</th><th>Meta</th></tr>
+  <tr><td>Leads pagos com campanha identificada</td><td>100% (hoje: 0% no Google, 41% na Meta)</td></tr>
+  <tr><td>Leads sem origem nenhuma</td><td>abaixo de 15% (hoje: 36%)</td></tr>
+  <tr><td>Leads com página de entrada e de conversão</td><td>perto de 100% (hoje: 0)</td></tr>
+  <tr><td>Leads de orgânico contados como Meta Ads</td><td>zero</td></tr>
+  <tr><td>Eventos "Lead" marcados como Servidor no Gerenciador</td><td>um por lead (hoje: 1 em 28 dias)</td></tr>
+</table>
+
+<div class="rodape">
+  Auditoria de medição conduzida em 10 de setembro de 2026, em seis frentes, com leitura direta das contas
+  de anúncio e do banco. Para exportar em PDF, imprima esta página pelo navegador.
+</div>
+</div>
