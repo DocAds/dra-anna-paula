@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { usePathname } from "next/navigation";
 import * as CC from "vanilla-cookieconsent";
 import "vanilla-cookieconsent/dist/cookieconsent.css";
 import { setConsent } from "@/lib/consent";
@@ -12,7 +13,14 @@ import { limpaOrigem } from "@/lib/tracking";
  * Ao mudar, atualiza o gtag consent e avisa o TrackingScripts via evento.
  */
 export function CookieConsent() {
+  // O painel não carrega tag de marketing nenhuma (TrackingScripts para no
+  // /admin), então o banner ali só atrapalha quem está atendendo: cobre o canto
+  // da tela de leads e pede consentimento para algo que não acontece.
+  const pathname = usePathname();
+  const noPainel = pathname.startsWith("/admin") || pathname.startsWith("/login");
+
   useEffect(() => {
+    if (noPainel) return;
     const sync = () => {
       const analytics = CC.acceptedCategory("analytics");
       const marketing = CC.acceptedCategory("marketing");
@@ -96,7 +104,7 @@ export function CookieConsent() {
         },
       },
     });
-  }, []);
+  }, [noPainel]);
 
   return null;
 }

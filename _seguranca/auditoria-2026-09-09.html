@@ -358,6 +358,44 @@
   <tr><td>Backup antes de aplicar</td><td class="ok">77 leads exportados para fora do repositório</td></tr>
 </table>
 
+<h2>Segunda rodada, 10/09: medição</h2>
+<p>
+  Depois da entrega do painel, a medição foi auditada em seis frentes (site, consentimento, Google Ads,
+  Meta, GA4 e os dados reais dos 77 leads). O achado que mais pesa não era de segurança:
+  <strong>o CAPI não chegava na Meta</strong>, 708 eventos de navegador contra 1 de servidor em 28 dias,
+  porque no Cloudflare Workers a promessa do <code>fetch</code> morre com o isolate quando o handler
+  devolve a resposta. Corrigido com <code>waitUntil</code>.
+</p>
+<div class="achado resolvido">
+  <h3><span class="selo ok">Corrigido</span> N1 · Colunas de origem sem limite no banco</h3>
+  <p>
+    <code>010_origem_ids.sql</code> criou <code>campaign_id</code>, <code>adset_id</code>,
+    <code>ad_id</code> e <code>origem_extra</code> sem constraint. A truncagem da rota só vale para
+    quem passa por ela, e o insert público continua aberto para a chave anon. Fechado na
+    <code>011_limites_origem.sql</code>, com teto de tamanho e formato de objeto no jsonb.
+  </p>
+</div>
+<div class="achado resolvido">
+  <h3><span class="selo ok">Corrigido</span> N2 · Envio externo sem teto de tempo</h3>
+  <p>
+    Se o contexto do Worker falhar, o caminho de espera seguraria a resposta do formulário até o Graph
+    responder, com o botão travado na cara do visitante. Os dois envios ganharam
+    <code>AbortSignal.timeout(6000)</code>.
+  </p>
+</div>
+<div class="achado resolvido">
+  <h3><span class="selo ok">Corrigido</span> N3 · SQL por concatenação no script de reclassificação</h3>
+  <p>
+    Não era explorável (os ids vêm do próprio banco e são uuid), mas o padrão é frágil. O script passou
+    a conferir o formato de cada id antes de montar a consulta.
+  </p>
+</div>
+<p>
+  Verificado em produção: conta sem a seção Leads enxerga 0 leads, editor com a seção enxerga os 77,
+  o gatilho recusa reescrever consentimento, e um lead de teste enviado pela rota real gravou canal,
+  página de entrada, página de conversão e consentimento antes de ser apagado.
+</p>
+
 <h2>Fila que continua aberta</h2>
 <ol>
   <li><strong>Rotacionar o PAT do Supabase</strong> usado nesta aplicação: ele trafegou em texto puro e ficou no registro da sessão.</li>

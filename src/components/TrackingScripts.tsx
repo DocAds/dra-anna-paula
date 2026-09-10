@@ -3,7 +3,7 @@
 import Script from "next/script";
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
-import { persistOrigem } from "@/lib/tracking";
+import { capturaOrigem, persistOrigem } from "@/lib/tracking";
 import { getConsent, onConsentChange } from "@/lib/consent";
 import type { PublicMarketing } from "@/lib/marketing";
 
@@ -58,10 +58,19 @@ export function TrackingScripts() {
     return onConsentChange((s) => setMarketingOk(s.marketing));
   }, []);
 
-  // Origem (gclid, fbclid, utm, página de entrada) só é persistida após
-  // consentimento de marketing, e nunca dentro do painel: navegar no /admin
-  // sobrescrevia a memória de origem do próprio navegador da clínica, e o
-  // primeiro lead enviado dali entrava com a origem errada.
+  // A origem da visita é capturada no primeiro render, sem esperar o banner:
+  // quem ignora a caixa de cookies nunca dispara callback, e era assim que 36%
+  // dos leads chegavam sem campanha nenhuma. Fica na sessionStorage, medição de
+  // primeira parte, e só viaja junto do lead que a própria pessoa enviou.
+  //
+  // A memória longa (90 dias, entre visitas) continua atrás do consentimento.
+  //
+  // Nada disso roda no painel: navegar no /admin sobrescrevia a memória de
+  // origem do navegador da própria clínica.
+  useEffect(() => {
+    if (!isAdmin) capturaOrigem();
+  }, [isAdmin]);
+
   useEffect(() => {
     if (marketingOk && !isAdmin) persistOrigem();
   }, [marketingOk, isAdmin]);

@@ -285,11 +285,20 @@ function BarraDeFiltros({
       ? [filtros.interesse, ...interesses]
       : interesses;
 
+  // A key força o form a remontar quando o recorte da URL muda.
+  //
+  // Sem ela, "Limpar filtros" limpava a URL e os dados voltavam completos, mas
+  // os campos continuavam exibindo o filtro anterior: defaultValue só é
+  // aplicado na montagem, e a navegação do Next reaproveita os mesmos elementos
+  // em vez de recriá-los. O recorte parecia continuar ativo, e bastava clicar
+  // em Filtrar para ele de fato voltar.
+  const chaveDoRecorte = `${view}|${new URLSearchParams(filtrosParaQuery(filtros)).toString()}`;
+
   return (
     <section aria-label="Filtros da lista de leads" className="mb-5 space-y-3">
       {/* O form é GET puro: o recorte vira URL, sobrevive ao F5 e pode ser
           mandado para outra pessoa. */}
-      <form className="flex flex-wrap items-center gap-2">
+      <form key={chaveDoRecorte} className="flex flex-wrap items-center gap-2">
         <input type="hidden" name="view" value={view} />
         {filtros.periodo !== "tudo" && <input type="hidden" name="periodo" value={filtros.periodo} />}
         {filtros.periodo === "personalizado" && filtros.de && (

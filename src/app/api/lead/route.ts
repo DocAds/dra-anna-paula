@@ -4,6 +4,26 @@ import { createClient as createSbClient } from "@supabase/supabase-js";
 import { getMarketingSettings } from "@/lib/marketing";
 import { classificaCanal } from "@/lib/leadOrigem";
 
+/**
+ * Entrega o que precisa sair depois da resposta.
+ *
+ * No Cloudflare Workers, promessa não aguardada morre com o isolate assim que o
+ * handler devolve. Era por isso que o CAPI marcava 1 evento de servidor contra
+ * 708 de navegador em 28 dias: o fetch para o Graph era criado e descartado.
+ * waitUntil segura o isolate até a promessa terminar, sem atrasar a resposta.
+ * Fora do Worker (dev local) não existe contexto, e aí a espera é normal.
+ */
+async function entregaEmSegundoPlano(promessas: Promise<unknown>[]) {
+  if (!promessas.length) return;
+  try {
+    const { getCloudflareContext } = await import("@opennextjs/cloudflare");
+    const ctx = getCloudflareContext().ctx;
+    promessas.forEach((p) => ctx.waitUntil(p));
+  } catch {
+    await Promise.allSettled(promessas);
+  }
+}
+
 const sha = (v: string) =>
   crypto.createHash("sha256").update(v.trim().toLowerCase()).digest("hex");
 
@@ -69,6 +89,25 @@ function rotuloNeutro(source: string): string {
   return source;
 }
 
+// Cada plataforma nomeia o id da campanha de um jeito. Aqui eles viram um
+// campo só, que é o que junta o lead com o relatório de mídia.
+function idsDaOrigem(extra: unknown) {
+  const e = (extra && typeof extra === "object" ? extra : {}) as Record<string, string>;
+  const corta = (v: string | undefined) => (v ? String(v).slice(0, 120) : null);
+  const limpo = Object.fromEntries(
+    Object.entries(e)
+      .filter(([, v]) => typeof v === "string" && v)
+      .slice(0, 20)
+      .map(([k, v]) => [k.slice(0, 40), String(v).slice(0, 200)])
+  );
+  return {
+    campaign_id: corta(e.utm_id || e.gad_campaignid),
+    adset_id: corta(e.adset_id),
+    ad_id: corta(e.ad_id),
+    origem_extra: Object.keys(limpo).length ? limpo : null,
+  };
+}
+
 function temperaturaFromUrgencia(u: string | undefined): "frio" | "morno" | "quente" {
   if (!u) return "morno";
   const v = u.toLowerCase();
@@ -93,6 +132,7 @@ export async function POST(req: Request) {
     landing_path,
     form_path,
     referrer,
+    origem_extra,
     utm_source,
     utm_medium,
     utm_campaign,
@@ -105,6 +145,8 @@ export async function POST(req: Request) {
     consent,
     consent_ts,
     consent_marketing,
+    fbp,
+    fbc,
   } = body as Record<string, string | number | boolean | undefined>;
 
   // Consentimento de marketing do banner. Só ele libera o envio de PII à Meta.
@@ -172,6 +214,9 @@ export async function POST(req: Request) {
     landing_path: trunc(landing_path, 200),
     form_path: trunc(form_path, 200),
     referrer: trunc(referrer, 500),
+    // O pacote inteiro de parâmetros de plataforma, cru. Os três que viram
+    // filtro e relatório saem dele para colunas próprias logo abaixo.
+    ...idsDaOrigem(origem_extra),
     user_agent: ua.slice(0, 400),
     ip_country: ipCountry,
     utm_source: trunc(utm_source, 200),
@@ -190,13 +235,14 @@ export async function POST(req: Request) {
   // dizia "enviado", o Pixel contava a conversão e o CRM ficava sem a linha.
   // Aqui a gravação é pré-requisito: sem ela, ninguém dispara nada.
   let gravou = false;
+  let leadId: string | null = null;
   if (process.env.NEXT_PUBLIC_SUPABASE_URL && nome && whatsapp) {
     const sb = createSbClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!,
       { auth: { persistSession: false, autoRefreshToken: false } }
     );
-    const { error } = await sb.from("leads").insert({
+    const { data: gravado, error } = await sb.from("leads").insert({
       ...safe,
       // Classificado na gravação, não na leitura: é o que permite o painel
       // filtrar por origem com índice em vez de carregar tudo e descartar.
@@ -206,7 +252,7 @@ export async function POST(req: Request) {
       consent: consent === true,
       consent_ts: typeof consent_ts === "string" ? consent_ts : null,
       consent_marketing: marketingConsentido,
-    });
+    }).select("id").single<{ id: string }>();
     if (error) {
       console.error("[lead] falha ao gravar", {
         code: error.code,
@@ -220,6 +266,7 @@ export async function POST(req: Request) {
       );
     }
     gravou = true;
+    leadId = gravado?.id ?? null;
   }
 
   // Meta CAPI — IDs/segredos vêm da aba Marketing do admin (fallback p/ env).
@@ -232,6 +279,8 @@ export async function POST(req: Request) {
   // consentimento de marketing nada de PII, nem hasheada, sai para a Meta.
   // O CAPI exige ao menos um identificador de usuário, então o evento inteiro
   // é suprimido em vez de enviado sem user_data.
+  const pendentes: Promise<unknown>[] = [];
+
   if (PIXEL && TOKEN && marketingConsentido) {
     const userData: Record<string, string | string[]> = {
       client_user_agent: ua,
@@ -244,12 +293,28 @@ export async function POST(req: Request) {
       if (first) userData.fn = [sha(first)];
       if (rest.length) userData.ln = [sha(rest.join(" "))];
     }
+    // Cidade e país entram hasheados e melhoram o casamento sem identificar
+    // ninguém sozinhos.
+    if (safe.cidade) userData.ct = [sha(String(safe.cidade).split(",")[0])];
+    if (safe.ip_country) userData.country = [sha(String(safe.ip_country))];
+    // external_id amarra o evento ao registro do CRM: é o que permite conferir
+    // depois, um a um, o que a Meta recebeu.
+    if (leadId) userData.external_id = [sha(leadId)];
+    // fbp vem do cookie do navegador; fbc é montado a partir do fbclid quando o
+    // cookie não veio. São os dois sinais que mais aumentam a correspondência.
+    if (typeof fbp === "string" && fbp) userData.fbp = fbp;
+    const fbcFinal =
+      (typeof fbc === "string" && fbc) ||
+      (safe.fbclid ? `fb.1.${Date.now()}.${safe.fbclid}` : "");
+    if (fbcFinal) userData.fbc = fbcFinal;
 
     const payload = {
       data: [
         {
           event_name: "Lead",
-          event_time: Math.floor(Number(ts ?? Date.now()) / 1000),
+          // Relógio do servidor: o do visitante pode estar adiantado e a Meta
+          // recusa evento fora da janela de 7 dias.
+          event_time: Math.floor(Date.now() / 1000),
           event_id: event_id ?? crypto.randomUUID(),
           action_source: "website",
           event_source_url: normalizaUrl(
@@ -273,14 +338,28 @@ export async function POST(req: Request) {
       ...(TEST ? { test_event_code: TEST } : {}),
     };
 
-    fetch(
-      `https://graph.facebook.com/v20.0/${PIXEL}/events?access_token=${TOKEN}`,
-      {
+    // A trilha é o que permite responder "o evento saiu?" sem abrir o
+    // Gerenciador: sucesso e falha ficam no log do Worker.
+    pendentes.push(
+      fetch(`https://graph.facebook.com/v20.0/${PIXEL}/events?access_token=${TOKEN}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
-      }
-    ).catch(() => undefined);
+        // Sem teto, o caminho de espera (fora do Worker, ou se o contexto
+        // falhar) seguraria a resposta do formulário público até o Graph
+        // responder, e o botão de enviar ficaria travado na cara do visitante.
+        signal: AbortSignal.timeout(6000),
+      })
+        .then(async (r) => {
+          const corpo = await r.text();
+          if (!r.ok) {
+            console.error("[capi] recusado", { status: r.status, corpo: corpo.slice(0, 300), leadId });
+          } else {
+            console.log("[capi] enviado", { corpo: corpo.slice(0, 200), leadId });
+          }
+        })
+        .catch((e) => console.error("[capi] falhou", { erro: String(e).slice(0, 200), leadId }))
+    );
   }
 
   // Webhook externo opcional — envia payload normalizado (nunca o body cru), e
@@ -288,12 +367,17 @@ export async function POST(req: Request) {
   // contato que o CRM não tem.
   const hook = process.env.LEAD_WEBHOOK_URL;
   if (hook && gravou) {
-    fetch(hook, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...safe, event_id: event_id ?? null, ts: ts ?? null }),
-    }).catch(() => undefined);
+    pendentes.push(
+      fetch(hook, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...safe, event_id: event_id ?? null, ts: ts ?? null }),
+        signal: AbortSignal.timeout(6000),
+      }).catch((e) => console.error("[webhook] falhou", String(e).slice(0, 200)))
+    );
   }
+
+  await entregaEmSegundoPlano(pendentes);
 
   return NextResponse.json({ ok: true });
 }

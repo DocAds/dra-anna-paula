@@ -74,6 +74,13 @@ export type Lead = {
   landing_path: string | null;
   form_path: string | null;
   referrer: string | null;
+  campaign_id: string | null;
+  adset_id: string | null;
+  ad_id: string | null;
+  origem_extra: Record<string, string> | null;
+  consent: boolean | null;
+  consent_ts: string | null;
+  consent_marketing: boolean | null;
   user_agent: string | null;
   ip_country: string | null;
   utm_source: string | null;

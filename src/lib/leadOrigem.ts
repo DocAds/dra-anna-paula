@@ -14,14 +14,17 @@ export type CanalLead =
   | "meta-ads"
   | "google-organico"
   | "social"
+  | "ia"
   | "whatsapp"
   | "referencia"
   | "direto"
+  | "nao-identificado"
   | "outro";
 
 type OrigemBruta = {
   source?: string | null;
   canal?: string | null;
+  landing_path?: string | null;
   utm_source?: string | null;
   utm_medium?: string | null;
   utm_campaign?: string | null;
@@ -35,9 +38,11 @@ export const CANAL_LABEL: Record<CanalLead, string> = {
   "meta-ads": "Meta Ads",
   "google-organico": "Google orgânico",
   social: "Redes sociais",
+  ia: "Busca por IA",
   whatsapp: "WhatsApp",
   referencia: "Outro site",
   direto: "Acesso direto",
+  "nao-identificado": "Sem origem",
   outro: "Outra origem",
 };
 
@@ -47,42 +52,70 @@ export const CANAIS_ORDEM: CanalLead[] = [
   "meta-ads",
   "google-organico",
   "social",
+  "ia",
   "whatsapp",
   "referencia",
   "direto",
+  "nao-identificado",
   "outro",
 ];
 
 export const isCanal = (v: string | undefined | null): v is CanalLead =>
   !!v && (CANAIS_ORDEM as string[]).includes(v);
 
+// Assistentes de IA já mandam tráfego real (3 dos 77 leads vieram do
+// chatgpt.com) e não são "outra origem": é um canal com comportamento próprio,
+// e vai crescer. Checado ANTES do Google, senão gemini.google.com vira busca
+// orgânica do Google.
+const FONTES_IA = /(chatgpt|openai|perplexity|gemini|bard|claude\.ai|copilot|grok)/;
+
+// "Pago" exige plataforma + intenção comercial no mesmo valor. O teste antigo
+// era src.includes("ads"), que casa com "leads" e com qualquer nome de campanha
+// que tenha a palavra dentro.
+const ehPago = (src: string, med: string) => {
+  const sinal = `${src} ${med}`;
+  if (/(^|[^a-z])(cpc|ppc|paid|paid_social|paidsocial)([^a-z]|$)/.test(sinal)) return true;
+  return /(meta|face|fb|ig|insta|google|youtube|tiktok|linkedin)[a-z_-]*ads/.test(sinal.replace(/\s+/g, ""));
+};
+
+const ehMeta = (src: string) =>
+  src.includes("face") || src.includes("meta") || src.includes("instagram") || /(^|[^a-z0-9])(ig|fb)([^a-z0-9]|$)/.test(src);
+
 /**
- * A cascata. Clique de anúncio ganha do utm porque sobrevive à navegação;
- * utm ganha do referrer porque é declarado pela campanha.
+ * De onde o lead veio.
+ *
+ * A UTM manda quando existe, e o clique de anúncio só desempata na ausência
+ * dela. A ordem inversa (que era a daqui) fazia todo lead com fbclid virar Meta
+ * Ads, inclusive os que a própria UTM declarava orgânicos: o navegador embutido
+ * do Instagram carimba fbclid em clique de link da bio e de story. Eram 21 dos
+ * 61 leads contados como pagos, um terço do balde.
  */
 export function classificaCanal(o: OrigemBruta): CanalLead {
+  const src = (o.utm_source || "").toLowerCase();
+  const med = (o.utm_medium || "").toLowerCase();
+
+  if (src) {
+    if (FONTES_IA.test(src)) return "ia";
+    const pago = ehPago(src, med);
+    // O gclid vale como prova de anúncio: a marcação automática do Google só o
+    // cria em clique pago. O fbclid NÃO vale: o navegador embutido do Instagram
+    // carimba o parâmetro em clique de link da bio e de story, que é orgânico.
+    // Por isso, dentro do Meta, quem decide é o que a própria UTM declara.
+    if (src.includes("google")) return pago || o.gclid ? "google-ads" : "google-organico";
+    if (ehMeta(src)) return pago ? "meta-ads" : "social";
+    if (src.includes("tiktok") || src.includes("youtube") || src.includes("linkedin"))
+      return pago ? "meta-ads" : "social";
+    if (src.includes("whats")) return "whatsapp";
+    return pago ? "outro" : "referencia";
+  }
+
+  // Sem utm, o clique de anúncio é o que sobra de mais confiável.
   if (o.gclid) return "google-ads";
   if (o.fbclid) return "meta-ads";
 
-  const src = (o.utm_source || "").toLowerCase();
-  const med = (o.utm_medium || "").toLowerCase();
-  const pago = med.includes("cpc") || med.includes("paid") || med.includes("ads");
-
-  if (src) {
-    if (src.includes("google")) return pago ? "google-ads" : "google-organico";
-    // "ig" só como palavra inteira: com includes, "digital" e "signal" caíam
-    // em Meta, e o backfill da migration classificava os mesmos leads como
-    // "outro". Duas telas, dois números para o mesmo lead.
-    const ehMeta =
-      src.includes("face") || src.includes("meta") || src.includes("instagram") || /(^|[^a-z0-9])ig([^a-z0-9]|$)/.test(src);
-    if (ehMeta) return pago ? "meta-ads" : "social";
-    if (src.includes("tiktok") || src.includes("youtube") || src.includes("linkedin")) return "social";
-    if (src.includes("whats")) return "whatsapp";
-    return "outro";
-  }
-
   const ref = (o.referrer || "").toLowerCase();
   if (ref) {
+    if (FONTES_IA.test(ref)) return "ia";
     if (ref.includes("google.")) return "google-organico";
     if (ref.includes("facebook.") || ref.includes("instagram.") || ref.includes("fb.me")) return "social";
     if (ref.includes("whatsapp") || ref.includes("wa.me")) return "whatsapp";
@@ -93,7 +126,10 @@ export function classificaCanal(o: OrigemBruta): CanalLead {
   // de conversa, sem passar pelo pop-up de qualificação.
   if ((o.source || "").startsWith("whatsapp:")) return "whatsapp";
 
-  return "direto";
+  // "Acesso direto" é afirmação forte: quem digitou o endereço ou tinha o site
+  // salvo. Sem nenhum sinal E sem nem saber por onde entrou, o honesto é
+  // admitir que não se sabe, em vez de creditar ao canal direto.
+  return o.landing_path === "/" ? "direto" : "nao-identificado";
 }
 
 /** Usa o canal já gravado quando existe; classifica na hora para o histórico. */
@@ -112,9 +148,11 @@ export function traduzCanalUtm(o: OrigemBruta): string {
     "meta-ads": "Veio de um anúncio do Facebook ou Instagram",
     "google-organico": "Veio do Google sem ser anúncio",
     social: "Veio de rede social (sem ser anúncio)",
+    ia: `Veio de um assistente de IA${o.utm_source ? ` (${o.utm_source})` : ""}`,
     whatsapp: "Veio de um link de WhatsApp",
-    referencia: "Veio de outro site",
-    direto: "Veio direto do site (sem campanha rastreada)",
+    referencia: o.utm_source ? `Veio de ${o.utm_source}` : "Veio de outro site",
+    direto: "Veio direto do site (digitou o endereço ou tinha salvo)",
+    "nao-identificado": "Não deu para identificar a origem",
     outro: o.utm_source ? `Veio de ${o.utm_source}` : "Origem não identificada",
   };
   return frase[canal];
@@ -200,8 +238,10 @@ export const CANAL_BADGE: Record<CanalLead, string> = {
   "meta-ads": "bg-indigo-600 text-white",
   "google-organico": "bg-sky-100 text-sky-800",
   social: "bg-fuchsia-100 text-fuchsia-900",
+  ia: "bg-teal-100 text-teal-900",
   whatsapp: "bg-emerald-100 text-emerald-900",
   referencia: "bg-stone-200 text-stone-700",
   direto: "bg-stone-100 text-stone-600",
+  "nao-identificado": "bg-amber-100 text-amber-900",
   outro: "bg-stone-100 text-stone-600",
 };

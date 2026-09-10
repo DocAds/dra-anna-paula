@@ -321,6 +321,23 @@ export function SeletorPeriodo({
             >
               Ontem
             </button>
+            {periodo === "personalizado" && (
+              /* Com um intervalo já aplicado, limpar só a seleção interna não
+                 limpava nada aos olhos de quem clicou: a lista continuava
+                 recortada. Aqui o botão desfaz o recorte de verdade. */
+              <button
+                type="button"
+                onClick={() => {
+                  setInicio(undefined);
+                  setFim(undefined);
+                  setAberto(false);
+                  router.push(`/admin/crm/leads?${new URLSearchParams(queryBase).toString()}`);
+                }}
+                className="rounded-full border border-cocoa/20 px-4 py-2.5 text-[11px] uppercase tracking-widest2 text-ink/75 hover:text-cocoa hover:border-cocoa transition-colors motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cocoa/60"
+              >
+                Tirar filtro
+              </button>
+            )}
           </div>
         </div>
       )}

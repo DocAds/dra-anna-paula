@@ -6,7 +6,7 @@ import { PhoneInput } from "react-international-phone";
 import "react-international-phone/style.css";
 import { whatsappLink } from "@/lib/site";
 import { interessesLead } from "@/lib/tratamentos";
-import { newEventId, readClickId, readUtm, readEntrada, trackLead } from "@/lib/tracking";
+import { newEventId, readClickId, readUtm, readEntrada, readExtra, readCookiesMeta, trackLead } from "@/lib/tracking";
 import { openWhatsapp } from "@/lib/whatsapp";
 import { getConsent } from "@/lib/consent";
 
@@ -64,6 +64,8 @@ export function LeadForm({ source = "contato" }: { source?: string }) {
       // foi guardado na chegada quando a pessoa navegou antes de converter.
       ...readUtm(),
       ...readEntrada(),
+      ...readCookiesMeta(),
+      origem_extra: readExtra(),
       form_path: window.location.pathname,
       gclid: params.get("gclid") || readClickId("gclid") || undefined,
       fbclid: params.get("fbclid") || readClickId("fbclid") || undefined,
