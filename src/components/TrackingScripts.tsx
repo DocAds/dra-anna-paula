@@ -3,7 +3,7 @@
 import Script from "next/script";
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
-import { persistGclid } from "@/lib/tracking";
+import { persistOrigem } from "@/lib/tracking";
 import { getConsent, onConsentChange } from "@/lib/consent";
 import type { PublicMarketing } from "@/lib/marketing";
 
@@ -58,10 +58,13 @@ export function TrackingScripts() {
     return onConsentChange((s) => setMarketingOk(s.marketing));
   }, []);
 
-  // gclid/fbclid só são persistidos após consentimento de marketing.
+  // Origem (gclid, fbclid, utm, página de entrada) só é persistida após
+  // consentimento de marketing, e nunca dentro do painel: navegar no /admin
+  // sobrescrevia a memória de origem do próprio navegador da clínica, e o
+  // primeiro lead enviado dali entrava com a origem errada.
   useEffect(() => {
-    if (marketingOk) persistGclid();
-  }, [marketingOk]);
+    if (marketingOk && !isAdmin) persistOrigem();
+  }, [marketingOk, isAdmin]);
 
   useEffect(() => {
     if (isAdmin) return;

@@ -1,25 +1,54 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { TrendingUp, Users, Thermometer, Target } from "lucide-react";
+import { TrendingUp, Users, Thermometer, Target, AlertCircle } from "lucide-react";
 import { CrmCharts } from "./CrmCharts";
-import type { Lead } from "@/lib/supabase/types";
+import type { LeadLite } from "./CrmCharts";
 import { requireSection } from "@/lib/admin-guard";
+import { diaSP, inicioDoDiaSP } from "@/lib/dataSP";
 
 export const dynamic = "force-dynamic";
 
 export default async function CrmDashboard() {
   await requireSection("dashboard");
   const sb = await createClient();
-  const { data: leads = [] } = await sb
+  const { data: leads = [], error: erroLeads } = await sb
     .from("leads")
-    .select("id, created_at, source, interesse, urgencia, temperatura, fase")
+    .select(
+      "id, created_at, source, canal, utm_source, utm_medium, utm_campaign, gclid, fbclid, referrer, interesse, urgencia, temperatura, fase"
+    )
     .order("created_at", { ascending: false })
-    .returns<Pick<Lead, "id" | "created_at" | "source" | "interesse" | "urgencia" | "temperatura" | "fase">[]>();
+    .returns<LeadLite[]>();
+
+  // Zero é um resultado válido, e por isso mente melhor do que uma tela em
+  // branco: sem este aviso, uma falha de leitura vira "nenhum lead" e a clínica
+  // acha que o site parou de captar.
+  if (erroLeads) {
+    console.error("[crm] falha ao carregar leads", {
+      code: erroLeads.code,
+      message: erroLeads.message,
+    });
+    return (
+      <main className="p-8 md:p-12">
+        <div className="text-[11px] uppercase tracking-widest3 text-cocoa mb-3">CRM</div>
+        <h1 className="font-display text-4xl text-ink leading-tight mb-6">Dashboard</h1>
+        <div role="alert" className="editorial-card rounded-3xl p-8 flex items-start gap-3">
+          <AlertCircle className="h-5 w-5 text-rose-700 shrink-0 mt-0.5" aria-hidden />
+          <div>
+            <p className="font-display text-xl text-ink">Não deu para carregar os números.</p>
+            <p className="text-sm text-ink/70 mt-1">
+              {erroLeads.code === "42703" || erroLeads.code === "PGRST204"
+                ? "O banco ainda não tem as colunas de origem: falta aplicar a migration 008_leads_origem.sql."
+                : `A base respondeu com um erro (${erroLeads.code ?? "sem código"}). O registro completo está no log do servidor.`}
+            </p>
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   const total = leads?.length || 0;
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const todayCount = (leads || []).filter((l) => new Date(l.created_at) >= today).length;
+  const inicioDeHoje = inicioDoDiaSP(diaSP());
+  const todayCount = (leads || []).filter((l) => new Date(l.created_at) >= inicioDeHoje).length;
   const last7 = new Date();
   last7.setDate(last7.getDate() - 6);
   const week = (leads || []).filter((l) => new Date(l.created_at) >= last7);

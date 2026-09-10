@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import * as CC from "vanilla-cookieconsent";
 import "vanilla-cookieconsent/dist/cookieconsent.css";
 import { setConsent } from "@/lib/consent";
+import { limpaOrigem } from "@/lib/tracking";
 
 /**
  * Banner de consentimento (LGPD) + ponte para o Google Consent Mode v2.
@@ -24,6 +25,11 @@ export function CookieConsent() {
           ad_personalization: marketing ? "granted" : "denied",
         });
       }
+
+      // Revogar marketing tem que apagar também o que já foi guardado: gclid,
+      // fbclid, utm e página de entrada continuavam no navegador e seguiam
+      // viajando no próximo lead.
+      if (!marketing) limpaOrigem();
 
       setConsent({ analytics, marketing });
     };

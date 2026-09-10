@@ -2,15 +2,33 @@
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
-import { format } from "date-fns/format";
-import { ptBR } from "date-fns/locale";
 import { GripVertical, ExternalLink, AlertCircle } from "lucide-react";
 import type { Lead, LeadFase } from "@/lib/supabase/types";
 import { TEMP_BADGE, TEMP_LABEL, FASE_LABEL } from "@/lib/crmStatus";
+import { formataDiaSP } from "@/lib/dataSP";
+import { mascaraTelefone } from "@/lib/leadWhatsapp";
+import { BotaoWhatsapp } from "../leads/BotaoWhatsapp";
+import { SeloOrigem } from "../leads/SeloOrigem";
 
 type LeadLite = Pick<
   Lead,
-  "id" | "nome" | "whatsapp" | "interesse" | "urgencia" | "temperatura" | "fase" | "created_at" | "source"
+  | "id"
+  | "nome"
+  | "whatsapp"
+  | "whatsapp_country"
+  | "interesse"
+  | "urgencia"
+  | "temperatura"
+  | "fase"
+  | "created_at"
+  | "source"
+  | "canal"
+  | "utm_source"
+  | "utm_medium"
+  | "utm_campaign"
+  | "gclid"
+  | "fbclid"
+  | "referrer"
 >;
 
 const COLUNAS: { v: LeadFase; l: string; desc: string }[] = [
@@ -53,6 +71,13 @@ export function KanbanBoard({
   }
 
   function onDragStart(e: React.DragEvent, id: string) {
+    // Arrastar a partir de um link, botão ou select do cartão não pode virar
+    // movimento de coluna: o gesto que começa no botão de WhatsApp é para abrir
+    // a conversa, não para mudar a fase do lead.
+    if ((e.target as HTMLElement).closest("a,button,select,input,label")) {
+      e.preventDefault();
+      return;
+    }
     setDraggingId(id);
     e.dataTransfer.effectAllowed = "move";
     e.dataTransfer.setData("text/plain", id);
@@ -130,24 +155,30 @@ export function KanbanBoard({
                       {l.nome}
                     </Link>
                     <div className="text-[11px] text-ink/70 mt-1 mb-2 truncate">
-                      {l.whatsapp}
+                      {mascaraTelefone(l.whatsapp, l.whatsapp_country)}
                     </div>
                     {l.interesse && (
-                      <div className="text-[11px] text-cocoa/85 italic mb-2 truncate">
+                      <div className="text-[11px] text-cocoa italic mb-2 truncate">
                         {l.interesse}
                       </div>
                     )}
+                    <div className="mb-2 flex min-w-0">
+                      <SeloOrigem lead={l} tamanho="sm" />
+                    </div>
                     <div className="flex items-center gap-2 mt-3 pt-2 border-t border-cocoa/10">
                       <span className={`text-[9px] uppercase tracking-widest2 px-2 py-0.5 rounded-full ${TEMP_BADGE[l.temperatura]}`}>
                         {TEMP_LABEL[l.temperatura]}
                       </span>
                       <span className="text-[10px] text-ink/70 ml-auto">
-                        {format(new Date(l.created_at), "dd MMM", { locale: ptBR })}
+                        {formataDiaSP(l.created_at)}
                       </span>
+                      <BotaoWhatsapp lead={l} tamanho="sm" />
                       <Link
                         href={`/admin/crm/leads/${l.id}`}
-                        className="grid place-items-center min-h-11 min-w-11 -my-2 rounded-full text-cocoa hover:text-ink transition-colors motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cocoa/50"
+                        className="grid place-items-center h-9 w-9 md:h-8 md:w-8 rounded-full text-cocoa hover:text-ink hover:bg-cocoa/10 transition-colors motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cocoa/50"
                         aria-label={`Abrir lead ${l.nome}`}
+                        draggable={false}
+                        onPointerDown={(e) => e.stopPropagation()}
                       >
                         <ExternalLink className="h-4 w-4" />
                       </Link>

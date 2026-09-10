@@ -1,8 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { format } from "date-fns/format";
-import { ptBR } from "date-fns/locale";
 import { ExternalLink, MessageCircle, Mail, MapPin, Sparkles, Clock, Globe, Smartphone, Megaphone } from "lucide-react";
 import { updateLead, deleteLead } from "../../actions";
 import { createNote, updateNote, deleteNote } from "../../notes-actions";
@@ -10,59 +8,19 @@ import { LeadActions } from "./LeadActions";
 import { LeadNotes } from "./LeadNotes";
 import type { Lead } from "@/lib/supabase/types";
 import { TEMP_BADGE, TEMP_LABEL } from "@/lib/crmStatus";
+import { traduzCanalUtm, traduzSource, CANAL_LABEL, canalDoLead } from "@/lib/leadOrigem";
+import { linkWhatsapp, mascaraTelefone } from "@/lib/leadWhatsapp";
+import { formataCompletoSP } from "@/lib/dataSP";
+import { requireSection } from "@/lib/admin-guard";
 
 export const dynamic = "force-dynamic";
-
-function traduzCanalUtm(u: Pick<Lead, "utm_source" | "utm_medium" | "utm_campaign" | "gclid" | "fbclid">) {
-  if (u.gclid) return "Veio de um anúncio do Google";
-  if (u.fbclid) return "Veio de um anúncio do Facebook ou Instagram";
-  if (u.utm_source) {
-    const src = u.utm_source.toLowerCase();
-    if (src.includes("google")) return "Veio de uma campanha do Google";
-    if (src.includes("face") || src.includes("meta") || src.includes("instagram")) return "Veio de uma campanha do Meta (Facebook/Instagram)";
-    if (src.includes("tiktok")) return "Veio do TikTok";
-    if (src.includes("whatsapp")) return "Veio de link do WhatsApp";
-    if (src.includes("organic") || src.includes("google_organic")) return "Veio do Google sem ser anúncio";
-    return `Veio de ${u.utm_source}`;
-  }
-  return "Veio direto do site (sem campanha rastreada)";
-}
-
-function traduzSource(s: string | null) {
-  const map: Record<string, string> = {
-    hero: "Botão principal do topo (Hero)",
-    nav: "Botão 'Agendar' no cabeçalho (desktop)",
-    "nav-mobile": "Botão 'Agendar' no menu do celular",
-    footer: "Botão de WhatsApp no rodapé",
-    link: "Link de WhatsApp no texto da página",
-    float: "Botão flutuante do WhatsApp",
-    "cta-final": "CTA do final da página",
-    "bloco-dra": "Bloco da Dra. Anna",
-    "tratamentos-final": "Final da página de tratamentos",
-    signature: "Bloco do tratamento de destaque (Ultraformer MPT)",
-    "signature-agendar": "Tratamento de destaque (botão Agendar)",
-    "sobre-hero": "Página Sobre — topo",
-    "sobre-final": "Página Sobre — final",
-    "contato-final": "Página de contato — botão final",
-    "resultados-final": "Final da galeria",
-    modal: "Pop-up de qualificação",
-  };
-  if (!s) return "—";
-  if (map[s]) return map[s];
-  if (s.startsWith("tratamento-")) {
-    const slug = s.replace(/^tratamento-/, "").replace(/-final$|-saiba$/g, "");
-    return `Página de tratamento: ${slug}`;
-  }
-  if (s.startsWith("whatsapp:")) return `Clique direto no WhatsApp (${s.replace("whatsapp:", "")})`;
-  if (s.startsWith("form:")) return `Formulário de contato (${s.replace("form:", "")})`;
-  return s;
-}
 
 export default async function LeadDetail({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
+  await requireSection("leads");
   const { id } = await params;
   const sb = await createClient();
   const { data: lead } = await sb.from("leads").select("*").eq("id", id).maybeSingle<Lead>();
@@ -84,8 +42,7 @@ export default async function LeadDetail({
     await deleteLead(id);
   };
 
-  const wa = (lead.whatsapp || "").replace(/\D/g, "");
-  const waMsg = `Olá ${lead.nome.split(" ")[0]}, falo da clínica Dra. Anna Bomtempo. Tudo bem? Você deixou contato pelo nosso site.`;
+  const waHref = linkWhatsapp(lead);
   const canal = traduzCanalUtm(lead);
 
   return (
@@ -102,14 +59,14 @@ export default async function LeadDetail({
             </span>
           </div>
           <div className="text-sm text-ink/70">
-            Recebido em {format(new Date(lead.created_at), "dd 'de' MMM yyyy 'às' HH:mm", { locale: ptBR })}
+            Recebido em {formataCompletoSP(lead.created_at)}
           </div>
         </div>
-        {wa && (
+        {waHref && (
           <a
-            href={`https://wa.me/${wa}?text=${encodeURIComponent(waMsg)}`}
+            href={waHref}
             target="_blank"
-            rel="noopener"
+            rel="noopener noreferrer"
             className="inline-flex items-center gap-2 rounded-full bg-cocoa text-bone px-5 py-3 text-[12px] uppercase tracking-widest2 hover:bg-ink transition-colors"
           >
             <ExternalLink className="h-4 w-4" /> Falar no WhatsApp
@@ -122,7 +79,7 @@ export default async function LeadDetail({
           <section className="editorial-card rounded-3xl p-7">
             <h2 className="text-[10px] uppercase tracking-widest3 text-cocoa mb-5">Contato</h2>
             <div className="grid sm:grid-cols-2 gap-5">
-              <Block icon={MessageCircle} label="WhatsApp" value={`${lead.whatsapp || "—"}`} sub={lead.whatsapp_country ? `País: ${lead.whatsapp_country}` : undefined} />
+              <Block icon={MessageCircle} label="WhatsApp" value={mascaraTelefone(lead.whatsapp, lead.whatsapp_country) || "—"} sub={lead.whatsapp_country && lead.whatsapp_country !== "BR" ? `País: ${lead.whatsapp_country}` : undefined} />
               <Block icon={Mail} label="E-mail" value={lead.email || "Não informado"} />
               <Block icon={MapPin} label="Cidade" value={lead.cidade || "Não informada"} />
               <Block icon={Globe} label="País detectado pelo IP" value={lead.ip_country || "Não identificado"} />
@@ -146,7 +103,7 @@ export default async function LeadDetail({
           <section className="editorial-card rounded-3xl p-7">
             <h2 className="text-[10px] uppercase tracking-widest3 text-cocoa mb-5">Origem do lead</h2>
             <div className="grid sm:grid-cols-2 gap-5">
-              <Block icon={Megaphone} label="Como chegou até nós" value={canal} />
+              <Block icon={Megaphone} label="Como chegou até nós" value={canal} sub={`Canal: ${CANAL_LABEL[canalDoLead(lead)]}`} />
               <Block icon={Smartphone} label="Botão que clicou" value={traduzSource(lead.source)} />
               {lead.page_url && (
                 <Block icon={Globe} label="Página de origem" value={prettyUrl(lead.page_url)} />
@@ -162,6 +119,12 @@ export default async function LeadDetail({
               )}
               {lead.utm_term && (
                 <Block icon={Megaphone} label="Palavra-chave" value={lead.utm_term} />
+              )}
+              {lead.landing_path && (
+                <Block icon={Globe} label="Por onde entrou no site" value={lead.landing_path} />
+              )}
+              {lead.referrer && (
+                <Block icon={Globe} label="Site que trouxe" value={prettyUrl(lead.referrer)} />
               )}
             </div>
           </section>

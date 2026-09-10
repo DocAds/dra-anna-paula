@@ -12,10 +12,21 @@ export default function LoadingLeads() {
         <div className="h-10 w-44 rounded-full bg-cocoa/10" />
       </div>
 
-      <div className="mb-4 flex flex-wrap items-center gap-2">
+      <div className="mb-3 flex flex-wrap items-center gap-2">
         <div className="h-11 flex-1 min-w-[200px] rounded-full bg-cocoa/10" />
+        <div className="h-11 w-36 rounded-full bg-cocoa/10" />
         <div className="h-11 w-40 rounded-full bg-cocoa/10" />
+        <div className="h-11 w-36 rounded-full bg-cocoa/10" />
         <div className="h-11 w-24 rounded-full bg-cocoa/15" />
+      </div>
+
+      <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap gap-1.5">
+          {[92, 64, 108, 116, 84, 128].map((w, i) => (
+            <div key={i} className="h-9 rounded-full bg-cocoa/10" style={{ width: w }} />
+          ))}
+        </div>
+        <div className="h-3 w-40 rounded-full bg-cocoa/10" />
       </div>
 
       <ul className="grid gap-3">
@@ -28,11 +39,13 @@ export default function LoadingLeads() {
             <div className="min-w-0 flex-1 space-y-2.5">
               <div className="h-5 w-1/3 min-w-[120px] rounded-md bg-cocoa/15" />
               <div className="h-3 w-2/3 min-w-[160px] rounded-full bg-cocoa/10" />
+              <div className="h-5 w-28 rounded-full bg-cocoa/10" />
             </div>
             <div className="hidden sm:flex items-center gap-2">
               <div className="h-6 w-16 rounded-full bg-cocoa/10" />
               <div className="h-6 w-20 rounded-full bg-cocoa/10" />
             </div>
+            <div className="h-11 w-11 rounded-full bg-cocoa/15" />
           </li>
         ))}
       </ul>

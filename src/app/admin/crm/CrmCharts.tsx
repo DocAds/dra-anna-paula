@@ -13,10 +13,28 @@ import {
   Legend,
 } from "recharts";
 import type { Lead } from "@/lib/supabase/types";
+import { CANAL_LABEL, canalDoLead, traduzSourceCurto } from "@/lib/leadOrigem";
+import { FASE_LABEL, TEMP_LABEL } from "@/lib/crmStatus";
 
 const COLORS = ["#82614A", "#9F825B", "#DAC09B", "#D0BCA0", "#E7DED0", "#2B1F17"];
 
-type LeadLite = Pick<Lead, "id" | "created_at" | "source" | "interesse" | "urgencia" | "temperatura" | "fase">;
+export type LeadLite = Pick<
+  Lead,
+  | "id"
+  | "created_at"
+  | "source"
+  | "canal"
+  | "utm_source"
+  | "utm_medium"
+  | "utm_campaign"
+  | "gclid"
+  | "fbclid"
+  | "referrer"
+  | "interesse"
+  | "urgencia"
+  | "temperatura"
+  | "fase"
+>;
 
 export function CrmCharts({ leads }: { leads: LeadLite[] }) {
   // Últimos 14 dias
@@ -37,28 +55,36 @@ export function CrmCharts({ leads }: { leads: LeadLite[] }) {
   }
 
   // Temperatura
-  const tempCount = ["frio", "morno", "quente"].map((t) => ({
-    name: t,
+  const tempCount = (["frio", "morno", "quente"] as const).map((t) => ({
+    name: TEMP_LABEL[t],
     value: leads.filter((l) => l.temperatura === t).length,
   }));
 
   // Fase
-  const fases = ["novo", "contatado", "agendado", "compareceu", "convertido", "perdido"];
+  const fases = ["novo", "contatado", "agendado", "compareceu", "convertido", "perdido"] as const;
   const faseCount = fases.map((f) => ({
-    name: f,
+    name: FASE_LABEL[f],
     value: leads.filter((l) => l.fase === f).length,
   }));
 
-  // Top sources
-  const sources = new Map<string, number>();
+  // Dois recortes diferentes, e os dois interessam: o canal responde "de onde
+  // vem o lead" (verba), o botão responde "o que na página fez a pessoa pedir
+  // contato" (site). Antes existia só o segundo, com o valor cru do banco.
+  const porCanal = new Map<string, number>();
+  const porBotao = new Map<string, number>();
   leads.forEach((l) => {
-    const s = l.source || "desconhecido";
-    sources.set(s, (sources.get(s) || 0) + 1);
+    const canal = CANAL_LABEL[canalDoLead(l)];
+    porCanal.set(canal, (porCanal.get(canal) || 0) + 1);
+    const botao = traduzSourceCurto(l.source) ?? "Não identificado";
+    porBotao.set(botao, (porBotao.get(botao) || 0) + 1);
   });
-  const topSources = Array.from(sources.entries())
-    .map(([k, v]) => ({ name: k, value: v }))
-    .sort((a, b) => b.value - a.value)
-    .slice(0, 6);
+  const maiores = (m: Map<string, number>) =>
+    Array.from(m.entries())
+      .map(([k, v]) => ({ name: k, value: v }))
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 6);
+  const topSources = maiores(porCanal);
+  const topBotoes = maiores(porBotao);
 
   return (
     <div className="grid gap-4 lg:grid-cols-2">
@@ -102,13 +128,28 @@ export function CrmCharts({ leads }: { leads: LeadLite[] }) {
       </div>
 
       <div className="editorial-card rounded-3xl p-6">
-        <h3 className="font-display text-lg text-ink mb-4">Origem dos leads</h3>
+        <h3 className="font-display text-lg text-ink mb-4">Canal de origem</h3>
         <ResponsiveContainer width="100%" height={220}>
           <BarChart data={topSources} layout="vertical">
-            <XAxis type="number" tick={{ fontSize: 10, fill: "#9F825B" }} axisLine={false} tickLine={false} />
-            <YAxis dataKey="name" type="category" tick={{ fontSize: 10, fill: "#9F825B" }} axisLine={false} tickLine={false} width={130} />
+            <XAxis type="number" tick={{ fontSize: 10, fill: "#82614A" }} axisLine={false} tickLine={false} allowDecimals={false} />
+            <YAxis dataKey="name" type="category" tick={{ fontSize: 10, fill: "#82614A" }} axisLine={false} tickLine={false} width={130} />
             <Tooltip contentStyle={{ background: "#FBF7F1", border: "1px solid #82614A22", borderRadius: 12 }} />
             <Bar dataKey="value" fill="#DAC09B" radius={[0, 6, 6, 0]} />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+
+      <div className="editorial-card rounded-3xl p-6">
+        <h3 className="font-display text-lg text-ink mb-1">Botão que gerou o lead</h3>
+        <p className="text-[11px] text-ink/70 mb-4">
+          Onde a pessoa pediu contato dentro do site
+        </p>
+        <ResponsiveContainer width="100%" height={220}>
+          <BarChart data={topBotoes} layout="vertical">
+            <XAxis type="number" tick={{ fontSize: 10, fill: "#82614A" }} axisLine={false} tickLine={false} allowDecimals={false} />
+            <YAxis dataKey="name" type="category" tick={{ fontSize: 10, fill: "#82614A" }} axisLine={false} tickLine={false} width={130} />
+            <Tooltip contentStyle={{ background: "#FBF7F1", border: "1px solid #82614A22", borderRadius: 12 }} />
+            <Bar dataKey="value" fill="#9F825B" radius={[0, 6, 6, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </div>

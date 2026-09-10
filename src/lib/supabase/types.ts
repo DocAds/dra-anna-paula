@@ -69,7 +69,11 @@ export type Lead = {
   urgencia: string | null;
   mensagem: string | null;
   source: string | null;
+  canal: string | null;
   page_url: string | null;
+  landing_path: string | null;
+  form_path: string | null;
+  referrer: string | null;
   user_agent: string | null;
   ip_country: string | null;
   utm_source: string | null;
