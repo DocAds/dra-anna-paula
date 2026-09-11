@@ -8,3 +8,9 @@ out
 .vercel
 .gstack/
 tsconfig.tsbuildinfo
+
+# Saída do build do OpenNext e estado local do wrangler dev: gerados a cada
+# build, nunca versionados. O Workers Builds constrói do zero do lado da Cloudflare.
+.open-next/
+.wrangler/
+.dev.vars

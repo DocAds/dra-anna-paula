@@ -245,12 +245,26 @@
 <h2>Médios</h2>
 
 <div class="achado">
-  <h3><span class="selo medio">M1</span> Doze vulnerabilidades altas na cadeia de build</h3>
+  <h3><span class="selo ok">Reduzido</span> M1 · Vulnerabilidades altas na cadeia de build: de 12 para 2</h3>
   <p>
-    Nenhuma é dependência direta de produção: vêm arrastadas por <code>wrangler</code>,
-    <code>sharp</code>, <code>postcss</code> e <code>miniflare</code> (o campo <code>via</code> confirma).
-    São ferramentas de build, não superfície do site publicado. A correção exige subir wrangler e
-    <code>@opennextjs/cloudflare</code>, que muda o runtime de publicação e precisa de teste em preview.
+    Em 10/09, wrangler subiu de 4.111 para 4.131, <code>@opennextjs/cloudflare</code> de 1.20.1 para 1.20.6 e
+    postcss direto para 8.5, mais <code>npm audit fix</code> sem forçar nada. Validado com o build do OpenNext
+    e o preview local (11 rotas e os cabeçalhos de segurança) antes de publicar.
+  </p>
+  <p>
+    O <code>npm audit fix</code> também tinha pulado o <code>@supabase/supabase-js</code> de 2.46 para 2.116,
+    com o cliente Postgres trocando de versão maior, como efeito colateral. Foi revertido e fixado em 2.46.1:
+    é o cliente que todas as telas usam para falar com o banco, e isso não entra de carona numa atualização
+    de ferramenta de build.
+  </p>
+  <p>
+    <strong>As 2 que sobram:</strong> o postcss de dentro do Next (a correção é o Next 16, fora de escopo, e só
+    age sobre CSS escrito por nós no build) e o sharp.
+  </p>
+  <p>
+    <strong>Achado ao investigar o sharp:</strong> ele não roda só nos scripts locais de foto. O upload de capa
+    do blog (<code>src/app/admin/posts/ai-actions.ts:33</code>) importa o sharp, que é binário nativo e não roda
+    no Cloudflare Workers. O upload de capa provavelmente está quebrado desde a migração de hospedagem.
   </p>
 </div>
 

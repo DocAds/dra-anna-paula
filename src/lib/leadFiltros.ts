@@ -9,7 +9,6 @@
 //    depois de carregar 2000 leads funciona até o dia em que a clínica passa de
 //    2000 e a tela começa a mentir em silêncio.
 
-import type { SupabaseClient } from "@supabase/supabase-js";
 import type { LeadFase, LeadTemperatura } from "@/lib/supabase/types";
 import { FASES_ORDEM } from "@/lib/crmStatus";
 import { isCanal, type CanalLead } from "@/lib/leadOrigem";
@@ -161,23 +160,33 @@ export const escapaValorPostgrest = (v: string): string =>
     .replace(/\\(?![%_])/g, "\\\\")
     .replace(/"/g, '\\"');
 
-type QueryDeLeads = ReturnType<ReturnType<SupabaseClient["from"]>["select"]>;
+// Só os quatro métodos que o recorte usa. Tipar pela cadeia
+// ReturnType<SupabaseClient["from"]>["select"] quebrava a cada atualização do
+// supabase-js: a versão nova do PostgrestFilterBuilder faz o TypeScript desistir
+// ("instantiation excessively deep") e o tipo deixa de encaixar. A interface
+// mínima descreve o que a função precisa, não a biblioteca inteira.
+interface Filtravel<Q> {
+  eq(coluna: string, valor: unknown): Q;
+  gte(coluna: string, valor: unknown): Q;
+  lte(coluna: string, valor: unknown): Q;
+  or(filtros: string): Q;
+}
 
 /** Aplica o recorte na query. Mesma função para a lista e para o kanban. */
-export function aplicaFiltros<Q extends QueryDeLeads>(query: Q, f: FiltrosLead): Q {
+export function aplicaFiltros<Q extends Filtravel<Q>>(query: Q, f: FiltrosLead): Q {
   let q = query;
-  if (f.fase) q = q.eq("fase", f.fase) as Q;
-  if (f.canal) q = q.eq("canal", f.canal) as Q;
-  if (f.temperatura) q = q.eq("temperatura", f.temperatura) as Q;
-  if (f.interesse) q = q.eq("interesse", f.interesse) as Q;
+  if (f.fase) q = q.eq("fase", f.fase);
+  if (f.canal) q = q.eq("canal", f.canal);
+  if (f.temperatura) q = q.eq("temperatura", f.temperatura);
+  if (f.interesse) q = q.eq("interesse", f.interesse);
 
   const { inicio, fim } = intervaloDoPeriodo(f);
-  if (inicio) q = q.gte("created_at", inicio) as Q;
-  if (fim) q = q.lte("created_at", fim) as Q;
+  if (inicio) q = q.gte("created_at", inicio);
+  if (fim) q = q.lte("created_at", fim);
 
   if (f.busca) {
     const v = escapaValorPostgrest(f.busca);
-    q = q.or(`nome.ilike."%${v}%",whatsapp.ilike."%${v}%",email.ilike."%${v}%"`) as Q;
+    q = q.or(`nome.ilike."%${v}%",whatsapp.ilike."%${v}%",email.ilike."%${v}%"`);
   }
   return q;
 }
